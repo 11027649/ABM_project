@@ -1,9 +1,9 @@
-# ABM_project
-Making an ABM model for the ABM course in the UvA Master Computational Science.
+# ABM project: Traffic!
+For the ABM project in our Master, we will try to implement an Agent-Based traffic model.
 
 ## Authors
-Jordan Earle
+Cormac Berkery,
+Jordan Earle,
+Steven Schoenmaker,
+Natasja Wezel (11027649),
 Linda Wouters
-Steven Schoenmaker
-Cormac Berkery
-Natasja Wezel
