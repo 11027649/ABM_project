@@ -37,18 +37,15 @@ class Traffic(Model):
         Method that provides an easy way of making a bunch of agents at once.
         '''
         self.new_road()
-
+        print((int(self.y_max/2) + 2, int(self.x_max/2 + 2)))
         self.new_light((int(self.y_max/2) + 2, int(self.x_max/2 + 2)))
         self.new_light((int(self.y_max/2) - 2, int(self.x_max/2 - 3)))
-
-
-
 
         # a car that starts on the left
         x = 0
         y = math.ceil(self.y_max/2 - 2)
         self.new_car((x, y), "right")
-
+        print(x,y)
         # a car that starts on the right
         x = self.x_max - 1
         y = math.ceil(self.y_max/2 + 1)
