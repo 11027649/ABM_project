@@ -16,18 +16,18 @@ def agent_portrayal(agent):
             current_color = "Green"
         else:
             current_color = "Orange"
-
-    portrayal = {"Shape": "rect" if type(agent) is Road else "circle",
-
+    
+    portrayal = {"Shape": "circle" if type(agent) is Road else "circle",
                  "Color": "Blue" if type(agent) is Pedestrian 
-                 else "Black" if type(agent) is Road 
-                 else "Blue" if type(agent) is Light 
+                 else "Grey" if type(agent) is Road
+                 else current_color if type(agent) is Light 
                  else "Pink",
 
                  "Filled": "true",
+                 # draw road on layer 0 and everything else on 1
                  "Layer": 0 if type(agent) is Road else 1,
-                 "w": 1,
-                 "h": 1,
+                 "w": 10,
+                 "h": 10,
                  "r": 10}
     return portrayal
 

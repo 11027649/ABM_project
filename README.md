@@ -4,6 +4,6 @@ For the ABM project in our Master, we will try to implement an Agent-Based traff
 ## Authors
 Cormac Berkery,
 Jordan Earle,
-Steven Schoenmaker,
-Natasja Wezel (11027649),
+Steven Schoenmaker, (10777679),
+Natasja Geitje Wezel, (11027649),
 Linda Wouters

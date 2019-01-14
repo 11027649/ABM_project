@@ -12,54 +12,28 @@ class Traffic(Model):
     '''
     '''
 
-    def __init__(self, y_max=30, x_max=30,
-                 initial_cars=0, initial_pedestrians=0):
+    def __init__(self, y_max=30, x_max=30):
 
         super().__init__()
 
         self.y_max = y_max
         self.x_max = x_max
-        self.initial_cars = initial_cars
-        self.initial_pedestrians = initial_pedestrians
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule = RandomActivation(self)
         self.schedule_light = RandomActivation(self)
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
+        self.init_population()
 
-        # Create cars and pedestrians
-        self.init_population(Car, self.initial_cars)
-        # self.init_population(Pedestrian, self.initial_pedestrians)
-
-    def init_population(self, agent_type, n):
+    def init_population(self):
         '''
         Method that provides an easy way of making a bunch of agents at once.
         '''
-        self.new_road()
-        print((int(self.y_max/2) + 2, int(self.x_max/2 + 2)))
-        self.new_light((int(self.y_max/2) + 2, int(self.x_max/2 + 2)))
-        self.new_light((int(self.y_max/2) - 2, int(self.x_max/2 - 3)))
+        # self.new_road()
 
-        # a car that starts on the left
-        x = 0
-        y = math.ceil(self.y_max/2 - 2)
-        self.new_car((x, y), "right")
-        print(x,y)
-        # a car that starts on the right
-        x = self.x_max - 1
-        y = math.ceil(self.y_max/2 + 1)
-        self.new_car((x, y), "left")
-        
-        # a pedestrian that starts on the bottom
-        x = int(self.x_max / 2 - 1)
-        y = 0
-        self.new_pedestrian((x, y), "up")
-
-        # a pedestrian that starts on the top
-        x = int(self.x_max / 2 + 1)
-        y = self.y_max - 1
-        self.new_pedestrian((x, y), "down")
+        self.new_light((int(self.y_max/2) + 2, int(self.x_max/2 - 3)))
+        self.new_light((int(self.y_max/2) - 2, int(self.x_max/2 + 2)))
 
     def new_road(self):
         '''
@@ -68,8 +42,10 @@ class Traffic(Model):
         # creates an horizontal road with size 4
         for i in range(int(self.y_max/2 - 2), int(self.y_max/2 + 2)):
             for j in range(self.x_max):
+                print(i,j)
                 road = Road(self.next_id(), self, (j,i))
                 self.space.place_agent(road, (j,i))
+                getattr(self, 'schedule_light').add(road)
 
     def new_light(self, pos):
         '''
@@ -119,6 +95,7 @@ class Traffic(Model):
         self.schedule_light.step()
         self.schedule.step()
         
+        # out of bounds checks for cars and pedestrians
         for current_agent in self.schedule.agents:
             if current_agent.dir == "up" and current_agent.pos[1] + current_agent.speed >= self.y_max:
                 self.remove_agent(current_agent)       
@@ -129,10 +106,38 @@ class Traffic(Model):
             if current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed <= 1:
                 self.remove_agent(current_agent)    
 
-
-        # self.schedule_Pedestrian.step()
         # TODO: if there are no more cars in the beginning of the lanes, add cars with a probability
+        if random.random() < 0.5:
+            
+            # if there's place place a new car with probability 0.7
+            pos = (2, self.y_max/2 + 1)
+            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
+                self.new_car(pos, "right")
+           
+        else:
+            # if there's place place a new car with probability 0.7
+            pos = (self.x_max - 3, self.y_max/2 - 2)
+            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
+                self.new_car(pos, "left")
 
+
+        if random.random() < 0.5:
+            
+            # if there's place place a new car with probability 0.7
+            x = int(self.x_max / 2 - 1)
+            y = 0
+            pos = (x,y)
+            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
+                self.new_pedestrian(pos, "up")
+           
+        else:
+            # if there's place place a new car with probability 0.7
+
+            x = int(self.x_max / 2 + 1)
+            y = self.y_max - 1
+            pos = (x,y)
+            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
+                self.new_pedestrian(pos, "down")
 
     def run_model(self, step_count=100):
         '''

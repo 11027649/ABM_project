@@ -18,7 +18,7 @@ class Light(Agent):
 
     def step(self):
         '''
-        This method should move the Sheep using the `random_move()` method implemented earlier, then conditionally reproduce.
+        This method should move the goat using the `random_move()` method implemented earlier, then conditionally reproduce.
         '''
         self.state = (self.state + 1) % 150
 
@@ -31,14 +31,17 @@ class Pedestrian(Agent):
         self.pos = pos
         self.dir = dir
         self.speed = speed
+    
     def step(self):
         '''
         This method should move the Sheep using the `random_move()` method implemented earlier, then conditionally reproduce.
         '''
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 1):            
+
+        # check if there's a traffic light (and adjust speed accordingly)
+        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 4):            
             if isinstance(i,Light) and i.state < 50:
                 self.speed = 0
-            else:
+            elif isinstance(i, Light) and i.state >= 50:
                 self.speed = 1
 
         # take a step
@@ -57,16 +60,18 @@ class Car(Agent):
         self.pos = pos
         self.dir = dir
         self.speed = speed
+
     def step(self):
         '''
         Cars go straight for now.
         '''
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 1):
+
+        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
         # not only affected by 1 light
             if isinstance(i,Light) and i.state > 50:
                 # if self.speed > 0:
                 self.speed = 0
-            else:
+            elif isinstance(i, Light) and i.state <= 50:
                 # if self.speed < 1:
                 self.speed = 1
 
