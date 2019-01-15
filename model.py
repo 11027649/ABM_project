@@ -41,11 +41,11 @@ class Traffic(Model):
         '''
         # self.new_road()
 
-        self.new_light((int(self.y_max/2) + 2, int(self.x_max/2 - 3)), 1)
-        self.new_light((int(self.y_max/2) - 2, int(self.x_max/2 + 2)), 2)
+        self.new_light((int(self.x_max/2 - 2), int(self.y_max/2) + 2), 0, 1)
+        self.new_light((int(self.x_max/2 + 2), int(self.y_max/2) + 2), 75, 2)
 
-        self.new_light((int(self.y_max/2) + 2, int(self.x_max/2 + 2)), 3)
-        self.new_light((int(self.y_max/2) - 2, int(self.x_max/2 - 3)), 4)
+        self.new_light((int(self.x_max/2 - 2), int(self.y_max/2) - 2), 75, 3)
+        self.new_light((int(self.x_max/2 + 2), int(self.y_max/2) - 2), 0, 4)
 
     def new_road(self):
         '''
@@ -59,11 +59,11 @@ class Traffic(Model):
                 self.space.place_agent(road, (j,i))
                 getattr(self, 'schedule_Light').add(road)
 
-    def new_light(self, pos, light_id):
+    def new_light(self, pos, state, light_id):
         '''
         Method that creates a new agent, and adds it to the correct scheduler.
         '''
-        light = Light(self.next_id(), self, pos, 0, light_id)
+        light = Light(self.next_id(), self, pos, state, light_id)
 
         self.space.place_agent(light, pos)
         getattr(self, 'schedule_Light').add(light)
@@ -109,13 +109,13 @@ class Traffic(Model):
         # out of bounds checks for cars and pedestrians
         for schedule in [self.schedule_Car.agents, self.schedule_Pedestrian.agents]:
             for current_agent in schedule:
-                if current_agent.dir == "up" and current_agent.pos[1] + current_agent.speed >= self.y_max:
+                if current_agent.dir == "up" and current_agent.pos[1] + current_agent.speed <= 1:
                     self.remove_agent(current_agent)
                 if current_agent.dir == "right" and current_agent.pos[0] + current_agent.speed >= self.x_max:
                     self.remove_agent(current_agent)
                 if current_agent.dir == "left" and current_agent.pos[0] + current_agent.speed <= 1:
                     self.remove_agent(current_agent)
-                if current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed <= 1:
+                if current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed >= self.y_max:
                     self.remove_agent(current_agent)
 
         # TODO: if there are no more cars in the beginning of the lanes, add cars with a probability
@@ -128,7 +128,7 @@ class Traffic(Model):
 
         else:
             # if there's place place a new car with probability 0.7
-            pos = (self.x_max - 3, self.y_max/2 - 2)
+            pos = (self.x_max - 3, self.y_max/2 - 1)
             if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
                 self.new_car(pos, "left")
 
@@ -136,17 +136,17 @@ class Traffic(Model):
         if random.random() < 0.5:
 
             # if there's place place a new car with probability 0.7
-            x = int(self.x_max / 2 - 1)
-            y = 0
+            x = int(self.x_max / 2 + 1)
+            y = self.y_max - 1
             pos = (x,y)
             if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
                 self.new_pedestrian(pos, "up")
 
         else:
             # if there's place place a new car with probability 0.7
+            x = int(self.x_max / 2 - 1)
 
-            x = int(self.x_max / 2 + 1)
-            y = self.y_max - 1
+            y = 0
             pos = (x,y)
             if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
                 self.new_pedestrian(pos, "down")
