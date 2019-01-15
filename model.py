@@ -20,11 +20,12 @@ class Traffic(Model):
         self.x_max = x_max
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
-        self.schedule = RandomActivation(self)
-        self.schedule_light = RandomActivation(self)
+        self.schedule_Car = RandomActivation(self)
+        self.schedule_Pedestrian = RandomActivation(self)
+        self.schedule_Light = RandomActivation(self)
 
         self.datacollector = DataCollector(
-             {"Cars and Pedestrians": lambda m: self.schedule.get_agent_count()})
+             {"Cars": lambda m: self.schedule_Car.get_agent_count()})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
         self.init_population()
@@ -52,7 +53,7 @@ class Traffic(Model):
                 print(i,j)
                 road = Road(self.next_id(), self, (j,i))
                 self.space.place_agent(road, (j,i))
-                getattr(self, 'schedule_light').add(road)
+                getattr(self, 'schedule_Light').add(road)
 
     def new_light(self, pos):
         '''
@@ -61,7 +62,7 @@ class Traffic(Model):
         light = Light(self.next_id(), self, pos, state = 0)
 
         self.space.place_agent(light, pos)
-        getattr(self, 'schedule_light').add(light)
+        getattr(self, 'schedule_Light').add(light)
 
     def new_car(self, pos, dir):
         '''
@@ -70,7 +71,7 @@ class Traffic(Model):
         car = Car(self.next_id(), self, pos, dir)
 
         self.space.place_agent(car, pos)
-        getattr(self, 'schedule').add(car)
+        getattr(self, 'schedule_Car').add(car)
 
     def new_pedestrian(self, pos, dir):
         '''
@@ -79,19 +80,16 @@ class Traffic(Model):
         pedestrian = Pedestrian(self.next_id(), self, pos, dir)
 
         self.space.place_agent(pedestrian, pos)
-        getattr(self, 'schedule').add(pedestrian)
+        getattr(self, 'schedule_Pedestrian').add(pedestrian)
 
     def remove_agent(self, agent):
         '''
         Method that removes an agent from the grid and the correct scheduler.
         '''
 
-        # do we need the seperate schedulers for this?
-
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
-        getattr(self, f'schedule').remove(agent)
-        # getattr(self, f'schedule_{type(agent).__name__}').remove(agent)
+        getattr(self, f'schedule_{type(agent).__name__}').remove(agent)
 
 
     def step(self):
@@ -100,19 +98,21 @@ class Traffic(Model):
         '''
 
         # let existing cars take a step
-        self.schedule_light.step()
-        self.schedule.step()
+        self.schedule_Light.step()
+        self.schedule_Pedestrian.step()
+        self.schedule_Car.step()
 
         # out of bounds checks for cars and pedestrians
-        for current_agent in self.schedule.agents:
-            if current_agent.dir == "up" and current_agent.pos[1] + current_agent.speed >= self.y_max:
-                self.remove_agent(current_agent)
-            if current_agent.dir == "right" and current_agent.pos[0] + current_agent.speed >= self.x_max:
-                self.remove_agent(current_agent)
-            if current_agent.dir == "left" and current_agent.pos[0] + current_agent.speed <= 1:
-                self.remove_agent(current_agent)
-            if current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed <= 1:
-                self.remove_agent(current_agent)
+        for schedule in [self.schedule_Car.agents, self.schedule_Pedestrian.agents]:
+            for current_agent in schedule:
+                if current_agent.dir == "up" and current_agent.pos[1] + current_agent.speed >= self.y_max:
+                    self.remove_agent(current_agent)
+                if current_agent.dir == "right" and current_agent.pos[0] + current_agent.speed >= self.x_max:
+                    self.remove_agent(current_agent)
+                if current_agent.dir == "left" and current_agent.pos[0] + current_agent.speed <= 1:
+                    self.remove_agent(current_agent)
+                if current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed <= 1:
+                    self.remove_agent(current_agent)
 
         # TODO: if there are no more cars in the beginning of the lanes, add cars with a probability
         if random.random() < 0.5:

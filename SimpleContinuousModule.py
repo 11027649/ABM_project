@@ -20,29 +20,18 @@ class SimpleCanvas(VisualizationElement):
     def render(self, model):
         space_state = []
 
-        # draw road and lights
-        for obj in model.schedule_light.agents:
-            portrayal = self.portrayal_method(obj)
-            x, y = obj.pos
-            x = ((x - model.space.x_min) /
-                 (model.space.x_max - model.space.x_min))
-            y = ((y - model.space.y_min) /
-                 (model.space.y_max - model.space.y_min))
-            portrayal["x"] = x
-            portrayal["y"] = y
-            space_state.append(portrayal)
-
         # draw pedestrians and cars
-        for obj in model.schedule.agents:
-            portrayal = self.portrayal_method(obj)
-            x, y = obj.pos
-            x = ((x - model.space.x_min) /
-                 (model.space.x_max - model.space.x_min))
-            y = ((y - model.space.y_min) /
-                 (model.space.y_max - model.space.y_min))
-            portrayal["x"] = x
-            portrayal["y"] = y
-            space_state.append(portrayal)
+        for schedule in [model.schedule_Light.agents, model.schedule_Car.agents, model.schedule_Pedestrian.agents]:
+            for obj in schedule:
+                portrayal = self.portrayal_method(obj)
+                x, y = obj.pos
+                x = ((x - model.space.x_min) /
+                     (model.space.x_max - model.space.x_min))
+                y = ((y - model.space.y_min) /
+                     (model.space.y_max - model.space.y_min))
+                portrayal["x"] = x
+                portrayal["y"] = y
+                space_state.append(portrayal)
 
         # return the drawing
         return space_state
