@@ -32,6 +32,45 @@ class Pedestrian(Agent):
         self.dir = dir
         self.speed = speed
 
+        # Liu, 2014 parameters
+        self.theta_field = 170  # Degrees
+        self.N_directions = 17
+        self.R_vision_range = 3 # Meters
+        self.desired_speed = 1 # Meters per time step
+
+    def step_new(self):
+        """
+        stepfunction based on Liu, 2014
+        """
+        # Choose direction
+        direction = self.choose_direction()
+        
+        # Calculate distance
+
+        # Check traffic light?
+
+        # Move in that direction
+        raise NotImplementedError
+
+    def choose_direction(self):
+        """
+        Picks the direction with the highest utility
+        """
+        raise NotImplementedError
+
+    def objects_per_direction(self):
+        """
+        returns a list of a list of nearest objects
+        and a list of nearest pedestrians
+        """
+        raise NotImplementedError
+
+    def pedestrians_in_field(self):
+        """
+        returns the number of pedestrians in the field
+        """
+        raise NotImplementedError
+    
     def step(self):
         '''
         This method should move the Sheep using the `random_move()` method implemented earlier, then conditionally reproduce.
