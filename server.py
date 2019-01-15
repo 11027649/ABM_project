@@ -1,7 +1,6 @@
 from mesa.space import ContinuousSpace
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule
-from mesa.visualization.modules import CanvasGrid
 from SimpleContinuousModule import SimpleCanvas
 from model import Traffic
 from agent import Car, Pedestrian, Road, Light
@@ -16,11 +15,11 @@ def agent_portrayal(agent):
             current_color = "Green"
         else:
             current_color = "Orange"
-    
+
     portrayal = {"Shape": "circle" if type(agent) is Road else "circle",
-                 "Color": "Blue" if type(agent) is Pedestrian 
+                 "Color": "Blue" if type(agent) is Pedestrian
                  else "Grey" if type(agent) is Road
-                 else current_color if type(agent) is Light 
+                 else current_color if type(agent) is Light
                  else "Pink",
 
                  "Filled": "true",
@@ -34,8 +33,13 @@ def agent_portrayal(agent):
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
 space = SimpleCanvas(agent_portrayal, 750, 750)
 
+# Create a dynamic linegraph
+chart = ChartModule([{"Label": "Cars and Pedestrians",
+                      "Color": "green"}],
+                    data_collector_name='datacollector')
+
 # Create the server, and pass the grid and the graph
 server = ModularServer(Traffic,
-                       [space],
+                       [space, chart],
                        "Traffic Model",
                        {})

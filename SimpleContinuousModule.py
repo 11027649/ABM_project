@@ -31,7 +31,7 @@ class SimpleCanvas(VisualizationElement):
             portrayal["x"] = x
             portrayal["y"] = y
             space_state.append(portrayal)
-        
+
         # draw pedestrians and cars
         for obj in model.schedule.agents:
             portrayal = self.portrayal_method(obj)
@@ -46,4 +46,3 @@ class SimpleCanvas(VisualizationElement):
 
         # return the drawing
         return space_state
-
