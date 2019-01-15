@@ -28,13 +28,13 @@ class Traffic(Model):
              {"Cars": lambda m: self.schedule_Car.get_agent_count()})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
-        self.init_population()
+        self.place_lights()
 
         # This is required for the datacollector to work
         self.running = True
         self.datacollector.collect(self)
 
-    def init_population(self):
+    def place_lights(self):
         '''
         Method that provides an easy way of making a bunch of agents at once.
         '''
