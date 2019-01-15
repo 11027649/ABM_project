@@ -40,8 +40,11 @@ class Traffic(Model):
         '''
         # self.new_road()
 
-        self.new_light((int(self.y_max/2) + 2, int(self.x_max/2 - 3)))
-        self.new_light((int(self.y_max/2) - 2, int(self.x_max/2 + 2)))
+        self.new_light((int(self.y_max/2) + 2, int(self.x_max/2 - 3)), 1)
+        self.new_light((int(self.y_max/2) - 2, int(self.x_max/2 + 2)), 2)
+
+        self.new_light((int(self.y_max/2) + 2, int(self.x_max/2 + 2)), 3)
+        self.new_light((int(self.y_max/2) - 2, int(self.x_max/2 - 3)), 4)
 
     def new_road(self):
         '''
@@ -55,11 +58,11 @@ class Traffic(Model):
                 self.space.place_agent(road, (j,i))
                 getattr(self, 'schedule_Light').add(road)
 
-    def new_light(self, pos):
+    def new_light(self, pos, light_id):
         '''
         Method that creates a new agent, and adds it to the correct scheduler.
         '''
-        light = Light(self.next_id(), self, pos, state = 0)
+        light = Light(self.next_id(), self, pos, 0, light_id)
 
         self.space.place_agent(light, pos)
         getattr(self, 'schedule_Light').add(light)

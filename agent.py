@@ -10,7 +10,7 @@ class Road(Agent):
         self.pos = pos
 
 class Light(Agent):
-    def __init__(self, unique_id, model, pos, state):
+    def __init__(self, unique_id, model, pos, state, light_id):
         super().__init__(unique_id, model)
 
         self.pos = pos
