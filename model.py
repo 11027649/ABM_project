@@ -18,6 +18,7 @@ class Traffic(Model):
 
         self.y_max = y_max
         self.x_max = x_max
+        self.time = []
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
@@ -25,7 +26,7 @@ class Traffic(Model):
         self.schedule_Light = RandomActivation(self)
 
         self.datacollector = DataCollector(
-             {"Cars": lambda m: self.schedule_Car.get_agent_count()})
+             {"Time": lambda m: self.time})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
         self.place_lights()

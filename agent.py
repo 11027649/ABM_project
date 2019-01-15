@@ -44,7 +44,7 @@ class Pedestrian(Agent):
         """
         # Choose direction
         direction = self.choose_direction()
-        
+
         # Calculate distance
 
         # Check traffic light?
@@ -70,7 +70,7 @@ class Pedestrian(Agent):
         returns the number of pedestrians in the field
         """
         raise NotImplementedError
-    
+
     def step(self):
         '''
         This method should move the Sheep using the `random_move()` method implemented earlier, then conditionally reproduce.
@@ -113,12 +113,13 @@ class Pedestrian(Agent):
 
 
 class Car(Agent):
-    def __init__(self, unique_id, model, pos, dir, speed = 1):
+    def __init__(self, unique_id, model, pos, dir, speed=1, time=0):
         super().__init__(unique_id, model)
 
         self.pos = pos
         self.dir = dir
         self.speed = speed
+        self.time = time
 
     def step(self):
         '''
@@ -142,6 +143,9 @@ class Car(Agent):
         else:
             next_pos = (self.pos[0] + self.speed, self.pos[1])
             self.model.space.move_agent(self, next_pos)
+
+        self.time += 1
+
 
     def check_front(self):
         '''
