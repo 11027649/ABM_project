@@ -40,16 +40,24 @@ class Pedestrian(Agent):
         self.desired_speed = 1 # Meters per time step
         self.pre_pos = pos
 
+        # Weights
+        self.Ek_w = 1
+        self.Ok_w = 1
+        self.Pk_w = 1
+        self.Ik_w = 1
+
     def step_new(self):
         """
         stepfunction based on Liu, 2014
         """
+        # Check traffic light and decide to more or not
+
+        # Later: choice if on midsection or on middle of the road
+
         # Choose direction
         direction = self.choose_direction()
         
         # Calculate distance
-
-        # Check traffic light?
 
         # Update previous position
         self.pre_pos = self.pos
@@ -65,6 +73,7 @@ class Pedestrian(Agent):
         # using equation 7
 
         # Return direction with highest utility
+        # If directions have equal utility, choose most right one
         raise NotImplementedError
 
     def objects_per_direction(self):
