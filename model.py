@@ -18,7 +18,8 @@ class Traffic(Model):
 
         self.y_max = y_max
         self.x_max = x_max
-        self.time = []
+        self.time_list = []
+        self.time_list.append(64)
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
@@ -26,7 +27,7 @@ class Traffic(Model):
         self.schedule_Light = RandomActivation(self)
 
         self.datacollector = DataCollector(
-             {"Time": lambda m: self.time})
+             {"Time": lambda m: self.time_list})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
         self.place_lights()
@@ -90,6 +91,10 @@ class Traffic(Model):
         '''
         Method that removes an agent from the grid and the correct scheduler.
         '''
+
+        # save level of service by saving spended time in list
+        print(agent.time)
+        self.time_list.append(agent.time)
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)

@@ -1,3 +1,6 @@
+import numpy as np
+from mesa.visualization.ModularVisualization import VisualizationElement
+
 class HistogramModule(VisualizationElement):
     package_includes = ["Chart.min.js"]
     local_includes = ["HistogramModule.js"]
@@ -13,6 +16,8 @@ class HistogramModule(VisualizationElement):
         self.js_code = "elements.push(" + new_element + ");"
 
     def render(self, model):
-        wealth_vals = [agent.wealth for agent in model.schedule.agents]
-        hist = np.histogram(wealth_vals, bins=self.bins)[0]
+        spended_times = [agent.time for agent in model.schedule_Car.agents]
+        print(spended_times)
+        hist = np.histogram(spended_times, bins=self.bins)[0]
+        print(hist)
         return [int(x) for x in hist]
