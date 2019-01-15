@@ -27,17 +27,19 @@ class Light(Agent):
 
 
 class Pedestrian(Agent):
-    def __init__(self, unique_id, model, pos, dir, speed = 1):
+    def __init__(self, unique_id, model, pos, dir, speed = 1, time=0):
         super().__init__(unique_id, model)
         self.pos = pos
         self.dir = dir
         self.speed = speed
+        self.time = time
 
         # Liu, 2014 parameters
         self.theta_field = 170  # Degrees
         self.N_directions = 17
         self.R_vision_range = 3 # Meters
         self.desired_speed = 1 # Meters per time step
+        self.pre_pos = pos
 
     def step_new(self):
         """
@@ -45,18 +47,25 @@ class Pedestrian(Agent):
         """
         # Choose direction
         direction = self.choose_direction()
-
+        
         # Calculate distance
 
         # Check traffic light?
 
-        # Move in that direction
+        # Update previous position
+        self.pre_pos = self.pos
+        # Move to new position
+
         raise NotImplementedError
 
     def choose_direction(self):
         """
         Picks the direction with the highest utility
         """
+        # Loop over directions and calculate the highest utility
+        # using equation 7
+
+        # Return direction with highest utility
         raise NotImplementedError
 
     def objects_per_direction(self):
