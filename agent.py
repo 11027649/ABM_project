@@ -41,6 +41,14 @@ class Pedestrian(Agent):
         self.desired_speed = 1 # Meters per time step
         self.pre_pos = pos
 
+        # Weights (for equation 1)
+        # What is We' for equation 7??
+        self.Ek_w = 1
+        self.Ok_w = 1
+        self.Pk_w = 1
+        self.Ak_w = 1
+        self.Ik_w = 1
+
     def step_new(self):
         """
         stepfunction based on Liu, 2014
@@ -50,7 +58,14 @@ class Pedestrian(Agent):
         
         # Calculate distance
 
-        # Check traffic light?
+        # Check traffic light and decide to more or not
+
+        # Later: choice if on midsection or on middle of the road
+
+        # If not on midsection:
+        # Choose direction
+        direction = self.choose_direction()    
+        # Get new position   
 
         # Update previous position
         self.pre_pos = self.pos
@@ -62,11 +77,40 @@ class Pedestrian(Agent):
         """
         Picks the direction with the highest utility
         """
+        # Get list of nearest objects/pedestrians per direction
+        obj_per_k = objects_per_direction(self)        
         # Loop over directions and calculate the highest utility
-        # using equation 7
+        # Save highest utility and that direction
 
         # Return direction with highest utility
         raise NotImplementedError
+
+    def calc_utility(self, closest_obj):
+        """
+        Calculate the utility (equation 7? Whats omega_e'?)
+        """
+        # Calculate distance to target point
+        # or ContinuousSpace
+        distance_to_obj = self.Space.get_distance(self.pos, closest_obj.pos)
+        Dk_target = min(self.desired_speed, distance_to_obj)
+        # Calculate distance pedestrian can move
+        Rk_step = None
+
+        # Calculate factors
+        Ek = 1 - (Dk_target - self.R_vision_range - Rk_step)/(2*Rk_step)
+        Ok = None
+        Pk = None
+        Ak = None
+        Ik = None
+
+        raise NotImplementedError
+
+        # Using equation 1 for now:
+        return self.Ek_w * Ek + self.Ok_w * Ok + \
+                self.Pk_w * Pk + self.Ak_w * Ak + \
+                self.Ik_w * Ik
+
+
 
     def objects_per_direction(self):
         """
