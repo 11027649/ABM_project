@@ -53,7 +53,7 @@ class Pedestrian(Agent):
         """
         stepfunction based on Liu, 2014
         """
-        # Check traffic light and decide to more or not
+        # Check traffic light and decide to move or not
 
         # Later: choice if on midsection or on middle of the road
 
@@ -84,6 +84,7 @@ class Pedestrian(Agent):
         Calculate the utility (equation 7? Whats omega_e'?)
         """
         # Calculate distance to target point
+        
         # or ContinuousSpace
         distance_to_obj = self.Space.get_distance(self.pos, closest_obj.pos)
         Dk_target = min(self.desired_speed, distance_to_obj)
