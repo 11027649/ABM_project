@@ -53,14 +53,14 @@ class Pedestrian(Agent):
         """
         stepfunction based on Liu, 2014
         """
-        # Check traffic light and decide to move or not
+        # Check traffic light and decide to more or not
 
         # Later: choice if on midsection or on middle of the road
 
         # If not on midsection:
         # Choose direction
-        direction = self.choose_direction()    
-        # Get new position   
+        direction = self.choose_direction()
+        # Get new position
 
         # Update previous position
         self.pre_pos = self.pos
@@ -72,7 +72,7 @@ class Pedestrian(Agent):
         Picks the direction with the highest utility
         """
         # Get list of nearest objects/pedestrians per direction
-        obj_per_k = objects_per_direction(self)        
+        obj_per_k = objects_per_direction(self)
         # Loop over directions and calculate the highest utility
         # Save highest utility and that direction
 
@@ -84,7 +84,6 @@ class Pedestrian(Agent):
         Calculate the utility (equation 7? Whats omega_e'?)
         """
         # Calculate distance to target point
-        
         # or ContinuousSpace
         distance_to_obj = self.Space.get_distance(self.pos, closest_obj.pos)
         Dk_target = min(self.desired_speed, distance_to_obj)

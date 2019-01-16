@@ -93,7 +93,7 @@ class Traffic(Model):
         '''
 
         # save level of service by saving spended time in list
-        # print(agent.time)
+        print("                                              " , agent.time)
         self.time_list.append(agent.time)
 
         # if we remove the agents, save the time they spended in the grid
@@ -114,11 +114,11 @@ class Traffic(Model):
         # out of bounds checks for cars and pedestrians
         for schedule in [self.schedule_Car.agents, self.schedule_Pedestrian.agents]:
             for current_agent in schedule:
-                if current_agent.dir == "up" and current_agent.pos[1] + current_agent.speed <= 1:
+                if current_agent.dir == "up" and current_agent.pos[1] - current_agent.speed <= 0:
                     self.remove_agent(current_agent)
                 if current_agent.dir == "right" and current_agent.pos[0] + current_agent.speed >= self.x_max:
                     self.remove_agent(current_agent)
-                if current_agent.dir == "left" and current_agent.pos[0] + current_agent.speed <= 1:
+                if current_agent.dir == "left" and current_agent.pos[0] -  current_agent.speed <= 0:
                     self.remove_agent(current_agent)
                 if current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed >= self.y_max:
                     self.remove_agent(current_agent)
