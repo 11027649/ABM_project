@@ -120,6 +120,46 @@ class Pedestrian(Agent):
         """
         raise NotImplementedError
 
+    def traffic_red(self):
+        """
+        Returns true if light is red
+        """
+        # check if there's a traffic light (and adjust speed accordingly)
+
+        # Check if agent is in front of the traffic light (correct_side=True)
+        correct_side = False
+        if self.dir == "up":
+            own_light = 2
+            if self.pos[1] > int(self.model.space.y_max/2 + 2 ):
+                correct_side = True
+        else:
+            own_light = 3
+            if self.pos[1] < int(self.model.space.y_max/2 - 2):
+                correct_side = True
+
+        # Iterate over all the agents
+        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
+            # If the agent is a light, which is red or orange, which is your own light and you're in front of the light
+            if (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
+                return True
+
+        return False
+
+        # # If an agent is in front, set speed to 0
+        # self.speed = 1
+        # if self.check_front() > 0:
+        #     self.speed = 0
+        # # else, check if their light is orange or red
+        # else:
+        #     # Iterate over all agents in the neighbourhood
+        #     for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
+        #         # If the agent is a light, which is red or orange, which is your own light and you're in front of the light
+        #         if (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
+        #             # Stop moving
+        #             self.speed = 0
+        #             break
+
+
     def step(self):
         '''
         This method should move the Sheep using the `random_move()` method implemented earlier, then conditionally reproduce.
