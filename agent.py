@@ -1,6 +1,9 @@
 from mesa import Agent
+from mesa import space
 from mesa.space import ContinuousSpace
 import random
+import math
+import numpy as np
 
 
 class Road(Agent):
@@ -30,6 +33,7 @@ class Pedestrian(Agent):
     def __init__(self, unique_id, model, pos, dir, speed = 1, time=0):
         super().__init__(unique_id, model)
         self.pos = pos
+        self.angle = 90
         self.dir = dir
         self.speed = speed
         self.time = time
@@ -112,12 +116,71 @@ class Pedestrian(Agent):
         """
         raise NotImplementedError
 
-    def pedestrians_in_field(self):
+    #def get_current_view(self, ):
+
+    def update_angle(self):
+        # Find the current heading
+        if (self.pos != self.pre_pos):
+
+            deltapos = self.model.space.get_heading(self.pos, self.pre_pos)
+            if (deltapos[0] != 0):
+                cur_angle = math.degrees(math.atan((deltapos[1] / deltapos[0])))
+                self.angle = cur_angle
+                print("The heading is:", cur_angle)
+            else:
+                if(self.dir == "up"):
+                    self.angle = 90
+                    print("The heading is 90")
+                elif(self.dir == "down"):
+                    self.angle = 270
+                    print("The heading is 270")
+
+    def pedestrians_in_field(self, vision_angle, range):
         """
         returns the number of pedestrians in the field
         --Jordan
         """
-        raise NotImplementedError
+        # Calculate the lower angle and the upper angle
+        lower_angle = self.angle - (vision_angle / 2)
+        upper_angle = self.angle + (vision_angle / 2)
+
+        # Change the current points to an np array for simplicity
+        p0 = np.array(self.pos)
+
+        # Convert to radians for angle calcuation
+        u_rads = math.radians(upper_angle)
+        l_rads = math.radians(lower_angle)
+
+        # Calculate the end angles
+        dx1 = math.cos(l_rads) * range
+        dy1 = math.sin(l_rads) * range
+        dx2 = math.cos(u_rads) * range
+        dy2 = math.sin(u_rads) * range
+
+        # Calculate the vectors
+        v1 = np.array([p0[0] + dx1, p0[1] + dy1])
+        v2 = np.array([p0[0] - dx2, p0[1] + dy2])
+
+        # Get the current neighbors
+        neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=range)
+        cone_neigh = []
+        # Loop to find if neighbor is within the cone
+        for neigh in neighbours:
+            v3 = np.array(neigh.pos) - p0
+            check1 = round(np.cross(v1, v3) * np.cross(v1, v2), 10)
+            check2 = round(np.cross(v2, v3) * np.cross(v2, v1), 10)
+
+            if (np.cross(v1, v3) * np.cross(v1, v2) >= 0 and np.cross(v2, v3) * np.cross(v2, v1) >= 0 and type(neigh) == Pedestrian):
+                print("We are in the range")
+                print(self.pos)
+                print(neigh.pos)
+                cone_neigh.append(neigh)
+            else:
+                print("We are out of the range")
+                print(self.pos)
+                print(neigh.pos)
+
+        return cone_neigh
 
     def step(self):
         '''
@@ -145,12 +208,18 @@ class Pedestrian(Agent):
             elif (changed == 0 and self.check_front() == 0) or (changed == 0 and self.check_front() == 0 and correct_side == False):
                 self.speed = 1
 
+        # This is testing the pedestrians in view
+        self.update_angle()
+        self.pedestrians_in_field(170,3)
+
         # take a step
         if self.dir is "up":
             next_pos = (self.pos[0], self.pos[1] - self.speed)
+            self.pre_pos = self.pos
             self.model.space.move_agent(self, next_pos)
         else:
             next_pos = (self.pos[0], self.pos[1] + self.speed)
+            self.pre_pos = self.pos
             self.model.space.move_agent(self, next_pos)
 
     # this function is in both pedestrian and agent -> more efficient way?
