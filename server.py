@@ -1,6 +1,7 @@
 from mesa.space import ContinuousSpace
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import ChartModule
+from HistogramModule import HistogramModule
 from SimpleContinuousModule import SimpleCanvas
 from model import Traffic
 from agent import Car, Pedestrian, Road, Light
@@ -34,12 +35,13 @@ def agent_portrayal(agent):
 space = SimpleCanvas(agent_portrayal, 750, 750)
 
 # Create a dynamic linegraph
-chart = ChartModule([{"Label": "Cars and Pedestrians",
-                      "Color": "green"}],
-                    data_collector_name='datacollector')
+# chart = ChartModule([{"Label": "Time spend passing the conjunction (by cars)",
+#                       "Color": "green"}],
+#                     data_collector_name='datacollector')
+histogram = HistogramModule(list(range(200)), 50, 200)
 
 # Create the server, and pass the grid and the graph
 server = ModularServer(Traffic,
-                       [space, chart],
+                       [space, histogram],
                        "Traffic Model",
                        {})

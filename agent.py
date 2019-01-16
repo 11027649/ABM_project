@@ -15,12 +15,13 @@ class Light(Agent):
 
         self.pos = pos
         self.state = state
+        self.light_id = light_id
 
     def step(self):
         '''
         This method should move the goat using the `random_move()` method implemented earlier, then conditionally reproduce.
         '''
-        self.state = (self.state + 1) % 150
+        self.state = (self.state + 1) % 130
 
 
 
@@ -96,19 +97,29 @@ class Pedestrian(Agent):
 
         # check if there's a traffic light (and adjust speed accordingly)
         changed = 0
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 4):
-            if self.check_front() > 0 or isinstance(i,Light) and i.state < 50:
+        correct_side = False
+        if self.dir == "up":
+            own_light = 2
+            if self.pos[1] > int(self.model.space.y_max/2 + 2 ):
+                correct_side = True
+        else:
+            own_light = 3
+            if self.pos[1] < int(self.model.space.y_max/2 - 2):
+                correct_side = True
+
+        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
+            if self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
                 self.speed = 0
                 changed = 1
-            elif changed == 0 and self.check_front() == 0 or (isinstance(i, Light) and i.state >= 50 and self.check_front() == 0):
+            elif (changed == 0 and self.check_front() == 0) or (changed == 0 and self.check_front() == 0 and correct_side == False):
                 self.speed = 1
 
         # take a step
         if self.dir is "up":
-            next_pos = (self.pos[0], self.pos[1] + self.speed)
+            next_pos = (self.pos[0], self.pos[1] - self.speed)
             self.model.space.move_agent(self, next_pos)
         else:
-            next_pos = (self.pos[0], self.pos[1] - self.speed)
+            next_pos = (self.pos[0], self.pos[1] + self.speed)
             self.model.space.move_agent(self, next_pos)
 
     # this function is in both pedestrian and agent -> more efficient way?
@@ -118,9 +129,9 @@ class Pedestrian(Agent):
         '''
 
         if self.dir == "up":
-            direction = 1
-        else:
             direction = -1
+        else:
+            direction = 1
 
         # the Pedestrian has a vision range of 1 tile for now (can be changed to its max speed?)
         for i in range(1, 2):
@@ -144,15 +155,28 @@ class Car(Agent):
         Cars go straight for now.
         '''
         changed = 0
+        correct_side = False
+        if self.dir == "right":
+            own_light = 1
+            if self.pos[0] < int(self.model.space.x_max/2 - 2):
+                correct_side = True
+        else:
+            own_light = 4
+            if self.pos[0] > int(self.model.space.x_max/2 + 2):
+                correct_side = True
+
+        # very inefficient code right here if we notice if the run time is too long
+
         for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
         # not only affected by 1 light
-            if self.check_front() > 0 or isinstance(i,Light) and i.state > 50:
+            if self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
                 # if self.speed > 0:
                 self.speed = 0
                 changed = 1
-            elif changed == 0 and self.check_front() == 0 or (isinstance(i, Light) and i.state <= 50 and self.check_front() == 0):
+            elif (changed == 0 and self.check_front() == 0) or (changed == 0 and self.check_front() == 0 and correct_side == False):
                 # if self.speed < 1:
                 self.speed = 1
+
 
         # take a step
         if self.dir is "left":
