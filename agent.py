@@ -53,11 +53,6 @@ class Pedestrian(Agent):
         """
         stepfunction based on Liu, 2014
         """
-        # Choose direction
-        direction = self.choose_direction()
-        
-        # Calculate distance
-
         # Check traffic light and decide to more or not
 
         # Later: choice if on midsection or on middle of the road
@@ -70,7 +65,6 @@ class Pedestrian(Agent):
         # Update previous position
         self.pre_pos = self.pos
         # Move to new position
-
         raise NotImplementedError
 
     def choose_direction(self):
@@ -111,7 +105,6 @@ class Pedestrian(Agent):
                 self.Ik_w * Ik
 
 
-
     def objects_per_direction(self):
         """
         returns a list of a list of nearest objects
@@ -122,6 +115,7 @@ class Pedestrian(Agent):
     def pedestrians_in_field(self):
         """
         returns the number of pedestrians in the field
+        --Jordan
         """
         raise NotImplementedError
 
