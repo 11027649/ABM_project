@@ -4,7 +4,7 @@ from mesa.visualization.modules import ChartModule
 # from HistogramModule import HistogramModule
 from SimpleContinuousModule import SimpleCanvas
 from model import Traffic
-from agent import Car, Pedestrian, Road, Light
+from agent import Car, Pedestrian, Light
 
 # You can change this to whatever you want. Make sure to make the different types
 # of agents distinguishable
@@ -17,15 +17,13 @@ def agent_portrayal(agent):
         else:
             current_color = "Orange"
 
-    portrayal = {"Shape": "circle" if type(agent) is Road else "circle",
+    portrayal = {"Shape": "circle" if type(agent) is Light else "circle",
                  "Color": "Blue" if type(agent) is Pedestrian
-                 else "Grey" if type(agent) is Road
                  else current_color if type(agent) is Light
                  else "Pink",
 
                  "Filled": "true",
                  # draw road on layer 0 and everything else on 1
-                 "Layer": 0 if type(agent) is Road else 1,
                  "w": 10,
                  "h": 10,
                  "r": 10}

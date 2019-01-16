@@ -5,7 +5,7 @@ from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 from mesa.time import RandomActivation
 
-from agent import Pedestrian, Car, Road, Light
+from agent import Pedestrian, Car, Light
 import math
 
 class Traffic(Model):
@@ -40,25 +40,12 @@ class Traffic(Model):
         '''
         Method that provides an easy way of making a bunch of agents at once.
         '''
-        # self.new_road()
 
         self.new_light((int(self.x_max/2 - 2), int(self.y_max/2) + 2), 0, 1)
         self.new_light((int(self.x_max/2 + 2), int(self.y_max/2) + 2), 75, 2)
 
         self.new_light((int(self.x_max/2 - 2), int(self.y_max/2) - 2), 75, 3)
         self.new_light((int(self.x_max/2 + 2), int(self.y_max/2) - 2), 0, 4)
-
-    def new_road(self):
-        '''
-        Method that creates the roads.
-        '''
-        # creates an horizontal road with size 4
-        for i in range(int(self.y_max/2 - 2), int(self.y_max/2 + 2)):
-            for j in range(self.x_max):
-                # print(i,j)
-                road = Road(self.next_id(), self, (j,i))
-                self.space.place_agent(road, (j,i))
-                getattr(self, 'schedule_Light').add(road)
 
     def new_light(self, pos, state, light_id):
         '''
