@@ -57,7 +57,7 @@ class Pedestrian(Agent):
         """
         stepfunction based on Liu, 2014
         """
-        # Check traffic light and decide to more or not
+        # Check traffic light and decide to move or not
 
         # Later: choice if on midsection or on middle of the road
 
@@ -88,6 +88,7 @@ class Pedestrian(Agent):
         Calculate the utility (equation 7? Whats omega_e'?)
         """
         # Calculate distance to target point
+        
         # or ContinuousSpace
         distance_to_obj = self.Space.get_distance(self.pos, closest_obj.pos)
         Dk_target = min(self.desired_speed, distance_to_obj)
@@ -242,7 +243,7 @@ class Pedestrian(Agent):
 
 
 class Car(Agent):
-    def __init__(self, unique_id, model, pos, dir, speed=1, time=0):
+    def __init__(self, unique_id, model, pos, dir, speed=3, time=0):
         super().__init__(unique_id, model)
 
         self.pos = pos
@@ -267,15 +268,21 @@ class Car(Agent):
 
         # very inefficient code right here if we notice if the run time is too long
 
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
+        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 6):
         # not only affected by 1 light
-            if self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
+            if changed == 0 and (self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True)):
                 # if self.speed > 0:
-                self.speed = 0
+                if self.speed > 0:
+                    self.speed = self.speed - 1
+                else:
+                    self.speed = 0
                 changed = 1
             elif (changed == 0 and self.check_front() == 0) or (changed == 0 and self.check_front() == 0 and correct_side == False):
                 # if self.speed < 1:
-                self.speed = 1
+                if self.speed < 3:
+                    self.speed = self.speed + 1
+                else:
+                    self.speed = 3
 
 
         # take a step
@@ -300,7 +307,7 @@ class Car(Agent):
             direction = -1
 
         # the car has a vision range of 1 tile for now (can be changed to its max speed?)
-        for i in range(1, 2):
+        for i in range(1, 4):
             for agent in self.model.space.get_neighbors((self.pos[0] + direction * i, self.pos[1]), radius = 0):
                 if isinstance(agent, Car) or isinstance(agent, Pedestrian):
                     return i

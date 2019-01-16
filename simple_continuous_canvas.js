@@ -74,7 +74,7 @@ var Simple_Continuous_Module = function(canvas_width, canvas_height) {
 
 	this.render = function(data) {
 		canvasDraw.resetCanvas();
-		
+
 		context.fillStyle = "Black";
 		context.fillRect(0, 336, 750, 78)
 		context.stroke()
