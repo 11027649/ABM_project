@@ -41,26 +41,16 @@ class Pedestrian(Agent):
         self.desired_speed = 1 # Meters per time step
         self.pre_pos = pos
 
-        # Weights (for equation 1)
-        # What is We' for equation 7??
-        self.Ek_w = 1
-        self.Ok_w = 1
-        self.Pk_w = 1
-        self.Ak_w = 1
-        self.Ik_w = 1
-
     def step_new(self):
         """
         stepfunction based on Liu, 2014
         """
-        # Check traffic light and decide to more or not
-
-        # Later: choice if on midsection or on middle of the road
-
-        # If not on midsection:
         # Choose direction
-        direction = self.choose_direction()    
-        # Get new position    
+        direction = self.choose_direction()
+        
+        # Calculate distance
+
+        # Check traffic light?
 
         # Update previous position
         self.pre_pos = self.pos
@@ -72,41 +62,11 @@ class Pedestrian(Agent):
         """
         Picks the direction with the highest utility
         """
-        # Get list of nearest objects/pedestrians per direction
-        obj_per_k = objects_per_direction(self)        
         # Loop over directions and calculate the highest utility
-        # Save highest utility and that direction
+        # using equation 7
 
-        # If directions have equal utility, choose most right one
         # Return direction with highest utility
         raise NotImplementedError
-
-
-    def calc_utility(self, closest_obj):
-        """
-        Calculate the utility (equation 7? Whats omega_e'?)
-        """
-        # Calculate distance to target point
-        # or ContinuousSpace
-        distance_to_obj = self.Space.get_distance(self.pos, closest_obj.pos)
-        Dk_target = min(self.desired_speed, distance_to_obj)
-        # Calculate distance pedestrian can move
-        Rk_step = None
-
-        # Calculate factors
-        Ek = 1 - (Dk_target - self.R_vision_range - Rk_step)/(2*Rk_step)
-        Ok = None
-        Pk = None
-        Ak = None
-        Ik = None
-
-        raise NotImplementedError
-
-        # Using equation 1 for now:
-        return self.Ek_w * Ek + self.Ok_w * Ok + \
-                self.Pk_w * Pk + self.Ak_w * Ak + \
-                self.Ik_w * Ik
-
 
     def objects_per_direction(self):
         """
@@ -117,11 +77,10 @@ class Pedestrian(Agent):
 
     def pedestrians_in_field(self):
         """
-        returns the total number of pedestrians in the field (density)
+        returns the number of pedestrians in the field
         """
         raise NotImplementedError
 
-    # Old part of pedestrians
     def step(self):
         '''
         This method should move the Sheep using the `random_move()` method implemented earlier, then conditionally reproduce.
@@ -138,6 +97,8 @@ class Pedestrian(Agent):
             own_light = 3
             if self.pos[1] < int(self.model.space.y_max/2 - 2):
                 correct_side = True
+
+        # very inefficient code right here if we notice if the run time is too long
 
         for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
             if self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
