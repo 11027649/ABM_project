@@ -55,7 +55,7 @@ class Traffic(Model):
         # creates an horizontal road with size 4
         for i in range(int(self.y_max/2 - 2), int(self.y_max/2 + 2)):
             for j in range(self.x_max):
-                print(i,j)
+                # print(i,j)
                 road = Road(self.next_id(), self, (j,i))
                 self.space.place_agent(road, (j,i))
                 getattr(self, 'schedule_Light').add(road)
@@ -93,7 +93,7 @@ class Traffic(Model):
         '''
 
         # save level of service by saving spended time in list
-        print(agent.time)
+        # print(agent.time)
         self.time_list.append(agent.time)
 
         # if we remove the agents, save the time they spended in the grid

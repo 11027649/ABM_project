@@ -17,7 +17,7 @@ class HistogramModule(VisualizationElement):
 
     def render(self, model):
         spended_times = [agent.time for agent in model.schedule_Car.agents]
-        print(spended_times)
+        # print(spended_times)
         hist = np.histogram(spended_times, bins=self.bins)[0]
-        print(hist)
+        # print(hist)
         return [int(x) for x in hist]
