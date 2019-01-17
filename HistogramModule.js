@@ -1,6 +1,7 @@
-// HistogramModule.js
 var HistogramModule = function(bins, canvas_width, canvas_height) {
     // Create the elements
+
+    console.log("I am making the Histogram right now!");
 
     // Create the tag:
     var canvas_tag = "<canvas width='" + canvas_width + "' height='" + canvas_height + "' ";
@@ -10,6 +11,8 @@ var HistogramModule = function(bins, canvas_width, canvas_height) {
     $("elements").append(canvas);
     // Create the context and the drawing controller:
     var context = canvas.getContext("2d");
+
+    console.log("Still working! ;-)");
 
     // Prep the chart properties and series:
     var datasets = [{
@@ -34,8 +37,13 @@ var HistogramModule = function(bins, canvas_width, canvas_height) {
         scaleBeginsAtZero: true
     };
 
+    console.log("I have just made all the settings, now onto the graph");
+
     // Create the chart object
-    var chart = new Chart(context, {'type': 'bar', 'data': data, 'options': options});
+    var chart = new Chart(context,
+      {'type': 'bar',
+      'data': data,
+      'options': options});
 
     this.render = function(data) {
         for (var i in data)
