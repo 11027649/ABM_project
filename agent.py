@@ -26,17 +26,18 @@ class Pedestrian(Agent):
     def __init__(self, unique_id, model, pos, dir, speed = 1, time=0):
         super().__init__(unique_id, model)
         self.pos = pos
-        self.angle = 90
         self.dir = dir
         self.speed = speed
         self.time = time
 
         # Liu, 2014 parameters
         self.theta_field = 170  # Degrees
-        self.N_directions = 17
+        self.N_directions = 17 # Should be >= 2!
         self.R_vision_range = 3 # Meters
         self.desired_speed = 1 # Meters per time step
         self.pre_pos = pos
+        self.angle = 90
+
 
         # Weights (for equation 1)
         # What is We' for equation 7??
