@@ -20,7 +20,6 @@ class Traffic(Model):
         self.x_max = x_max
         self.time_list = []
         self.time_list.append(64)
-
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
         self.schedule_Pedestrian = RandomActivation(self)
@@ -46,6 +45,7 @@ class Traffic(Model):
 
         self.new_light((int(self.x_max/2 - 2), int(self.y_max/2) - 2), 75, 3)
         self.new_light((int(self.x_max/2 + 2), int(self.y_max/2) - 2), 0, 4)
+
 
     def new_light(self, pos, state, light_id):
         '''
@@ -133,6 +133,7 @@ class Traffic(Model):
             pos = (x,y)
             if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
                 self.new_pedestrian(pos, "up")
+                print('a')
 
         else:
             # if there's place place a new car with probability 0.7
