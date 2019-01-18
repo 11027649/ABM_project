@@ -37,6 +37,8 @@ class Pedestrian(Agent):
         self.desired_speed = 1 # Meters per time step
         self.pre_pos = pos
         self.direction = 90
+        self.speed_free = 1 #normal distribution of N(1.34, 0.342)
+        self.density = None
 
 
         # Weights (for equation 1)
@@ -55,6 +57,8 @@ class Pedestrian(Agent):
         if traffic_red() is False:
             # Later: choice if on midsection or on middle of the road
 
+            # Set desired_speed
+
             # Choose direction
             direction = self.choose_direction()
 
@@ -71,6 +75,9 @@ class Pedestrian(Agent):
         # Update angle
         self.update_angle()
 
+    def desired_speed(self, gamma=1.913, max_density=5.4):
+        #Parameters: Normal speed, 
+        return self.speed_free * (1 - np.exp(-gamma * ((1/self.density)-(1/max_density))))
 
     def choose_direction(self):
         """
@@ -79,6 +86,7 @@ class Pedestrian(Agent):
         # Get list of nearest objects/pedestrians per direction
         obj_per_k = objects_per_direction(self)
         # Loop over directions and calculate the highest utility
+
         # Save highest utility and that direction
 
         # Return direction with highest utility
