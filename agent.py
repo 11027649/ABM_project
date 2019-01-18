@@ -62,7 +62,7 @@ class Pedestrian(Agent):
         # This is testing the pedestrians in view
         self.update_angle()
         self.pedestrians_in_field(170,3)
-        
+
         # Get new position
 
         # Update previous position
@@ -156,11 +156,11 @@ class Pedestrian(Agent):
         dx2 = math.cos(u_rads) * vis_range
         dy2 = math.sin(u_rads) * vis_range
 
-        
+
         # Calculate the points
         p1 = np.array([p0[0] + dx1, p0[1] + dy1])
         p2 = np.array([p0[0] + dx2, p0[1] + dy2])
-        
+
         # Calculate the vectors
         v1 = p1-p0
         v2 = p2-p1
@@ -173,18 +173,7 @@ class Pedestrian(Agent):
             v3 = np.array(neigh.pos) - p0
             # Append object to cone_neigh
             if (np.cross(v1, v3) * np.cross(v1, v2) >= 0 and np.cross(v2, v3) * np.cross(v2, v1) >= 0 and type(neigh) == Pedestrian):
-<<<<<<< HEAD
-                # print("We are in the range")
-                # print(self.pos)
-                # print(neigh.pos)
                 cone_neigh.append(neigh)
-            # else:
-            #     print("We are out of the range")
-            #     print(self.pos)
-            #     print(neigh.pos)
-=======
-                cone_neigh.append(neigh)
->>>>>>> 6a99f2f60444f156a6a02e50f3a318b258b4e58d
 
         return cone_neigh
 
