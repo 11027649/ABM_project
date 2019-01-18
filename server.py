@@ -17,18 +17,18 @@ def agent_portrayal(agent):
         else:
             current_color = "Orange"
 
-    portrayal = {"Shape": "circle" if type(agent) is Light else "circle",
+    portrayal = {"Shape": "circle" if type(agent) is Car else "circle",
                  "Color": "Blue" if type(agent) is Pedestrian
                  else current_color if type(agent) is Light
                  else "Pink",
                  "Filled": "true",
                  "w": 10,
                  "h": 10,
-                 "r": 10}
+                 "r": 17 if type(agent) is Car else 2}
     return portrayal
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
-space = SimpleCanvas(agent_portrayal, 750, 750)
+space = SimpleCanvas(agent_portrayal)
 
 # Create a dynamic histogram
 histogram = HistogramModule(list(range(10)))

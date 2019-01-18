@@ -14,7 +14,7 @@ class Traffic(Model):
     '''
     '''
 
-    def __init__(self, y_max=30, x_max=30):
+    def __init__(self, y_max=50, x_max=50):
 
         super().__init__()
 
@@ -42,6 +42,9 @@ class Traffic(Model):
         Method that provides an easy way of making a bunch of agents at once.
         '''
 
+        self.new_light((1,1),0,6)
+        self.new_light((self.x_max - 1, self.y_max-1), 0,5)
+
         self.new_light((int(self.x_max/2 - 2), int(self.y_max/2) + 2), 0, 1)
         self.new_light((int(self.x_max/2 + 2), int(self.y_max/2) + 2), 75, 2)
 
@@ -54,7 +57,7 @@ class Traffic(Model):
         Method that creates a new agent, and adds it to the correct scheduler.
         '''
         light = Light(self.next_id(), self, pos, state, light_id)
-
+        print(light.pos)
         self.space.place_agent(light, pos)
         getattr(self, 'schedule_Light').add(light)
 
@@ -83,7 +86,7 @@ class Traffic(Model):
 
         # save level of service by saving spended time in list
         self.time_list[type(agent).__name__].append(agent.time)
-    
+
         print(self.time_list)
 
         # if we remove the agents, save the time they spended in the grid

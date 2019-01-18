@@ -3,16 +3,14 @@ from mesa.visualization.ModularVisualization import VisualizationElement
 class SimpleCanvas(VisualizationElement):
     local_includes = ["simple_continuous_canvas.js"]
     portrayal_method = None
-    canvas_height = 750
-    canvas_width = 750
 
-    def __init__(self, portrayal_method, canvas_height=750, canvas_width=750):
+    def __init__(self, portrayal_method):
         '''
         Instantiate a new SimpleCanvas
         '''
         self.portrayal_method = portrayal_method
-        self.canvas_height = canvas_height
-        self.canvas_width = canvas_width
+        self.canvas_height = 750
+        self.canvas_width = 750
         new_element = ("new Simple_Continuous_Module({}, {})".
                        format(self.canvas_width, self.canvas_height))
         self.js_code = "elements.push(" + new_element + ");"

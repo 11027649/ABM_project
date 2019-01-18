@@ -20,7 +20,7 @@ Pedestrian
 * Speed 1 cell per timestep
 * If green go, if red stop
 
-Car 
+Car
 * Occupies 2x3 cells
 * Speed 1 cell per timestep
 * If green and no pedestrian in front
@@ -34,10 +34,13 @@ Car
 ## TODO:
 - Drive into the grid/ drive out of the grid for cars: measure waiting time for level of service
 - Pedestrians: spawn around the same distance, also measure time of crossing for los
+
 - Nagel-Schreckenberg for cars
 - Different pedestrian spawning? Also nagel-schreckenberg? (waves)
 - Multiple lanes for pedestrians
 - Acceleration
+
+- Figure out what kind of updating schedule to use (Random for now?)
 
 Crowding
 - Continuous grid
@@ -57,4 +60,3 @@ Experimentation
 - How and if we want to use Nagel-Schreckenberg for the cars
 - Flow we want to use for the pedestrians
 - What crowd dynamics we want to use for pedestrians
-
