@@ -205,6 +205,19 @@ class Pedestrian(Agent):
 
         return inter_neighbors
 
+    def closest_pedestrian(self, inter_neigh):
+        """This is used to find the closest pedestrian of a given included list of neighbours"""
+        min_distance = self.model.space.get_distance(self.pos, inter_neigh[0].pos)
+        #min_distance = math.sqrt((self.pos[0]-inter_neigh[0].pos[0])**2+(self.pos[1]-inter_neigh[0].pos[1])**2)
+        min_pedestrian = 0
+        for i in range(1, len(inter_neigh)):
+            #if math.sqrt((self.pos[0]-inter_neigh[i].pos[0])**2+(self.pos[1]-inter_neigh[i].pos[1])**2) < min_distance:
+            if self.model.space.get_distance(self.pos, inter_neigh[i].pos) < min_distance:
+                min_pedestrian = i
+
+        return min_distance, min_pedestrian
+
+
     def traffic_red(self):
         """
         Returns true if light is red
@@ -280,6 +293,9 @@ class Pedestrian(Agent):
             next_pos = (self.pos[0], self.pos[1] + self.speed)
             self.pre_pos = self.pos
             self.model.space.move_agent(self, next_pos)
+
+        # TODO has to be moved to new step function
+        self.time += 1
 
     # this function is in both pedestrian and agent -> more efficient way?
     def check_front(self):
