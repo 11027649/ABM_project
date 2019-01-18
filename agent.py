@@ -31,12 +31,12 @@ class Pedestrian(Agent):
         self.time = time
 
         # Liu, 2014 parameters
-        self.theta_field = 170  # Degrees
+        self.vision_angle = 170  # Degrees
         self.N_directions = 17 # Should be >= 2!
         self.R_vision_range = 3 # Meters
         self.desired_speed = 1 # Meters per time step
         self.pre_pos = pos
-        self.angle = 90
+        self.direction = 90
 
 
         # Weights (for equation 1)
@@ -58,6 +58,11 @@ class Pedestrian(Agent):
         # If not on midsection:
         # Choose direction
         direction = self.choose_direction()
+
+        # This is testing the pedestrians in view
+        self.update_angle()
+        self.pedestrians_in_field(170,3)
+        
         # Get new position
 
         # Update previous position
@@ -119,24 +124,24 @@ class Pedestrian(Agent):
             deltapos = self.model.space.get_heading(self.pos, self.pre_pos)
             if (deltapos[0] != 0):
                 cur_angle = math.degrees(math.atan((deltapos[1] / deltapos[0])))
-                self.angle = cur_angle
+                self.direction = cur_angle
                 print("The heading is:", cur_angle)
             else:
                 if(self.dir == "up"):
-                    self.angle = 90
+                    self.direction = 90
                     print("The heading is 90")
                 elif(self.dir == "down"):
-                    self.angle = 270
+                    self.direction = 270
                     print("The heading is 270")
 
-    def pedestrians_in_field(self, vision_angle, range):
+
+    def pedestrians_in_field(self, vision_angle, vis_range):
         """
         returns the number of pedestrians in the field
-        --Jordan
         """
         # Calculate the lower angle and the upper angle
-        lower_angle = self.angle - (vision_angle / 2)
-        upper_angle = self.angle + (vision_angle / 2)
+        lower_angle = self.direction - (vision_angle / 2)
+        upper_angle = self.direction + (vision_angle / 2)
 
         # Change the current points to an np array for simplicity
         p0 = np.array(self.pos)
@@ -146,35 +151,32 @@ class Pedestrian(Agent):
         l_rads = math.radians(lower_angle)
 
         # Calculate the end angles
-        dx1 = math.cos(l_rads) * range
-        dy1 = math.sin(l_rads) * range
-        dx2 = math.cos(u_rads) * range
-        dy2 = math.sin(u_rads) * range
+        dx1 = math.cos(l_rads) * vis_range
+        dy1 = math.sin(l_rads) * vis_range
+        dx2 = math.cos(u_rads) * vis_range
+        dy2 = math.sin(u_rads) * vis_range
 
+        
+        # Calculate the points
+        p1 = np.array([p0[0] + dx1, p0[1] + dy1])
+        p2 = np.array([p0[0] + dx2, p0[1] + dy2])
+        
         # Calculate the vectors
-        v1 = np.array([p0[0] + dx1, p0[1] + dy1])
-        v2 = np.array([p0[0] - dx2, p0[1] + dy2])
+        v1 = p1-p0
+        v2 = p2-p1
 
         # Get the current neighbors
-        neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=range)
+        neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=vis_range)
         cone_neigh = []
         # Loop to find if neighbor is within the cone
         for neigh in neighbours:
             v3 = np.array(neigh.pos) - p0
-            check1 = round(np.cross(v1, v3) * np.cross(v1, v2), 10)
-            check2 = round(np.cross(v2, v3) * np.cross(v2, v1), 10)
-
+            # Append object to cone_neigh
             if (np.cross(v1, v3) * np.cross(v1, v2) >= 0 and np.cross(v2, v3) * np.cross(v2, v1) >= 0 and type(neigh) == Pedestrian):
-                print("We are in the range")
-                print(self.pos)
-                print(neigh.pos)
                 cone_neigh.append(neigh)
-            else:
-                print("We are out of the range")
-                print(self.pos)
-                print(neigh.pos)
 
         return cone_neigh
+
 
     def traffic_red(self):
         """
@@ -242,9 +244,6 @@ class Pedestrian(Agent):
             elif (changed == 0 and self.check_front() == 0) or (changed == 0 and self.check_front() == 0 and correct_side == False):
                 self.speed = 1
 
-        # This is testing the pedestrians in view
-        self.update_angle()
-        self.pedestrians_in_field(170,3)
 
         # take a step
         if self.dir is "up":
