@@ -203,10 +203,13 @@ class Pedestrian(Agent):
         return inter_neighbors
 
     def closest_pedestrian(self, inter_neigh):
-        min_distance = math.sqrt((self.pos[0]-inter_neigh[0].pos[0])**2+(self.pos[1]-inter_neigh[0].pos[1])**2)
+        """This is used to find the closest pedestrian of a given included list of neighbours"""
+        min_distance = self.model.space.get_distance(self.pos, inter_neigh[0].pos)
+        #min_distance = math.sqrt((self.pos[0]-inter_neigh[0].pos[0])**2+(self.pos[1]-inter_neigh[0].pos[1])**2)
         min_pedestrian = 0
         for i in range(1, len(inter_neigh)):
-            if math.sqrt((self.pos[0]-inter_neigh[i].pos[0])**2+(self.pos[1]-inter_neigh[i].pos[1])**2) < min_distance:
+            #if math.sqrt((self.pos[0]-inter_neigh[i].pos[0])**2+(self.pos[1]-inter_neigh[i].pos[1])**2) < min_distance:
+            if self.model.space.get_distance(self.pos, inter_neigh[i].pos) < min_distance:
                 min_pedestrian = i
 
         return min_distance, min_pedestrian
