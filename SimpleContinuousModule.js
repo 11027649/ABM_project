@@ -59,10 +59,7 @@ var ContinuousVisualization = function(height, width, context) {
 	};
 };
 
-var Simple_Continuous_Module = function(canvas_width, canvas_height) {
-	// Create the element
-	// ------------------
-
+var SimpleContinuousModule = function(canvas_width, canvas_height) {
 	// Create the tag:
 	var canvas_tag = "<canvas width='" + canvas_width + "' height='" + canvas_height + "' ";
 	canvas_tag += "style='border:1px dotted'></canvas>";
@@ -95,7 +92,6 @@ var Simple_Continuous_Module = function(canvas_width, canvas_height) {
 			context.fillRect(345,p,60,7)
 			context.stroke()
 		};
-
 
 		// draw agents
 		canvasDraw.draw(data);

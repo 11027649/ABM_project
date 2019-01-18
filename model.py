@@ -12,6 +12,7 @@ import math
 
 class Traffic(Model):
     '''
+    The actual model class!
     '''
 
     def __init__(self, y_max=50, x_max=50):
