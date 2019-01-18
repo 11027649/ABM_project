@@ -51,24 +51,26 @@ class Pedestrian(Agent):
         """
         stepfunction based on Liu, 2014
         """
-        # Check traffic light and decide to more or not
+        # Check traffic light and decide to move or not
+        if traffic_red() is False:
+            # Later: choice if on midsection or on middle of the road
 
-        # Later: choice if on midsection or on middle of the road
-
-        # If not on midsection:
-        # Choose direction
-        direction = self.choose_direction()
+            # Choose direction
+            direction = self.choose_direction()
 
         # This is testing the pedestrians in view
-        self.update_angle()
         self.pedestrians_in_field(170,3)
 
         # Get new position
 
         # Update previous position
         self.pre_pos = self.pos
+
         # Move to new position
         raise NotImplementedError
+        # Update angle
+        self.update_angle()
+
 
     def choose_direction(self):
         """
@@ -118,21 +120,25 @@ class Pedestrian(Agent):
     #def get_current_view(self, ):
 
     def update_angle(self):
+        """
+        Updates the angle to the new direction
+        """
         # Find the current heading
         if (self.pos != self.pre_pos):
-
+            
+            # Get heading
             deltapos = self.model.space.get_heading(self.pos, self.pre_pos)
+            # If the heading has a non-zero angle
             if (deltapos[0] != 0):
+                # Calculate new angle
                 cur_angle = math.degrees(math.atan((deltapos[1] / deltapos[0])))
                 self.direction = cur_angle
-                print("The heading is:", cur_angle)
+            # If angle is zero, set the direction according to 'up' or 'down'
             else:
                 if(self.dir == "up"):
                     self.direction = 90
-                    print("The heading is 90")
                 elif(self.dir == "down"):
                     self.direction = 270
-                    print("The heading is 270")
 
 
     def pedestrians_in_field(self, vision_angle, vis_range):
@@ -149,18 +155,15 @@ class Pedestrian(Agent):
         # Convert to radians for angle calcuation
         u_rads = math.radians(upper_angle)
         l_rads = math.radians(lower_angle)
-
         # Calculate the end angles
         dx1 = math.cos(l_rads) * vis_range
         dy1 = math.sin(l_rads) * vis_range
         dx2 = math.cos(u_rads) * vis_range
         dy2 = math.sin(u_rads) * vis_range
 
-
-        # Calculate the points
+        # Calculate the points 
         p1 = np.array([p0[0] + dx1, p0[1] + dy1])
         p2 = np.array([p0[0] + dx2, p0[1] + dy2])
-
         # Calculate the vectors
         v1 = p1-p0
         v2 = p2-p1
@@ -171,7 +174,7 @@ class Pedestrian(Agent):
         # Loop to find if neighbor is within the cone
         for neigh in neighbours:
             v3 = np.array(neigh.pos) - p0
-            # Append object to cone_neigh
+            # Append object to cone_neigh if its within vision cone
             if (np.cross(v1, v3) * np.cross(v1, v2) >= 0 and np.cross(v2, v3) * np.cross(v2, v1) >= 0 and type(neigh) == Pedestrian):
                 cone_neigh.append(neigh)
 
@@ -182,9 +185,8 @@ class Pedestrian(Agent):
         """
         Returns true if light is red
         """
-        # check if there's a traffic light (and adjust speed accordingly)
-
         # Check if agent is in front of the traffic light (correct_side=True)
+        # TODO: Add light for midsection (and add midsection)
         correct_side = False
         if self.dir == "up":
             own_light = 2
