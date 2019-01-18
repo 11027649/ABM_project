@@ -180,6 +180,27 @@ class Pedestrian(Agent):
 
         return cone_neigh
 
+    def pedestrian_intersection(self, conal_neighbours, angle, offset):
+        """This fucntion will check the map for intersections from the given angle and the offset
+        and return a list of neighbours that match those crieria"""
+        # calculate the linear formula for the line
+        m = math.tan(radians(angle))
+        b = self.pos[1] - (m*self.pos(0))
+
+        # calcuate the y offset of the range of lines
+        b_offset = offset/math.cos(angle)
+
+        # calcuate the new intersection points based off the offset of the line
+        b_top = b+b_offset
+        b_bot = b-b_offset
+
+        neighbours = conal_neighbours
+        inter_neighbors = []
+        for neigh in neighbours:
+            if ((neigh.pos[1] - ((m*neigh.pos[0])+b_top)) <= 0 and (neigh.pos[1] - ((m*neigh.pos[0])+b_bot)) >= 0):
+                inter_neighbors.append(neigh)
+
+        return inter_neighbors
 
     def traffic_red(self):
         """
