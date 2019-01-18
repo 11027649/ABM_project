@@ -8,8 +8,10 @@ var ContinuousVisualization = function(height, width, context) {
 			var p = objects[i];
 
 			if (p.Shape == "rect")
-				this.drawRectange(p.x, p.y, p.w, p.h, p.Color, p.Filled);
+			console.log("I'm gonna draw a rectange")
+				this.drawRectange(p.x, p.y, 15, 30, p.Color, p.Filled);
 			if (p.Shape == "circle")
+			console.log("I'd rather draw a circle")
 				this.drawCircle(p.x, p.y, p.r, p.Color, p.Filled);
 		};
 	};
@@ -75,10 +77,27 @@ var Simple_Continuous_Module = function(canvas_width, canvas_height) {
 	this.render = function(data) {
 		canvasDraw.resetCanvas();
 
-		//  draw the road
+		//  draw the road (This color is Asphalt grey :-P)
 		context.fillStyle = "#282B2A";
-		context.fillRect(0, 336, 750, 78)
+		context.fillRect(0, 307, 750, 135)
 		context.stroke()
+
+		// draw the middle part of the road
+		context.fillStyle = "#2CB037";
+		context.fillRect(0, 367, 750, 16)
+		context.stroke()
+
+		// draw zebra crossings
+		ys_zebra = [314, 333, 352, 388, 406, 425]
+		for (var i in ys_zebra) {
+			var p = ys_zebra[i];
+			context.fillStyle = "White";
+			context.fillRect(345,p,60,7)
+			context.stroke()
+		};
+
+
+		// draw agents
 		canvasDraw.draw(data);
 
 	};

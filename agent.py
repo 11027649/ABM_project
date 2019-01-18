@@ -76,7 +76,7 @@ class Pedestrian(Agent):
         self.update_angle()
 
     def desired_speed(self, gamma=1.913, max_density=5.4):
-        #Parameters: Normal speed, 
+        #Parameters: Normal speed,
         return self.speed_free * (1 - np.exp(-gamma * ((1/self.density)-(1/max_density))))
 
     def choose_direction(self):
@@ -133,7 +133,7 @@ class Pedestrian(Agent):
         """
         # Find the current heading
         if (self.pos != self.pre_pos):
-            
+
             # Get heading
             deltapos = self.model.space.get_heading(self.pos, self.pre_pos)
             # If the heading has a non-zero angle
@@ -169,7 +169,7 @@ class Pedestrian(Agent):
         dx2 = math.cos(u_rads) * vis_range
         dy2 = math.sin(u_rads) * vis_range
 
-        # Calculate the points 
+        # Calculate the points
         p1 = np.array([p0[0] + dx1, p0[1] + dy1])
         p2 = np.array([p0[0] + dx2, p0[1] + dy2])
         # Calculate the vectors
@@ -262,7 +262,7 @@ class Pedestrian(Agent):
                 correct_side = True
 
         # Iterate over all the agents
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
+        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 4):
             # If the agent is a light, which is red or orange, which is your own light and you're in front of the light
             if (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
                 return True
@@ -293,7 +293,7 @@ class Pedestrian(Agent):
         changed = 0
         correct_side = False
         if self.dir == "up":
-            own_light = 2
+            own_light = 6
             if self.pos[1] > int(self.model.space.y_max/2 + 2 ):
                 correct_side = True
         else:
@@ -363,13 +363,13 @@ class Car(Agent):
             if self.pos[0] < int(self.model.space.x_max/2 - 2):
                 correct_side = True
         else:
-            own_light = 4
+            own_light = 2
             if self.pos[0] > int(self.model.space.x_max/2 + 2):
                 correct_side = True
 
         # very inefficient code right here if we notice if the run time is too long
 
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
+        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 4):
         # not only affected by 1 light
             if changed == 0 and (self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True)):
                 self.speed = 0
