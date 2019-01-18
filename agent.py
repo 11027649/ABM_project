@@ -5,22 +5,7 @@ import random
 import math
 import numpy as np
 
-class Light(Agent):
-    def __init__(self, unique_id, model, pos, state, light_id):
-        super().__init__(unique_id, model)
-
-        self.pos = pos
-        self.state = state
-        self.light_id = light_id
-
-    def step(self):
-        '''
-        This method should move the goat using the `random_move()` method implemented earlier, then conditionally reproduce.
-        '''
-        self.state = (self.state + 1) % 130
-
-
-
+from light import Light
 
 class Pedestrian(Agent):
     def __init__(self, unique_id, model, pos, dir, speed = 1, time=0):
@@ -341,7 +326,6 @@ class Pedestrian(Agent):
                 if isinstance(agent, Car) or isinstance(agent, Pedestrian):
                     return i
         return 0
-
 
 class Car(Agent):
     def __init__(self, unique_id, model, pos, dir, speed=1, time=0):
