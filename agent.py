@@ -58,8 +58,8 @@ class Pedestrian(Agent):
             # Choose direction
             direction = self.choose_direction()
 
-        # This is testing the pedestrians in view
-        self.pedestrians_in_field(170,3)
+        # # This is testing the pedestrians in view
+        # self.pedestrians_in_field(170,3)
 
         # Get new position
 
@@ -182,7 +182,10 @@ class Pedestrian(Agent):
 
     def pedestrian_intersection(self, conal_neighbours, angle, offset):
         """This fucntion will check the map for intersections from the given angle and the offset
-        and return a list of neighbours that match those crieria"""
+        and return a list of neighbours that match those crieria
+        Conal_neighbours: the objects within the vision field
+        Angle: the direction k
+        Offset: 1.5*radius to both sides of the direction line"""
         # calculate the linear formula for the line
         m = math.tan(radians(angle))
         b = self.pos[1] - (m*self.pos(0))
