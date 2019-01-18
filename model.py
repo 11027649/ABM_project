@@ -26,7 +26,7 @@ class Traffic(Model):
         self.schedule_Light = RandomActivation(self)
 
         self.datacollector = DataCollector(
-             {"Time": lambda m: self.time_list})
+             {"Cars and pedestrians": lambda m: self.schedule_Pedestrian.get_agent_count()})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
         self.place_lights()
@@ -147,9 +147,19 @@ class Traffic(Model):
         # Save the statistics
         self.datacollector.collect(self)
 
-    def run_model(self, step_count=100):
+    def run_model(self, step_count=1):
         '''
         Method that runs the model for a specific amount of steps.
         '''
         for i in range(step_count):
             self.step()
+
+        print("ik heb nu alle stappen gedaan")
+
+        hist, bin_edges = np.histogram(model.time_list)
+        import matplotlib.pyplot as plt
+
+        n, bins, patches = plt.hist(x=time_list, bins='auto')
+        plt.xlabel("Time spend crossing conjunction")
+        plt.ylabel("Frequency")
+        plt.title("Level of Service")

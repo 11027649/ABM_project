@@ -31,7 +31,10 @@ def agent_portrayal(agent):
 space = SimpleCanvas(agent_portrayal, 750, 750)
 
 # Create a dynamic histogram
-histogram = HistogramModule(list(range(100)), 100, 100)
+histogram = HistogramModule(list(range(10)))
+# chart = ChartModule([{"Label": "Cars and Pedestrians",
+#                       "Color": "green"}],
+#                       data_collector_name='datacollector')
 
 # Create the server, and pass the grid and the graph
 server = ModularServer(Traffic,

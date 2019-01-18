@@ -165,14 +165,14 @@ class Pedestrian(Agent):
             check2 = round(np.cross(v2, v3) * np.cross(v2, v1), 10)
 
             if (np.cross(v1, v3) * np.cross(v1, v2) >= 0 and np.cross(v2, v3) * np.cross(v2, v1) >= 0 and type(neigh) == Pedestrian):
-                print("We are in the range")
-                print(self.pos)
-                print(neigh.pos)
+                # print("We are in the range")
+                # print(self.pos)
+                # print(neigh.pos)
                 cone_neigh.append(neigh)
-            else:
-                print("We are out of the range")
-                print(self.pos)
-                print(neigh.pos)
+            # else:
+            #     print("We are out of the range")
+            #     print(self.pos)
+            #     print(neigh.pos)
 
         return cone_neigh
 
