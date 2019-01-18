@@ -81,7 +81,7 @@ var SimpleContinuousModule = function(canvas_width, canvas_height) {
 
 		// draw the middle part of the road
 		context.fillStyle = "#2CB037";
-		context.fillRect(0, 367, 750, 16)
+		context.fillRect(0, 368, 750, 14)
 		context.stroke()
 
 		// draw zebra crossings

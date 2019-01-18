@@ -15,6 +15,6 @@ class Light(Agent):
 
     def step(self):
         '''
-        This method should move the goat using the `random_move()` method implemented earlier, then conditionally reproduce.
+        Update the state of the light.
         '''
         self.state = (self.state + 1) % 130
