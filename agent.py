@@ -254,10 +254,10 @@ class Pedestrian(Agent):
         correct_side = False
         if self.dir == "up":
             own_light = 2
-            if self.pos[1] > int(self.model.space.y_max/2 + 2 ):
+            if self.pos[1] > int(self.model.space.y_max/2 + 2):
                 correct_side = True
         else:
-            own_light = 3
+            own_light = 6
             if self.pos[1] < int(self.model.space.y_max/2 - 2):
                 correct_side = True
 

@@ -138,7 +138,7 @@ class Traffic(Model):
         if random.random() < 0.5:
 
             # if there's place place a new car with probability 0.7
-            x = int(self.x_max / 2 + 1)
+            x = int(self.x_max / 2 - 1)
             y = self.y_max - 1
             pos = (x,y)
             if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
@@ -146,7 +146,8 @@ class Traffic(Model):
 
         else:
             # if there's place place a new car with probability 0.7
-            x = int(self.x_max / 2 - 1)
+
+            x = int(self.x_max / 2 + 1)
 
             y = 0
             pos = (x,y)
