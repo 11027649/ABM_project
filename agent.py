@@ -255,6 +255,9 @@ class Pedestrian(Agent):
             self.pre_pos = self.pos
             self.model.space.move_agent(self, next_pos)
 
+        # TODO has to be moved to new step function
+        self.time += 1
+
     # this function is in both pedestrian and agent -> more efficient way?
     def check_front(self):
         '''

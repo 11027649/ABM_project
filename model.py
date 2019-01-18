@@ -18,8 +18,8 @@ class Traffic(Model):
 
         self.y_max = y_max
         self.x_max = x_max
-        self.time_list = []
-        self.time_list.append(64)
+        self.time_list = {}
+
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
         self.schedule_Pedestrian = RandomActivation(self)
@@ -80,8 +80,7 @@ class Traffic(Model):
         '''
 
         # save level of service by saving spended time in list
-        print("                                              " , agent.time)
-        self.time_list.append(agent.time)
+        self.time_list.append(type(agent).__name, agent.time)
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
@@ -133,7 +132,6 @@ class Traffic(Model):
             pos = (x,y)
             if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
                 self.new_pedestrian(pos, "up")
-                print('a')
 
         else:
             # if there's place place a new car with probability 0.7
@@ -154,12 +152,4 @@ class Traffic(Model):
         for i in range(step_count):
             self.step()
 
-        print("ik heb nu alle stappen gedaan")
-
-        hist, bin_edges = np.histogram(model.time_list)
-        import matplotlib.pyplot as plt
-
-        n, bins, patches = plt.hist(x=time_list, bins='auto')
-        plt.xlabel("Time spend crossing conjunction")
-        plt.ylabel("Frequency")
-        plt.title("Level of Service")
+        return self.time_list
