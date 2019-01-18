@@ -14,5 +14,6 @@ class HistogramModule(VisualizationElement):
         self.js_code = "elements.push(" + new_element + ");"
 
     def render(self, model):
-        hist = np.histogram(model.time_list, bins=self.bins)[0]
+        # hist = np.histogram(model.time_list, bins=self.bins)[0]
+        hist = []
         return [int(x) for x in hist]
