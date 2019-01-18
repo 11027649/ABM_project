@@ -181,7 +181,7 @@ class Pedestrian(Agent):
         return cone_neigh
 
     def pedestrian_intersection(self, conal_neighbours, angle, offset):
-        """This fucntion will check the map for intersections from the given angle and the offset
+        """This function will check the map for intersections from the given angle and the offset
         and return a list of neighbours that match those crieria"""
         # calculate the linear formula for the line
         m = math.tan(radians(angle))
@@ -201,6 +201,16 @@ class Pedestrian(Agent):
                 inter_neighbors.append(neigh)
 
         return inter_neighbors
+
+    def closest_pedestrian(self, inter_neigh):
+        min_distance = math.sqrt((self.pos[0]-inter_neigh[0].pos[0])**2+(self.pos[1]-inter_neigh[0].pos[1])**2)
+        min_pedestrian = 0
+        for i in range(1, len(inter_neigh)):
+            if math.sqrt((self.pos[0]-inter_neigh[i].pos[0])**2+(self.pos[1]-inter_neigh[i].pos[1])**2) < min_distance:
+                min_pedestrian = i
+
+        return min_distance, min_pedestrian
+
 
     def traffic_red(self):
         """
