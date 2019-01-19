@@ -17,13 +17,24 @@ class Pedestrian(Agent):
 
         # Liu, 2014 parameters
         self.vision_angle = 170  # Degrees
+        self.pre_pos = pos # TODO: can be deleted?
+
+        # parameters TODO: optimization?
         self.N = 16 # Should be >= 2!
         self.R_vision_range = 3 # Meters
         self.des_speed = 1 # Meters per time step
-        self.pre_pos = pos
-        self.speed_free = 1 #normal distribution of N(1.34, 0.342)
-        self.peds_in_vision = None # list of pedestrians in vision field
+        # Weights (for equation 1)
+        # What is We' for equation 7??
+        self.Ek_w = 1
+        self.Ok_w = 1
+        self.Pk_w = 1
+        self.Ak_w = 1
+        self.Ik_w = 1
+        # TODO: assign target point randomly (preference to right side?)
+        self.target_point = (10,0)
+        self.speed_free = 1 # TODO: normal distribution of N(1.34, 0.342)
 
+        self.peds_in_vision = None # list of pedestrians in vision field
         # Set direction in degrees
         if self.dir == "up":
             self.direction = 270
@@ -32,16 +43,6 @@ class Pedestrian(Agent):
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
-        # TODO: assign target point randomly (preference to right side?)
-        self.target_point = (10,0)
-
-        # Weights (for equation 1)
-        # What is We' for equation 7??
-        self.Ek_w = 1
-        self.Ok_w = 1
-        self.Pk_w = 1
-        self.Ak_w = 1
-        self.Ik_w = 1
 
     def step_new(self):
         """
@@ -55,34 +56,29 @@ class Pedestrian(Agent):
 
             # Get list of pedestrians in the vision field
             self.peds_in_vision = self.pedestrians_in_field(self.vision_angle, self.R_vision_range)
-            # Set desired_speed with number of pedestrians in vision field as input
+            # Set desired_speed
             self.des_speed = self.desired_speed(len(self.peds_in_vision))
 
-            # Choose direction
-            theta_chosen = self.choose_direction()
-            self.direction = theta_chosen
+            # Get new position and update direction
+            next_pos, self.direction = self.choose_direction()
 
-            # TODO: DELETE THESE VARIABLES
-            theta_chosen = 90
-            available_speed = 3
-
-            # Choose speed (TODO: or delete?)
-            chosen_speed = min(available_speed, self.des_speed)
-            # Get new position
-            next_pos = self.new_pos(chosen_speed, theta_chosen)
-
-            # Update previous position
+            # Update previous position (TODO: not necessary?)
             self.pre_pos = self.pos
-            # Move to new position
-            # self.model.space.move_agent(self, next_pos)
 
+            # # TODO: de-comment this if we're running this step function
+            # # Move to new position
+            # self.model.space.move_agent(self, next_pos)
             # # Finalize this step
             # self.time += 1
 
 
     def desired_speed(self, n_agents_in_cone, gamma=1.913, max_density=5.4):
+        """
+        Returns desired speed, using equation 8
+        Takes as input the number of agents in vision field
+        """
         #Parameters: Normal speed
-        # TODO: Only works for vision angle of 170 degrees for now
+        # TODO: Only works for vision angle of 170 degrees
         print('self', self.vision_angle)
         if self.vision_angle == 170:
             # cone_area_170 = 13.3517
@@ -90,23 +86,22 @@ class Pedestrian(Agent):
             # dens = agent_area/cone_area
             dens = 0.0376
         else:
-            # TODO: remove hardcoding?
             raise ValueError('Code only works for 170 degrees vision range for now')
 
         # Calculate cone density 
-        # TODO: DELETE THIS HACK AND FIX DIVIDE BY ZERO ERROR CORRECTLY
+        # TODO: Is this correct to do to aviod getting a division by zero, looking at the equation?
         if n_agents_in_cone <= 0:
-            n_agents_in_cone = 1
+            return self.speed_free
 
         cone_density = n_agents_in_cone * dens
         # Calculate the desired speed (see eq. 8)
         des_speed = self.speed_free*(1 - np.exp(-gamma*((1/cone_density)-(1/max_density))))
 
-        # Check if speed is not negative?
+        # Check if speed is not negative
         if des_speed >= 0:
             return des_speed
         else:
-            # TODO: set a default speed?
+            # TODO: set a default speed? Or just stop? Or can we go back with negative speed?
             return 0
 
 
@@ -115,22 +110,23 @@ class Pedestrian(Agent):
         Picks the direction with the highest utility
         """
         # Loop over the possible directions
-        # TODO: Check if utility function doesn't return a negative value
-        max_util = [-1, None]
+        # TODO: Is it okay for the utility to return a negative value? Should we check for that? (Now weights are just set at 1)
+        max_util = [-10**6, None, None]
         pos_directions = self.possible_directions()        
         for direction in pos_directions:
             # Calculate utility
-            util = self.calc_utility(direction)
+            util, next_pos = self.calc_utility(direction)
             # Check if this utility is higher than the previous
             if util > max_util[0]:
-                max_util = [util, direction]
+                max_util = [util, next_pos, direction]
 
-        # Return direction
-        return max_util[1]
+        # Return next position and the direction
+        return max_util[1], max_util[2]
 
 
     def possible_directions(self):
         """
+        Returns the possible directions for theta and N.
         TODO: THIS ONE STILL INCLUDES END BOUNDARIES OF VISION RANGE
         """
 
@@ -158,10 +154,10 @@ class Pedestrian(Agent):
 
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
-            # min_distance, min_pedestrian.pos
+            # Get closest pedestrian: min_distance, min_pedestrian.pos
+            # TODO: returning the pedestrian.pos not necessary? (then also update code for this)
             closest_ped = self.closest_pedestrian(peds_in_dir)
-            # print('closest:', closest_ped)
-        # If no pedestrians in view, closest_ped is set at vision range
+        # If no pedestrians in view, closest_ped distance is set at vision range
         else:
             closest_ped = [self.R_vision_range, None]
         
@@ -179,20 +175,23 @@ class Pedestrian(Agent):
         target_dist = self.model.space.get_distance(next_pos, self.target_point)
 
         # Calculate factors
-        Ek = self.Ek(target_dist) # Efficiency of approaching target point
+        Ek = 1 - (target_dist - self.R_vision_range - self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
         Ok =  min(self.R_vision_range, closest_wall[0])/self.R_vision_range # distance to closest obstacle/vision range
         Pk =  min(self.R_vision_range, closest_ped[0])/self.R_vision_range # distance to closest person/vision range
-
-        # Ak = None
-        # Ik = None
+        # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
+        # # TODO: Use for the trajectory the line between current postion and possible next_pos? Or R_vision_range?
+        # # TODO: in radians or degrees?
+        theta_vj = 18
+        Ak = 1 - theta_vj/math.pi # flocking
+        # TODO: Check the equation in the article. It says '1*...', maybe a typo?
+        Ik = abs(self.direction-direction) / (self.vision_angle/2)
 
         # # Using equation 1 for now:
         # TODO: Do we want to change to equation 7? I don't quite understand 7..
-        # return self.Ek_w * Ek + self.Ok_w * Ok + \
-        #         self.Pk_w * Pk + self.Ak_w * Ak + \
-        #         self.Ik_w * Ik
-        # TODO: DELETE AND RETURN CORRECT UTILITY
-        return 1
+        # TODO: can utility become <0? Should we check? (also dependent on weights; optimization?)
+        return self.Ek_w * Ek + self.Ok_w * Ok + \
+                self.Pk_w * Pk + self.Ak_w * Ak + \
+                self.Ik_w * Ik, next_pos
 
 
     def new_pos(self, chosen_velocity, theta_chosen):
@@ -200,36 +199,6 @@ class Pedestrian(Agent):
         TODO: CHECK FUNCTION IF SENDS CORRECT NEW POSITION"""
         new_pos = (self.pos[0] + chosen_velocity*np.cos(math.radians(theta_chosen)), self.pos[1]+chosen_velocity*np.sin(math.radians(theta_chosen)))
         return new_pos
-
-    def Ek(self, target_dist):
-        """
-        Efficiency of reaching target point
-        """
-        #Distance of proposed new position to target
-        return 1 - (target_dist - self.R_vision_range - self.speed_free)/(2*self.speed_free)
-
-
-    # TODO: DELETE I think
-    # def update_angle(self):
-    #     """
-    #     Updates the angle to the new direction
-    #     """
-    #     # Find the current heading
-    #     if (self.pos != self.pre_pos):
-
-    #         # Get heading
-    #         deltapos = self.model.space.get_heading(self.pos, self.pre_pos)
-    #         # If the heading has a non-zero angle
-    #         if (deltapos[0] != 0):
-    #             # Calculate new angle
-    #             cur_angle = math.degrees(math.atan((deltapos[1] / deltapos[0])))
-    #             self.direction = cur_angle
-    #         # If angle is zero, set the direction according to 'up' or 'down'
-    #         else:
-    #             if(self.dir == "up"):
-    #                 self.direction = 90
-    #             elif(self.dir == "down"):
-    #                 self.direction = 270
 
 
     def pedestrians_in_field(self, vision_angle, vis_range):
