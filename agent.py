@@ -174,19 +174,20 @@ class Pedestrian(Agent):
         chosen_velocity = min(self.des_speed, closest_ped[0], closest_wall[0])
         next_pos = self.new_pos(chosen_velocity, direction)
 
-        # Calculate distance to target point
+        # Calculate distance from possible next_pos to target point
+        # TODO: CHANGE TO DISTANCE TO PROJECTION TARGET POINT
         target_dist = self.model.space.get_distance(next_pos, self.target_point)
 
-        # # Calculate factors
-        # Ek = 1 - (Dk_target - self.R_vision_range - Rk_step)/(2*Rk_step)
-        # Ok = None
-        # Pk = None
+        # Calculate factors
+        Ek = self.Ek(target_dist) # Efficiency of approaching target point
+        Ok =  min(self.R_vision_range, closest_wall[0])/self.R_vision_range # distance to closest obstacle/vision range
+        Pk =  min(self.R_vision_range, closest_ped[0])/self.R_vision_range # distance to closest person/vision range
+
         # Ak = None
         # Ik = None
 
-        # raise NotImplementedError
-
         # # Using equation 1 for now:
+        # TODO: Do we want to change to equation 7? I don't quite understand 7..
         # return self.Ek_w * Ek + self.Ok_w * Ok + \
         #         self.Pk_w * Pk + self.Ak_w * Ak + \
         #         self.Ik_w * Ik
@@ -199,6 +200,13 @@ class Pedestrian(Agent):
         TODO: CHECK FUNCTION IF SENDS CORRECT NEW POSITION"""
         new_pos = (self.pos[0] + chosen_velocity*np.cos(math.radians(theta_chosen)), self.pos[1]+chosen_velocity*np.sin(math.radians(theta_chosen)))
         return new_pos
+
+    def Ek(self, target_dist):
+        """
+        Efficiency of reaching target point
+        """
+        #Distance of proposed new position to target
+        return 1 - (target_dist - self.R_vision_range - self.speed_free)/(2*self.speed_free)
 
 
     # TODO: DELETE I think
