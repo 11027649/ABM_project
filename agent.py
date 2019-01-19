@@ -358,8 +358,16 @@ class Car(Agent):
             direction = -1
 
         # the car has a vision range of 1 tile for now (can be changed to its max speed?)
-        for i in range(1, 2):
+        for i in range(1, self.braking_distance() + self.speed):
             for agent in self.model.space.get_neighbors((self.pos[0] + direction * i, self.pos[1]), radius = 0):
                 if isinstance(agent, Car) or isinstance(agent, Pedestrian):
                     return i
         return 0
+
+    def braking_distance(self):
+        distance = 0
+        # this should be minimal 1
+        for i in range(1, self.speed + 1):
+            distance = distance + i
+        return distance
+
