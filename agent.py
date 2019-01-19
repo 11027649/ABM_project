@@ -5,22 +5,7 @@ import random
 import math
 import numpy as np
 
-class Light(Agent):
-    def __init__(self, unique_id, model, pos, state, light_id):
-        super().__init__(unique_id, model)
-
-        self.pos = pos
-        self.state = state
-        self.light_id = light_id
-
-    def step(self):
-        '''
-        This method should move the goat using the `random_move()` method implemented earlier, then conditionally reproduce.
-        '''
-        self.state = (self.state + 1) % 130
-
-
-
+from light import Light
 
 class Pedestrian(Agent):
     def __init__(self, unique_id, model, pos, dir, speed = 1, time=0):
@@ -76,7 +61,7 @@ class Pedestrian(Agent):
         self.update_angle()
 
     def desired_speed(self, gamma=1.913, max_density=5.4):
-        #Parameters: Normal speed, 
+        #Parameters: Normal speed,
         return self.speed_free * (1 - np.exp(-gamma * ((1/self.density)-(1/max_density))))
 
     def choose_direction(self):
@@ -133,7 +118,7 @@ class Pedestrian(Agent):
         """
         # Find the current heading
         if (self.pos != self.pre_pos):
-            
+
             # Get heading
             deltapos = self.model.space.get_heading(self.pos, self.pre_pos)
             # If the heading has a non-zero angle
@@ -169,7 +154,7 @@ class Pedestrian(Agent):
         dx2 = math.cos(u_rads) * vis_range
         dy2 = math.sin(u_rads) * vis_range
 
-        # Calculate the points 
+        # Calculate the points
         p1 = np.array([p0[0] + dx1, p0[1] + dy1])
         p2 = np.array([p0[0] + dx2, p0[1] + dy2])
         # Calculate the vectors
@@ -213,15 +198,34 @@ class Pedestrian(Agent):
 
         return inter_neighbors
 
+    def closest_ped_on_line(self, m, b, neighbours):
+        """This would find the closest pedestrian to a path given a subset of pedestrians"""
+        min_distance = abs((m*neighbours[0].pos[0])-neighbours[0].pos[1]+b)/math.sqrt((m**2) + 1)
+        min_pedestrian = neighbours[0]
+        for i in range(1, len(inter_neigh)):
+            cur_distance = abs((m * neighbours[i].pos[0]) - neighbours[i].pos[1] + b) / math.sqrt((m ** 2) + 1)
+            #if math.sqrt((self.pos[0]-inter_neigh[i].pos[0])**2+(self.pos[1]-inter_neigh[i].pos[1])**2) < min_distance:
+            if cur_distance < min_distance:
+                min_pedestrian = neighbours[i]
+                min_distance = cur_distance
+            elif cur_distance == min_distance:
+                if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours.pos):
+                    min_pedestrian = neighbours[i]
+                    min_distance = cur_distance
+
+        return min_distance, min_pedestrian
+
     def closest_pedestrian(self, inter_neigh):
         """This is used to find the closest pedestrian of a given included list of neighbours"""
         min_distance = self.model.space.get_distance(self.pos, inter_neigh[0].pos)
         #min_distance = math.sqrt((self.pos[0]-inter_neigh[0].pos[0])**2+(self.pos[1]-inter_neigh[0].pos[1])**2)
-        min_pedestrian = 0
+        min_pedestrian = inter_neigh[0]
         for i in range(1, len(inter_neigh)):
             #if math.sqrt((self.pos[0]-inter_neigh[i].pos[0])**2+(self.pos[1]-inter_neigh[i].pos[1])**2) < min_distance:
-            if self.model.space.get_distance(self.pos, inter_neigh[i].pos) < min_distance:
-                min_pedestrian = i
+            cur_distance = self.model.space.get_distance(self.pos, inter_neigh[i].pos)
+            if cur_distance < min_distance:
+                min_pedestrian = inter_neigh[i]
+                min_distance = cur_distance
 
         return min_distance, min_pedestrian
 
@@ -235,15 +239,15 @@ class Pedestrian(Agent):
         correct_side = False
         if self.dir == "up":
             own_light = 2
-            if self.pos[1] > int(self.model.space.y_max/2 + 2 ):
+            if self.pos[1] > int(self.model.space.y_max/2 + 2):
                 correct_side = True
         else:
-            own_light = 3
+            own_light = 6
             if self.pos[1] < int(self.model.space.y_max/2 - 2):
                 correct_side = True
 
         # Iterate over all the agents
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
+        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 4):
             # If the agent is a light, which is red or orange, which is your own light and you're in front of the light
             if (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
                 return True
@@ -274,7 +278,7 @@ class Pedestrian(Agent):
         changed = 0
         correct_side = False
         if self.dir == "up":
-            own_light = 2
+            own_light = 6
             if self.pos[1] > int(self.model.space.y_max/2 + 2 ):
                 correct_side = True
         else:
@@ -323,7 +327,6 @@ class Pedestrian(Agent):
                     return i
         return 0
 
-
 class Car(Agent):
     def __init__(self, unique_id, model, pos, dir, speed=1, time=0):
         super().__init__(unique_id, model)
@@ -344,13 +347,13 @@ class Car(Agent):
             if self.pos[0] < int(self.model.space.x_max/2 - 2):
                 correct_side = True
         else:
-            own_light = 4
+            own_light = 2
             if self.pos[0] > int(self.model.space.x_max/2 + 2):
                 correct_side = True
 
         # very inefficient code right here if we notice if the run time is too long
 
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
+        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 4):
         # not only affected by 1 light
             if changed == 0 and (self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True)):
                 self.speed = 0

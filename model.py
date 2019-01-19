@@ -12,9 +12,10 @@ import math
 
 class Traffic(Model):
     '''
+    The actual model class!
     '''
 
-    def __init__(self, y_max=30, x_max=30):
+    def __init__(self, y_max=50, x_max=50):
 
         super().__init__()
 
@@ -39,14 +40,22 @@ class Traffic(Model):
 
     def place_lights(self):
         '''
-        Method that provides an easy way of making a bunch of agents at once.
+        Method that places the ligths for the visualization. The lights keep
+        the agents from crossing when they are red.
         '''
 
-        self.new_light((int(self.x_max/2 - 2), int(self.y_max/2) + 2), 0, 1)
-        self.new_light((int(self.x_max/2 + 2), int(self.y_max/2) + 2), 75, 2)
+        # car lights
+        self.new_light((20,30), 0, 1)
+        self.new_light((30,20), 0, 2)
 
-        self.new_light((int(self.x_max/2 - 2), int(self.y_max/2) - 2), 75, 3)
-        self.new_light((int(self.x_max/2 + 2), int(self.y_max/2) - 2), 0, 4)
+        # pedestrian lights
+        self.new_light((27, 20), 75, 3)
+        self.new_light((23, 30), 75, 6)
+
+        # lights in the middle, not assigned for now and simultaneous with the
+        # other pedestrian lights
+        self.new_light((27, 24.65), 75, 4)
+        self.new_light((23, 25.35), 75, 5)
 
 
     def new_light(self, pos, state, light_id):
@@ -54,7 +63,7 @@ class Traffic(Model):
         Method that creates a new agent, and adds it to the correct scheduler.
         '''
         light = Light(self.next_id(), self, pos, state, light_id)
-
+        print(light.pos)
         self.space.place_agent(light, pos)
         getattr(self, 'schedule_Light').add(light)
 
@@ -83,7 +92,7 @@ class Traffic(Model):
 
         # save level of service by saving spended time in list
         self.time_list[type(agent).__name__].append(agent.time)
-    
+
         print(self.time_list)
 
         # if we remove the agents, save the time they spended in the grid
@@ -113,17 +122,16 @@ class Traffic(Model):
                 if current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed >= self.y_max:
                     self.remove_agent(current_agent)
 
-        # TODO: if there are no more cars in the beginning of the lanes, add cars with a probability
         if random.random() < 0.5:
 
             # if there's place place a new car with probability 0.7
-            pos = (2, self.y_max/2 + 1)
+            pos = (2, self.y_max/2 + 2.5)
             if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
                 self.new_car(pos, "right")
 
         else:
             # if there's place place a new car with probability 0.7
-            pos = (self.x_max - 3, self.y_max/2 - 1)
+            pos = (self.x_max - 3, self.y_max/2 - 2.5)
             if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
                 self.new_car(pos, "left")
 
@@ -131,7 +139,7 @@ class Traffic(Model):
         if random.random() < 0.5:
 
             # if there's place place a new car with probability 0.7
-            x = int(self.x_max / 2 + 1)
+            x = int(self.x_max / 2 - 1)
             y = self.y_max - 1
             pos = (x,y)
             if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
@@ -139,7 +147,8 @@ class Traffic(Model):
 
         else:
             # if there's place place a new car with probability 0.7
-            x = int(self.x_max / 2 - 1)
+
+            x = int(self.x_max / 2 + 1)
 
             y = 0
             pos = (x,y)
