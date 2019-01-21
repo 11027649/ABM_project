@@ -22,8 +22,6 @@ class Traffic(Model):
         self.y_max = y_max
         self.x_max = x_max
 
-        self.data = Data()
-
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
         self.schedule_Pedestrian = RandomActivation(self)
@@ -91,8 +89,9 @@ class Traffic(Model):
         Method that removes an agent from the grid and the correct scheduler.
         '''
 
-        # save level of service by saving spended time in list
-        self.data.write_row(type(agent).__name__, agent.unique_id, agent.time)
+        if self.data:
+            # save level of service by saving spended time in list
+            self.data.write_row(type(agent).__name__, agent.unique_id, agent.time)
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
@@ -163,3 +162,5 @@ class Traffic(Model):
         '''
         for i in range(step_count):
             self.step()
+
+        self.data = Data()
