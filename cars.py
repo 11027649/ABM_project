@@ -31,21 +31,21 @@ class Car(Agent):
                     if self.dir == "right":
                         if self.braking_distance() < ((self.own_light[0] - 1) - self.pos[0]):
                             self.speed = self.speed - 1
+                        
                     else:
                         if self.braking_distance() < self.pos[0] - (self.own_light[0] + 1):
                             self.speed = self.speed - 1
+                
 
                 # if the light is red, make sure to stop, even by slowing down more than 1 speed per step
                 elif i.state < 50:
                     if self.dir == "right":
                         if self.braking_distance() < ((self.own_light[0] - 1) - self.pos[0]):
                             self.speed = self.speed - 1
-                        elif:
 
                     else:
                         if self.braking_distance() < self.pos[0] - (self.own_light[0] + 1):
                             self.speed = self.speed - 1
-
                             self.speed = (self.own_light[0] - self.pos[0]) - 1
 
         # if there is a car in front and within speed, stop right behind it
@@ -53,7 +53,7 @@ class Car(Agent):
             self.speed = self.check_front() - 1
         
         # if there are no cars ahead and no traffic lights, speed up till max speed
-        elif self.speed < self.max_speed:
+        elif (self.speed == 0 and ((self.own_light[0] - 1) - self.pos[0]) > 0) or (self.speed < self.max_speed and self.correct_side == True):
             self.speed = self.speed + 1
         
         # take a step

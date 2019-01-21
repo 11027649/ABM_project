@@ -79,7 +79,6 @@ class Pedestrian(Agent):
         """
         #Parameters: Normal speed
         # TODO: Only works for vision angle of 170 degrees
-        print('self', self.vision_angle)
         if self.vision_angle == 170:
             # cone_area_170 = 13.3517
             # agent_area: pi*(0.4**2) = 0.5027
@@ -398,6 +397,8 @@ class Pedestrian(Agent):
                     return i
         return 0
 
+
+        
 class Car(Agent):
     def __init__(self, unique_id, model, pos, dir, speed=3, time=0):
         super().__init__(unique_id, model)
@@ -416,7 +417,7 @@ class Car(Agent):
             self.own_light = (20, 30)
         else:
             self.direction = -1
-            self.own_light = (30,20)
+            self.own_light = (30, 20)
 
     def step(self):
         '''
@@ -427,37 +428,47 @@ class Car(Agent):
             for i in self.model.space.get_neighbors(self.own_light, include_center = True, radius = 0):
 
                 # if the light is orange and there is time to slow down, slow down in steps of 1
-                if i.state > 100:
+                current_state = i.state
+                if current_state > 100:
                     if self.dir == "right":
-                        if self.braking_distance() == ((self.own_light[0] - 1) - self.pos[0]):
+                        if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
                             self.speed = self.speed - 1
                         
-                        if self.braking_distance() < 
                     else:
-                        if self.braking_distance() == self.pos[0] - (self.own_light[0] + 1):
+                        if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
                             self.speed = self.speed - 1
+                
 
                 # if the light is red, make sure to stop, even by slowing down more than 1 speed per step
-                elif i.state < 50:
+                elif current_state < 50:
                     if self.dir == "right":
-                        if self.braking_distance() == ((self.own_light[0] - 1) - self.pos[0]):
+                        if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
                             self.speed = self.speed - 1
-                        elif:
 
                     else:
-                        if self.braking_distance() == self.pos[0] - (self.own_light[0] + 1):
+                        if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
                             self.speed = self.speed - 1
-
-                            self.speed = (self.own_light[0] - self.pos[0]) - 1
 
         # if there is a car in front and within speed, stop right behind it
         if self.check_front() > 0:
-            self.speed = self.check_front() - 1
+            if self.speed > 0:
+                self.speed = self.check_front() - 1
         
         # if there are no cars ahead and no traffic lights, speed up till max speed
-        elif self.speed < self.max_speed:
+        elif (self.speed == 0 and ((self.own_light[0] - 1) - self.pos[0]) > 0) or (self.speed < self.max_speed and self.correct_side == True):
+            self.speed = self.speed + 1
+
+        elif self.speed < self.max_speed and self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
+            if current_state > 50 and current_state < 100:
+                self.speed = self.speed + 1
+        
+        elif self.speed < self.max_speed and self.correct_side == False:
             self.speed = self.speed + 1
         
+
+        if self.check_front() > 0:
+            if self.speed > 0:
+                self.speed = self.check_front() - 1
         # take a step
         next_pos = (self.pos[0] + self.speed * self.direction, self.pos[1])
         self.model.space.move_agent(self, next_pos)
@@ -482,6 +493,7 @@ class Car(Agent):
             for agent in self.model.space.get_neighbors((self.pos[0] + self.direction * (i + 1), self.pos[1]), radius = 0):
                 if isinstance(agent, Car) or isinstance(agent, Pedestrian):
                     return i + 1
+        
         return 0
 
     def braking_distance(self):
@@ -489,4 +501,3 @@ class Car(Agent):
         for i in range(1, self.speed + 1):
             distance = distance + i
         return distance
-

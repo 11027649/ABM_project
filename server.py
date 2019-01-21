@@ -21,9 +21,9 @@ def agent_portrayal(agent):
                  else current_color if type(agent) is Light
                  else "Pink",
                  "Filled": "true",
-                 "w": 25,
-                 "h": 25,
-                 "r": 25 if type(agent) is Car else 3}
+                 "w": 25 if type(agent) is Car else None,
+                 "h": 25 if type(agent) is Car else None,
+                 "r": 3 if type(agent) is not Car else None}
     return portrayal
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels

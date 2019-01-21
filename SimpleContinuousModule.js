@@ -7,12 +7,12 @@ var ContinuousVisualization = function(height, width, context) {
 		for (var i in objects) {
 			var p = objects[i];
 
-			if (p.Shape == "rect")
-			console.log("I'm gonna draw a rectange")
-				this.drawRectange(p.x, p.y, 15, 30, p.Color, p.Filled);
-			if (p.Shape == "circle")
-			console.log("I'd rather draw a circle")
+			if (p.Shape == "rect"){
+				this.drawRectangle(p.x, p.y, 55, 25, p.Color);
+			}
+			else if (p.Shape == 'circle'){
 				this.drawCircle(p.x, p.y, p.r, p.Color, p.Filled);
+			};
 		};
 	};
 
@@ -20,7 +20,7 @@ var ContinuousVisualization = function(height, width, context) {
 		var cx = x * width;
 		var cy = y * height;
 		var r = radius;
-
+		console.log(x,y)
 		context.beginPath();
 		context.arc(cx, cy, r, 0, Math.PI * 2, false);
 		context.closePath();
@@ -35,22 +35,12 @@ var ContinuousVisualization = function(height, width, context) {
 
 	};
 
-	this.drawRectange = function(x, y, w, h, color, fill) {
-		context.beginPath();
-		var dx = w * width;
-		var dy = h * height;
-
-		// Keep the drawing centered:
-		var x0 = (x*width) + 2*dx;
-		var y0 = (y*height) + 2*dy;
-
-		context.strokeStyle = color;
+	this.drawRectangle = function(x, y, w, h, color) {
+		var cx = x * width - 1/2 * w;
+		var cy = y * height - 1/2 * h;
 		context.fillStyle = color;
-		if (fill)
-			context.fillRect(x0, y0, dx, dy);
-		else
-			context.strokeRect(x0, y0, dx, dy);
-
+		context.fillRect(cx, cy, w, h);
+		context.stroke();
 	};
 
 	this.resetCanvas = function() {
