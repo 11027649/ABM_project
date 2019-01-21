@@ -64,10 +64,6 @@ class Traffic(Model):
         Method that creates a new agent, and adds it to the correct scheduler.
         '''
         light = Light(self.next_id(), self, pos, state, light_id)
-<<<<<<< HEAD
-=======
-
->>>>>>> c149a4634b1d656385f486a37161e7cd8c65cf8c
         self.space.place_agent(light, pos)
         getattr(self, 'schedule_Light').add(light)
 
