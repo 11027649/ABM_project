@@ -29,7 +29,7 @@ class Traffic(Model):
         self.schedule_Light = RandomActivation(self)
 
         self.datacollector = DataCollector(
-             {"Cars and pedestrians": lambda m: self.schedule_Pedestrian.get_agent_count()})
+             {"Level of service": lambda m: self.time_list})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
         self.place_lights()
@@ -92,8 +92,6 @@ class Traffic(Model):
 
         # save level of service by saving spended time in list
         self.time_list[type(agent).__name__].append(agent.time)
-
-        print(self.time_list)
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
