@@ -103,6 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# IDEA projects
-
+# Don't add Jordan's IDE IDEA files
 .idea
+
+# don't push the data
+.data/
