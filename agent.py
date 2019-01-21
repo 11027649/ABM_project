@@ -17,6 +17,7 @@ class Pedestrian(Agent):
 
         # Liu, 2014 parameters
         self.vision_angle = 170  # Degrees
+        self.walls_x = [20, 30] # TODO: correct walls?
 
         # parameters TODO: optimization?
         self.N = 16 # Should be >= 2!
@@ -33,7 +34,6 @@ class Pedestrian(Agent):
         self.target_point = (10,0)
         self.speed_free = random.gauss(.134, .0342) # normal distribution of N(1.34, 0.342) m/s, but per (1/10s) timesteps
 
-        self.peds_in_vision = None # list of pedestrians in vision field
         # Set direction in degrees
         if self.dir == "up":
             self.direction = 270
@@ -54,12 +54,16 @@ class Pedestrian(Agent):
             # TODO: decide what their choice is if on midsection or on middle of the road. Move to the spot where there is space?
 
             # Get list of pedestrians in the vision field
-            self.peds_in_vision = self.pedestrians_in_field(self.vision_angle, self.R_vision_range)
+            peds_in_vision = self.pedestrians_in_field(self.vision_angle, self.R_vision_range)
             # Set desired_speed
-            self.des_speed = self.desired_speed(len(self.peds_in_vision))
+            self.des_speed = self.desired_speed(len(peds_in_vision))
 
+            # TODO: delete printstatements at some point :p
+            # print(self.dir, self.pos, self.direction)
             # Get new position and update direction
             next_pos, self.direction = self.choose_direction()
+            # print(self.dir, self.pos, next_pos, self.direction)
+            # print()
 
             # # TODO: de-comment this if we're running this step function
             # # Move to new position
@@ -102,13 +106,17 @@ class Pedestrian(Agent):
         """
         Picks the direction with the highest utility
         """
+
+        # For getting the neighbours in the front 180 degrees within vision range; for calc_utility
+        peds_in_180 = self.pedestrians_in_field(180, self.R_vision_range)
+
         # Loop over the possible directions
         # TODO: Is it okay for the utility to return a negative value? Should we check for that? (Now weights are just set at 1)
         max_util = [-10**6, None, None]
-        pos_directions = self.possible_directions()        
+        pos_directions = self.possible_directions()  
         for direction in pos_directions:
             # Calculate utility
-            util, next_pos = self.calc_utility(direction)
+            util, next_pos = self.calc_utility(direction, peds_in_180)
             # Check if this utility is higher than the previous
             if util > max_util[0]:
                 max_util = [util, next_pos, direction]
@@ -125,7 +133,6 @@ class Pedestrian(Agent):
 
         # Calculate the lower angle and the upper angle
         lower_angle = self.direction - (self.vision_angle / 2)
-        upper_angle = self.direction + (self.vision_angle / 2)
 
         # Get list of possible directions
         theta_N = self.vision_angle/(self.N)
@@ -136,31 +143,30 @@ class Pedestrian(Agent):
         return pos_directions
 
 
-    def calc_utility(self, direction):
+    def calc_utility(self, direction, peds_in_180):
         """
         Calculate the utility (equation 1 for now. Whats omega_e' in eq. 7?)
         """
 
-        # TODO: Something is still going wrong with the direction? I think in pedestrian_intersection. Checked pos_directions and that seems okay (see notebook pedestians_tryout_parts)
         # List of pedestrians in that direction
-        peds_in_dir = self.pedestrian_intersection(self.peds_in_vision, direction, .7)
+        peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, .7)
 
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # Get closest pedestrian: min_distance, min_pedestrian.pos
             # TODO: returning the pedestrian.pos not necessary? (then also update code for this)
-            closest_ped = self.closest_pedestrian(peds_in_dir)
+            closest_ped = self.closest_pedestrian(peds_in_dir)[0]
         # If no pedestrians in view, closest_ped distance is set at vision range
         else:
-            closest_ped = [self.R_vision_range, None]
+            closest_ped = self.R_vision_range
         
         # Distance to road 'wall'
         # TODO: IMPLEMENT: Check if wall is within vision range and get the distance to it and coordinates
         # If no pedestrians in view, closest_ped is set at vision range
-        closest_wall = [self.R_vision_range, None]
+        closest_wall = self.R_vision_range
 
         # Determine possible new position
-        chosen_velocity = min(self.des_speed, closest_ped[0], closest_wall[0])
+        chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
         next_pos = self.new_pos(chosen_velocity, direction)
 
         # Calculate distance from possible next_pos to target point
@@ -169,12 +175,12 @@ class Pedestrian(Agent):
 
         # Calculate factors
         Ek = 1 - (target_dist - self.R_vision_range - self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
-        Ok =  min(self.R_vision_range, closest_wall[0])/self.R_vision_range # distance to closest obstacle/vision range
-        Pk =  min(self.R_vision_range, closest_ped[0])/self.R_vision_range # distance to closest person/vision range
+        Ok =  min(self.R_vision_range, closest_wall)/self.R_vision_range # distance to closest obstacle/vision range
+        Pk =  min(self.R_vision_range, closest_ped)/self.R_vision_range # distance to closest person/vision range
         # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
         # # TODO: Use for the trajectory the line between current postion and possible next_pos? Or R_vision_range?
         # # TODO: in radians or degrees?
-        theta_vj = 18
+        theta_vj = 0
         Ak = 1 - theta_vj/math.pi # flocking
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
@@ -185,6 +191,16 @@ class Pedestrian(Agent):
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
 
+
+    def within_wall(self, direction):
+        """
+        Returns True if 
+        """
+        max_x_pos = self.pos[0] + self.R_vision_range*np.cos(math.radians(direction))
+        if max_x_pos < self.walls_x[0] or max_x_pos > self.walls_x[1]:
+            return False
+        else:
+            return True
 
     def new_pos(self, chosen_velocity, theta_chosen):
         """
@@ -246,7 +262,6 @@ class Pedestrian(Agent):
         inter_neighbors = []
 
         if (angle == 270 or angle == 90):
-            print("We hit this loop")
             for neigh in neighbours:
                 if (neigh.pos[0] > self.pos[0] - offset and neigh.pos[0] < self.pos[0] + offset):
                     inter_neighbors.append(neigh)
