@@ -416,49 +416,90 @@ class Pedestrian(Agent):
                     return i
         return 0
 
+
+        
 class Car(Agent):
-    def __init__(self, unique_id, model, pos, dir, speed=1, time=0):
+    def __init__(self, unique_id, model, pos, dir, speed=3, time=0):
         super().__init__(unique_id, model)
 
+        self.max_speed = 3
         self.pos = pos
         self.dir = dir
         self.speed = speed
         self.time = time
+        self.vision_range = self.braking_distance() + self.speed
+
+        # the correct_side is the side where the car is heading
+        self.correct_side = False
+        if self.dir == "right":
+            self.direction = 1
+            self.own_light = (20, 30)
+        else:
+            self.direction = -1
+            self.own_light = (30, 20)
 
     def step(self):
         '''
         Cars go straight for now.
         '''
-        changed = 0
-        correct_side = False
-        if self.dir == "right":
-            own_light = 1
-            if self.pos[0] < int(self.model.space.x_max/2 - 2):
-                correct_side = True
-        else:
-            own_light = 2
-            if self.pos[0] > int(self.model.space.x_max/2 + 2):
-                correct_side = True
+        # deteremines if the agent has passed his own traffic light
+        if self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
+            for i in self.model.space.get_neighbors(self.own_light, include_center = True, radius = 0):
 
-        # very inefficient code right here if we notice if the run time is too long
+                # if the light is orange and there is time to slow down, slow down in steps of 1
+                current_state = i.state
+                if current_state > 100:
+                    if self.dir == "right":
+                        if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
+                            self.speed = self.speed - 1
+                        
+                    else:
+                        if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
+                            self.speed = self.speed - 1
+                
 
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 4):
-        # not only affected by 1 light
-            if changed == 0 and (self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True)):
-                self.speed = 0
-                break
+                # if the light is red, make sure to stop, even by slowing down more than 1 speed per step
+                elif current_state < 50:
+                    if self.dir == "right":
+                        if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
+                            self.speed = self.speed - 1
 
-            elif (changed == 0 and self.check_front() == 0) or (changed == 0 and self.check_front() == 0 and correct_side == False):
-                self.speed = 1
+                    else:
+                        if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
+                            self.speed = self.speed - 1
 
+        # if there is a car in front and within speed, stop right behind it
+        if self.check_front() > 0:
+            if self.speed > 0:
+                self.speed = self.check_front() - 1
+        
+        # if there are no cars ahead and no traffic lights, speed up till max speed
+        elif (self.speed == 0 and ((self.own_light[0] - 1) - self.pos[0]) > 0) or (self.speed < self.max_speed and self.correct_side == True):
+            self.speed = self.speed + 1
 
+        elif self.speed < self.max_speed and self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
+            if current_state > 50 and current_state < 100:
+                self.speed = self.speed + 1
+        
+        elif self.speed < self.max_speed and self.correct_side == False:
+            self.speed = self.speed + 1
+        
+
+        if self.check_front() > 0:
+            if self.speed > 0:
+                self.speed = self.check_front() - 1
         # take a step
-        if self.dir is "left":
-            next_pos = (self.pos[0] - self.speed, self.pos[1])
-            self.model.space.move_agent(self, next_pos)
-        else:
-            next_pos = (self.pos[0] + self.speed, self.pos[1])
-            self.model.space.move_agent(self, next_pos)
+        next_pos = (self.pos[0] + self.speed * self.direction, self.pos[1])
+        self.model.space.move_agent(self, next_pos)
+
+        # checks if the traffic light has been passed (this information is used in next time step)
+        if self.correct_side == False:
+            if self.dir == "right":
+                if self.pos[0] > (self.own_light[0] - 1):
+                    self.correct_side = True
+            else:
+                if self.pos[0] < (self.own_light[0] + 1):
+                    self.correct_side = True
 
         self.time += 1
 
@@ -467,15 +508,15 @@ class Car(Agent):
         '''
         Function to see if there is a car closeby in front of a car
         '''
-
-        if self.dir == "right":
-            direction = 1
-        else:
-            direction = -1
-
-        # the car has a vision range of 1 tile for now (can be changed to its max speed?)
-        for i in range(1, 2):
-            for agent in self.model.space.get_neighbors((self.pos[0] + direction * i, self.pos[1]), radius = 0):
+        for i in range(0, self.speed):
+            for agent in self.model.space.get_neighbors((self.pos[0] + self.direction * (i + 1), self.pos[1]), radius = 0):
                 if isinstance(agent, Car) or isinstance(agent, Pedestrian):
-                    return i
+                    return i + 1
+        
         return 0
+
+    def braking_distance(self):
+        distance = 0
+        for i in range(1, self.speed + 1):
+            distance = distance + i
+        return distance

@@ -107,4 +107,4 @@ venv.bak/
 .idea
 
 # don't push the data
-.data/
+data/
