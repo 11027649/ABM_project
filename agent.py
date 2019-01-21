@@ -17,7 +17,7 @@ class Pedestrian(Agent):
 
         # Liu, 2014 parameters
         self.vision_angle = 170  # Degrees
-        self.pre_pos = pos # TODO: can be deleted?
+        # self.pre_pos = pos # TODO: can be deleted?
 
         # parameters TODO: optimization?
         self.N = 16 # Should be >= 2!
@@ -62,9 +62,6 @@ class Pedestrian(Agent):
             # Get new position and update direction
             next_pos, self.direction = self.choose_direction()
 
-            # Update previous position (TODO: not necessary?)
-            self.pre_pos = self.pos
-
             # # TODO: de-comment this if we're running this step function
             # # Move to new position
             # self.model.space.move_agent(self, next_pos)
@@ -77,9 +74,7 @@ class Pedestrian(Agent):
         Returns desired speed, using equation 8
         Takes as input the number of agents in vision field
         """
-        #Parameters: Normal speed
-        # TODO: Only works for vision angle of 170 degrees
-        print('self', self.vision_angle)
+        # TODO: Only works for vision angle of 170 degrees, is that okay?
         if self.vision_angle == 170:
             # cone_area_170 = 13.3517
             # agent_area: pi*(0.4**2) = 0.5027
@@ -101,7 +96,6 @@ class Pedestrian(Agent):
         if des_speed >= 0:
             return des_speed
         else:
-            # TODO: set a default speed? Or just stop? Or can we go back with negative speed?
             return 0
 
 
@@ -127,7 +121,7 @@ class Pedestrian(Agent):
     def possible_directions(self):
         """
         Returns the possible directions for theta and N.
-        TODO: THIS ONE STILL INCLUDES END BOUNDARIES OF VISION RANGE
+        Includes outer directions of the vision range
         """
 
         # Calculate the lower angle and the upper angle
@@ -183,8 +177,7 @@ class Pedestrian(Agent):
         # # TODO: in radians or degrees?
         theta_vj = 18
         Ak = 1 - theta_vj/math.pi # flocking
-        # TODO: Check the equation in the article. It says '1*...', maybe a typo?
-        Ik = abs(self.direction-direction) / (self.vision_angle/2)
+        Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
         # # Using equation 1 for now:
         # TODO: Do we want to change to equation 7? I don't quite understand 7..
@@ -196,9 +189,9 @@ class Pedestrian(Agent):
 
     def new_pos(self, chosen_velocity, theta_chosen):
         """
-        TODO: CHECK FUNCTION IF SENDS CORRECT NEW POSITION"""
-        new_pos = (self.pos[0] + chosen_velocity*np.cos(math.radians(theta_chosen)), self.pos[1]+chosen_velocity*np.sin(math.radians(theta_chosen)))
-        return new_pos
+        Returns new position using self.pos, the velocity and angle
+        """
+        return (self.pos[0] + chosen_velocity*np.cos(math.radians(theta_chosen)), self.pos[1]+chosen_velocity*np.sin(math.radians(theta_chosen)))
 
 
     def pedestrians_in_field(self, vision_angle, vis_range):
@@ -368,11 +361,11 @@ class Pedestrian(Agent):
         # take a step
         if self.dir is "up":
             next_pos = (self.pos[0], self.pos[1] - self.speed)
-            self.pre_pos = self.pos
+            # self.pre_pos = self.pos
             self.model.space.move_agent(self, next_pos)
         else:
             next_pos = (self.pos[0], self.pos[1] + self.speed)
-            self.pre_pos = self.pos
+            # self.pre_pos = self.pos
             self.model.space.move_agent(self, next_pos)
 
         # TODO has to be moved to new step function
