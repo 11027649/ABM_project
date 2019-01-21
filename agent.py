@@ -295,11 +295,13 @@ class Pedestrian(Agent):
 
         return inter_neighbors
 
-    def closest_ped_on_line(self, m, b, neighbours):
+    def closest_ped_on_line(self, neighbours):
         """
         This would find the closest pedestrian to a path given a subset of pedestrians
         TODO: CHECK CODE FOR DIFFERENT SITUATIONS
         """
+        m = math.tan(math.radians(self.direction))
+        b = self.pos[1] - (m*self.pos[0])
         min_distance = abs((m*neighbours[0].pos[0])-neighbours[0].pos[1]+b)/math.sqrt((m**2) + 1)
         min_pedestrian = neighbours[0]
         for i in range(1, len(neighbours)):
