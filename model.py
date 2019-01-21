@@ -6,7 +6,7 @@ from mesa.datacollection import DataCollector
 from mesa.time import RandomActivation
 
 from collections import defaultdict
-
+from data import Data
 from agent import Pedestrian, Car, Light
 import math
 
@@ -21,7 +21,8 @@ class Traffic(Model):
 
         self.y_max = y_max
         self.x_max = x_max
-        self.time_list = defaultdict(list)
+
+        self.data = Data()
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
@@ -29,7 +30,7 @@ class Traffic(Model):
         self.schedule_Light = RandomActivation(self)
 
         self.datacollector = DataCollector(
-             {"Level of service": lambda m: self.time_list})
+             {"Pedestrians": lambda m: self.schedule_Pedestrian.get_agent_count()})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
         self.place_lights()
@@ -91,7 +92,7 @@ class Traffic(Model):
         '''
 
         # save level of service by saving spended time in list
-        self.time_list[type(agent).__name__].append(agent.time)
+        self.data.write_row(type(agent).__name__, agent.unique_id, agent.time)
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
@@ -162,5 +163,3 @@ class Traffic(Model):
         '''
         for i in range(step_count):
             self.step()
-
-        return self.time_list
