@@ -5,9 +5,10 @@ from mesa.space import ContinuousSpace
 from mesa.datacollection import DataCollector
 from mesa.time import RandomActivation, RandomActivation
 
-from collections import defaultdict
+from progressBar import printProgressBar
 from data import Data
 from agent import Pedestrian, Car, Light
+
 import math
 
 class Traffic(Model):
@@ -28,7 +29,8 @@ class Traffic(Model):
         self.schedule_Light = RandomActivation(self)
 
         self.datacollector = DataCollector(
-             {"Pedestrians": lambda m: self.schedule_Pedestrian.get_agent_count()})
+             {"Pedestrians": lambda m: self.schedule_Pedestrian.get_agent_count(),
+              "Cars": lambda m: self.schedule_Car.get_agent_count()})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
         self.place_lights()
@@ -90,7 +92,7 @@ class Traffic(Model):
 
         if self.data:
             # save level of service by saving spended time in list
-            self.data.write_row(type(agent).__name__, agent.unique_id, agent.time)
+            self.data.write_row_hist(type(agent).__name__, agent.unique_id, agent.time)
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
@@ -112,9 +114,9 @@ class Traffic(Model):
             for current_agent in schedule:
                 if current_agent.dir == "up" and current_agent.pos[1] - current_agent.speed + 1 <= 0:
                     self.remove_agent(current_agent)
-                if current_agent.dir == "right" and current_agent.pos[0] + current_agent.speed + 1 >= self.x_max:
+                if current_agent.dir == "right" and current_agent.pos[0] + current_agent.speed + 3 >= self.x_max:
                     self.remove_agent(current_agent)
-                if current_agent.dir == "left" and current_agent.pos[0] -  current_agent.speed + 1 <= 0:
+                if current_agent.dir == "left" and current_agent.pos[0] -  current_agent.speed - 1 <= 0:
                     self.remove_agent(current_agent)
                 if current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed + 1 >= self.y_max:
                     self.remove_agent(current_agent)
@@ -159,7 +161,12 @@ class Traffic(Model):
         '''
         Method that runs the model for a specific amount of steps.
         '''
+        self.data = Data()
+
         for i in range(step_count):
+            printProgressBar(i, step_count)
             self.step()
 
-        self.data = Data()
+        # return the data object so we can write all info from the datacollector too
+        # TODO: it might be nicer to also do the histogram stuff in the datacollector
+        return self.data
