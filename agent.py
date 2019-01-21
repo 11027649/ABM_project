@@ -17,7 +17,6 @@ class Pedestrian(Agent):
 
         # Liu, 2014 parameters
         self.vision_angle = 170  # Degrees
-        # self.pre_pos = pos # TODO: can be deleted?
 
         # parameters TODO: optimization?
         self.N = 16 # Should be >= 2!
@@ -32,7 +31,7 @@ class Pedestrian(Agent):
         self.Ik_w = 1
         # TODO: assign target point randomly (preference to right side?)
         self.target_point = (10,0)
-        self.speed_free = 1 # TODO: normal distribution of N(1.34, 0.342)
+        self.speed_free = random.gauss(.134, .0342) # normal distribution of N(1.34, 0.342) m/s, but per (1/10s) timesteps
 
         self.peds_in_vision = None # list of pedestrians in vision field
         # Set direction in degrees
@@ -83,11 +82,11 @@ class Pedestrian(Agent):
         else:
             raise ValueError('Code only works for 170 degrees vision range for now')
 
-        # Calculate cone density 
-        # TODO: Is this correct to do to aviod getting a division by zero, looking at the equation?
+        # Errorcheck for division by zero
         if n_agents_in_cone <= 0:
             return self.speed_free
 
+        # Calculate cone density
         cone_density = n_agents_in_cone * dens
         # Calculate the desired speed (see eq. 8)
         des_speed = self.speed_free*(1 - np.exp(-gamma*((1/cone_density)-(1/max_density))))
@@ -311,7 +310,7 @@ class Pedestrian(Agent):
         Returns true if light is red
         """
         # Check if agent is in front of the traffic light (correct_side=True)
-        # TODO: Add light for midsection (and add midsection)
+        # TODO: Add light checking for midsection (and add midsection)
         correct_side = False
         if self.dir == "up":
             own_light = 2
@@ -361,14 +360,11 @@ class Pedestrian(Agent):
         # take a step
         if self.dir is "up":
             next_pos = (self.pos[0], self.pos[1] - self.speed)
-            # self.pre_pos = self.pos
             self.model.space.move_agent(self, next_pos)
         else:
             next_pos = (self.pos[0], self.pos[1] + self.speed)
-            # self.pre_pos = self.pos
             self.model.space.move_agent(self, next_pos)
 
-        # TODO has to be moved to new step function
         self.time += 1
         # DELETE
         self.step_new()
