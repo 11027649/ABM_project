@@ -239,28 +239,42 @@ class Pedestrian(Agent):
         Conal_neighbours: the objects within the vision field
         Angle: the direction k
         Offset: 1.5*radius_of_pedestrian to both sides of the direction line
-        TODO: So this code give us the pedestrians in a certain direction right?
-        TODO: CHECK CODE FOR DIFFERENT SITUATIONS
         """
-        # calculate the linear formula for the line
-        m = math.tan(math.radians(angle))
-        b = self.pos[1] - (m*self.pos[0])
 
-        # calcuate the y offset of the range of lines
-        b_offset = offset/math.cos(angle)
-
-        # calcuate the new intersection points based off the offset of the line
-        b_top = b+b_offset
-        b_bot = b-b_offset
-
+        # Checks if the agent is looking straight up or down
         neighbours = conal_neighbours
         inter_neighbors = []
-        for neigh in neighbours:
-            if ((neigh.pos[1] - ((m*neigh.pos[0])+b_top)) <= 0 and (neigh.pos[1] - ((m*neigh.pos[0])+b_bot)) >= 0):
-                inter_neighbors.append(neigh)
 
-        # TODO: debug statement. This function only works for pedestrians going down? (i.e. 90 degree direction?)
-        # TODO: Check for going up and directions other than 90 and 270
+        if (angle == 270 or angle == 90):
+            print("We hit this loop")
+            for neigh in neighbours:
+                if (neigh.pos[0] > self.pos[0] - offset and neigh.pos[0] < self.pos[0] + offset):
+                    inter_neighbors.append(neigh)
+
+        # Checks if the agent is looking left uor right
+        elif (angle == 0 or angle == 180):
+            for neigh in neighbours:
+                if (neigh.pos[1] > self.pos[1] - offset and neigh.pos[1] < self.pos[1] + offset):
+                    inter_neighbors.append(neigh)
+
+                    # The agent is looking at an different non-exeption angle
+        else:
+            # calculate the linear formula for the line
+            m = math.tan(math.radians(angle))
+            b = self.pos[1] - (m * self.pos[0])
+
+            # calcuate the y offset of the range of lines
+            b_offset = offset / math.cos(angle)
+
+            # calcuate the new intersection points based off the offset of the line
+            b_top = b + b_offset
+            b_bot = b - b_offset
+
+            for neigh in neighbours:
+                if ((neigh.pos[1] - ((m * neigh.pos[0]) + b_top)) <= 0 and (
+                        neigh.pos[1] - ((m * neigh.pos[0]) + b_bot)) >= 0):
+                    inter_neighbors.append(neigh)
+
         # Prints the position, dir and direction of the current agent and the positions of the agents it sees
         # print('ped_intersect', self.pos, self.dir, self.direction, 'sees:', [neigh.pos for neigh in inter_neighbors])
 
