@@ -7,7 +7,8 @@ from data import Data
 import matplotlib.pyplot as plt
 
 print("Do you want to launch the server for visualization? (Type yes/no)")
-choiche = input()
+# choiche = input()
+choiche = "yes"
 
 if choiche == "yes":
     # launch at default port

@@ -110,6 +110,7 @@ class Traffic(Model):
         self.schedule_Car.step()
 
         # out of bounds checks for cars and pedestrians
+        # TODO: remove the pedestrian schedule from here if we use the new pedestrian step
         for schedule in [self.schedule_Car.agents, self.schedule_Pedestrian.agents]:
             for current_agent in schedule:
                 if current_agent.dir == "up" and current_agent.pos[1] - current_agent.speed + 1 <= 0:
@@ -120,6 +121,15 @@ class Traffic(Model):
                     self.remove_agent(current_agent)
                 if current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed + 1 >= self.y_max:
                     self.remove_agent(current_agent)
+
+        # out of bounds checks for pedestrians
+        for schedule in [self.schedule_Car.agents, self.schedule_Pedestrian.agents]:
+            for current_agent in schedule:
+                if current_agent.dir == "up" and current_agent.pos[1] - current_agent.speed_free<= 0:
+                    self.remove_agent(current_agent)
+                elif current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed_free >= self.y_max:
+                    self.remove_agent(current_agent)
+
 
         if random.random() < 0.5:
 
