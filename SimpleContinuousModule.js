@@ -47,7 +47,7 @@ var ContinuousVisualization = function(height, width, context) {
 	};
 
 	this.resetCanvas = function() {
-		context.clearRect(0, 0, height, width);
+		context.clearRect(0, 0, 9999, 9999);
 		context.beginPath();
 	};
 };
