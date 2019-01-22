@@ -161,9 +161,12 @@ class Pedestrian(Agent):
         if len(peds_in_dir) > 0:
             # Get closest pedestrian: min_distance, min_pedestrian.pos
             closest_ped = self.closest_pedestrian(peds_in_dir)
-        # If no pedestrians in view, closest_ped distance is set at vision range
+            cpil = self.closest_ped_on_line(peds_in_dir, direction)[1]
+            theta_vj = self.direction - cpil.direction
+            # If no pedestrians in view, closest_ped distance is set at vision range
         else:
             closest_ped = self.R_vision_range
+            theta_vj = 0
         
         # Distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
         closest_wall = self.dist_wall(direction)
@@ -186,9 +189,7 @@ class Pedestrian(Agent):
         Ok =  closest_wall/self.R_vision_range # distance to closest obstacle/vision range
         Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range
         # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
-        # # TODO: Use for the trajectory the line between current postion and possible next_pos? Or R_vision_range?
-        # theta_vj = self.traject_angle(peds_in_180, next_pos)
-        theta_vj = 0
+
         Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
@@ -348,21 +349,28 @@ class Pedestrian(Agent):
         """
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
+        # Find the terms for the equation for the line that will be passing through the current point in direction
         m = math.tan(math.radians(direction))
         b = self.pos[1] - (m*self.pos[0])
+        # Calculate the first distance from the line (perpendicular distance and assign the min pedestrian
         min_distance = abs((m*neighbours[0].pos[0])-neighbours[0].pos[1]+b)/math.sqrt((m**2) + 1)
         min_pedestrian = neighbours[0]
-        for i in range(1, len(neighbours)):
-            cur_distance = abs((m * neighbours[i].pos[0]) - neighbours[i].pos[1] + b) / math.sqrt((m ** 2) + 1)
-            #if math.sqrt((self.pos[0]-inter_neigh[i].pos[0])**2+(self.pos[1]-inter_neigh[i].pos[1])**2) < min_distance:
-            if cur_distance < min_distance:
-                min_pedestrian = neighbours[i]
-                min_distance = cur_distance
-            elif cur_distance == min_distance:
-                if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours.pos):
+        # If there are more, check the rest
+        if len(neighbours)>1:
+            for i in range(1, len(neighbours)):
+                # calculate the distance if the current neighbour
+                cur_distance = abs((m * neighbours[i].pos[0]) - neighbours[i].pos[1] + b) / math.sqrt((m ** 2) + 1)
+                # Checks distance against that stored
+                if cur_distance < min_distance:
                     min_pedestrian = neighbours[i]
                     min_distance = cur_distance
+                # if equal checks to see which is closer to the current position.
+                elif cur_distance == min_distance:
+                    if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours.pos):
+                        min_pedestrian = neighbours[i]
+                        min_distance = cur_distance
 
+        # Returns the min distance and the corresponding pedestrian
         return min_distance, min_pedestrian
 
 
