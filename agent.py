@@ -326,26 +326,27 @@ class Pedestrian(Agent):
         return inter_neighbors
 
 
-    # def closest_ped_on_line(self, neighbours):
-    #     """
-    #     This would find the closest pedestrian to a path given a subset of pedestrians
-    #     """
-    #     m = math.tan(math.radians(self.direction))
-    #     b = self.pos[1] - (m*self.pos[0])
-    #     min_distance = abs((m*neighbours[0].pos[0])-neighbours[0].pos[1]+b)/math.sqrt((m**2) + 1)
-    #     min_pedestrian = neighbours[0]
-    #     for i in range(1, len(neighbours)):
-    #         cur_distance = abs((m * neighbours[i].pos[0]) - neighbours[i].pos[1] + b) / math.sqrt((m ** 2) + 1)
-    #         #if math.sqrt((self.pos[0]-inter_neigh[i].pos[0])**2+(self.pos[1]-inter_neigh[i].pos[1])**2) < min_distance:
-    #         if cur_distance < min_distance:
-    #             min_pedestrian = neighbours[i]
-    #             min_distance = cur_distance
-    #         elif cur_distance == min_distance:
-    #             if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours.pos):
-    #                 min_pedestrian = neighbours[i]
-    #                 min_distance = cur_distance
+    def closest_ped_on_line(self, neighbours):
+        """
+        This would find the closest pedestrian to a path given a subset of pedestrians
+        """
+        m = math.tan(math.radians(self.direction))
+        b = self.pos[1] - (m*self.pos[0])
+        min_distance = abs((m*neighbours[0].pos[0])-neighbours[0].pos[1]+b)/math.sqrt((m**2) + 1)
+        min_pedestrian = neighbours[0]
+        for i in range(1, len(neighbours)):
+            cur_distance = abs((m * neighbours[i].pos[0]) - neighbours[i].pos[1] + b) / math.sqrt((m ** 2) + 1)
+            #if math.sqrt((self.pos[0]-inter_neigh[i].pos[0])**2+(self.pos[1]-inter_neigh[i].pos[1])**2) < min_distance:
+            if cur_distance < min_distance:
+                min_pedestrian = neighbours[i]
+                min_distance = cur_distance
+            elif cur_distance == min_distance:
+                if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours.pos):
+                    min_pedestrian = neighbours[i]
+                    min_distance = cur_distance
 
-    #     return min_distance, min_pedestrian
+        return min_distance, min_pedestrian
+
 
     def closest_pedestrian(self, inter_neigh):
         """
@@ -359,6 +360,7 @@ class Pedestrian(Agent):
                 min_distance = cur_distance
 
         return min_distance
+
 
     def ped_velocity_interaction(self, neighbours):
         """Calculates the interaction between pedesrians based off the angle of their movement"""
