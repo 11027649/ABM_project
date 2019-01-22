@@ -10,7 +10,7 @@ class SimpleCanvas(VisualizationElement):
         '''
         self.portrayal_method = portrayal_method
         self.canvas_height = 750
-        self.canvas_width = 750
+        self.canvas_width = 1500
         new_element = ("new SimpleContinuousModule({}, {})".
                        format(self.canvas_width, self.canvas_height))
         self.js_code = "elements.push(" + new_element + ");"

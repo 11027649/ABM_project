@@ -1,6 +1,10 @@
 var ContinuousVisualization = function(height, width, context) {
-	var height = height;
-	var width = width;
+	// idk why we have to calculate the ratio here, but this seems to work
+	var ratio = height / width
+	// just found out I have to calculate ratio2 here as well...??? this makes so little sense
+	var ratio2 = width / height
+	var height = height * ratio2;
+	var width = width * ratio;
 	var context = context;
 
 	this.draw = function(objects) {
@@ -20,7 +24,6 @@ var ContinuousVisualization = function(height, width, context) {
 		var cx = x * width;
 		var cy = y * height;
 		var r = radius;
-		console.log(x,y)
 		context.beginPath();
 		context.arc(cx, cy, r, 0, Math.PI * 2, false);
 		context.closePath();
@@ -66,20 +69,21 @@ var SimpleContinuousModule = function(canvas_width, canvas_height) {
 
 		//  draw the road (This color is Asphalt grey :-P)
 		context.fillStyle = "#282B2A";
-		context.fillRect(0, 307, 750, 135)
+		context.fillRect(0, 307, canvas_width, 135)
 		context.stroke()
 
 		// draw the middle part of the road
 		context.fillStyle = "#2CB037";
-		context.fillRect(0, 368, 750, 14)
+		context.fillRect(0, 368, canvas_width, 14)
 		context.stroke()
 
 		// draw zebra crossings
 		ys_zebra = [314, 333, 352, 388, 406, 425]
 		for (var i in ys_zebra) {
 			var p = ys_zebra[i];
+			var zebra_width = 60
 			context.fillStyle = "White";
-			context.fillRect(345,p,60,7)
+			context.fillRect((canvas_width/2) - (zebra_width/2),p,zebra_width,7)
 			context.stroke()
 		};
 
