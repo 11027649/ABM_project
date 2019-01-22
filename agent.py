@@ -423,7 +423,6 @@ class Pedestrian(Agent):
 
         self.time += 1
         # DELETE
-        self.step_new()
 
     # this function is in both pedestrian and agent -> more efficient way?
     def check_front(self):
@@ -446,10 +445,10 @@ class Pedestrian(Agent):
 
         
 class Car(Agent):
-    def __init__(self, unique_id, model, pos, dir, speed=3, time=0):
+    def __init__(self, unique_id, model, pos, dir, speed=5, time=0):
         super().__init__(unique_id, model)
 
-        self.max_speed = 3
+        self.max_speed = 5
         self.pos = pos
         self.dir = dir
         self.speed = speed
@@ -460,10 +459,10 @@ class Car(Agent):
         self.correct_side = False
         if self.dir == "right":
             self.direction = 1
-            self.own_light = (20, 30)
+            self.own_light = (int(0.45 * model.x_max), int(0.6 * model.y_max))
         else:
             self.direction = -1
-            self.own_light = (30, 20)
+            self.own_light = (int(0.55 * model.x_max), int(0.4 * model.y_max))
 
     def step(self):
         '''
@@ -498,7 +497,9 @@ class Car(Agent):
         # if there is a car in front and within speed, stop right behind it
         if self.check_front() > 0:
             if self.speed > 0:
-                self.speed = self.check_front() - 1
+                self.speed = self.check_front() - 4
+                if self.speed < 0:
+                    self.speed = 0
         
         # if there are no cars ahead and no traffic lights, speed up till max speed
         elif (self.speed == 0 and ((self.own_light[0] - 1) - self.pos[0]) > 0) or (self.speed < self.max_speed and self.correct_side == True):
@@ -514,7 +515,9 @@ class Car(Agent):
 
         if self.check_front() > 0:
             if self.speed > 0:
-                self.speed = self.check_front() - 1
+                self.speed = self.check_front() - 4
+                if self.speed < 0:
+                    self.speed = 0
         # take a step
         next_pos = (self.pos[0] + self.speed * self.direction, self.pos[1])
         self.model.space.move_agent(self, next_pos)
@@ -535,7 +538,7 @@ class Car(Agent):
         '''
         Function to see if there is a car closeby in front of a car
         '''
-        for i in range(0, self.speed):
+        for i in range(0, self.speed + 4):
             for agent in self.model.space.get_neighbors((self.pos[0] + self.direction * (i + 1), self.pos[1]), radius = 0):
                 if isinstance(agent, Car) or isinstance(agent, Pedestrian):
                     return i + 1

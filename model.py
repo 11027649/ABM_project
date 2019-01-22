@@ -16,7 +16,7 @@ class Traffic(Model):
     The actual model class!
     '''
 
-    def __init__(self, y_max=50, x_max=50):
+    def __init__(self, y_max=50, x_max=100):
 
         super().__init__()
 
@@ -46,17 +46,17 @@ class Traffic(Model):
         '''
 
         # car lights
-        self.new_light((20,30), 0, 1)
-        self.new_light((30,20), 0, 2)
+        self.new_light((int(0.45 * self.x_max), int(0.6 * self.y_max)), 0, 1)
+        self.new_light((int(0.55 * self.x_max), int(0.4 * self.y_max)), 0, 2)
 
         # pedestrian lights
-        self.new_light((27, 20), 75, 3)
-        self.new_light((23, 30), 75, 6)
+        self.new_light((27 * 2, 20), 75, 3)
+        self.new_light((23 * 2, 30), 75, 6)
 
         # lights in the middle, not assigned for now and simultaneous with the
         # other pedestrian lights
-        self.new_light((27, 24.65), 75, 4)
-        self.new_light((23, 25.35), 75, 5)
+        self.new_light((27 * 2, 24.65), 75, 4)
+        self.new_light((23 * 2, 25.35), 75, 5)
 
 
     def new_light(self, pos, state, light_id):
