@@ -26,10 +26,15 @@ class Pedestrian(Agent):
         # Weights (for equation 1)
         # What is We' for equation 7??
         self.Ek_w = 1
-        self.Ok_w = 1
-        self.Pk_w = 1
-        self.Ak_w = 1
-        self.Ik_w = 1
+        self.Ok_w = .4
+        self.Pk_w = .6
+        self.Ak_w = .3
+        self.Ik_w = .1
+
+        self.Ok_w_7 = .4
+        self.Pk_w_7 = .6
+        self.Ak_w_7 = .3
+        self.Ik_w_7 = .1
         self.speed_free = random.gauss(.134, .0342) # normal distribution of N(1.34, 0.342) m/s, but per (1/10s) timesteps
 
         # Set direction in degrees
@@ -64,12 +69,8 @@ class Pedestrian(Agent):
             # Set desired_speed
             self.des_speed = self.desired_speed(len(peds_in_vision))
 
-            # TODO: delete printstatements at some point :p
-            # print(self.dir, self.pos, self.direction)
             # Get new position and update direction
             next_pos, self.direction = self.choose_direction()
-            # print(self.dir, self.pos, next_pos, self.direction)
-            # print()
 
             # TODO: de-comment this if we're running this step function
             # Move to new position
@@ -117,7 +118,6 @@ class Pedestrian(Agent):
         peds_in_180 = self.pedestrians_in_field(180, self.R_vision_range)
 
         # Loop over the possible directions
-        # TODO: Is it okay for the utility to return a negative value? Should we check for that? (Now weights are just set at 1)
         max_util = [-10**6, None, None]
         pos_directions = self.possible_directions()  
         for direction in pos_directions:
@@ -141,9 +141,9 @@ class Pedestrian(Agent):
         lower_angle = self.direction - (self.vision_angle / 2)
 
         # Get list of possible directions
-        theta_N = self.vision_angle/(self.N)
+        theta_N = self.vision_angle/(self.N-1)
         pos_directions = []
-        for i in range(self.N+1):
+        for i in range(self.N):
             pos_directions.append(lower_angle+i*theta_N)
 
         return pos_directions
@@ -191,9 +191,14 @@ class Pedestrian(Agent):
         Ak = 1 - math.radians(theta_vj)/math.pi # flocking
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
+
+        # Equation 7
+        # return -self.Ok_w_7 * (1-Ok) - \
+        # self.Pk_w_7 * (1-Pk) - self.Ak_w_7 * (1-Ak) - \
+        # self.Ik_w * (1-Ik), next_pos
+
         # # Using equation 1 for now:
         # TODO: Do we want to change to equation 7? I don't quite understand 7..
-        # TODO: can utility become <0? Should we check? (also dependent on weights; optimization?)
         return self.Ek_w * Ek + self.Ok_w * Ok + \
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
