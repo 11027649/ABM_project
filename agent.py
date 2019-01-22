@@ -187,8 +187,9 @@ class Pedestrian(Agent):
         Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range
         # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
         # # TODO: Use for the trajectory the line between current postion and possible next_pos? Or R_vision_range?
+        # theta_vj = self.traject_angle(peds_in_180, next_pos)
         theta_vj = 0
-        Ak = 1 - math.radians(theta_vj)/math.pi # flocking
+        Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
 
@@ -202,6 +203,23 @@ class Pedestrian(Agent):
         return self.Ek_w * Ek + self.Ok_w * Ok + \
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
+
+
+    def traject_angle(self, direction, peds_in_180, next_pos):
+        """
+        Returns the traject angle
+        """
+        # Get the visible neighbours (180)
+        # Get the end of the trajectory from the next_position
+        # Get the closest neighbour in this trajectory from this pedestrian to the next position of this pedestrian
+        # Should return False if there is no neighbour in view
+        closest_neigh = self.closest_ped_on_line(peds_in_180, direction)[1]
+        if closest_neigh is False:
+            return 0
+        else:
+            # Return the angle of the closest neighbours direction and the current pedestrians direction
+            return abs(closest_neigh.direction - direction)
+
 
 
     def target_projection(self):
@@ -326,11 +344,11 @@ class Pedestrian(Agent):
         return inter_neighbors
 
 
-    def closest_ped_on_line(self, neighbours):
+    def closest_ped_on_line(self, neighbours, direction):
         """
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
-        m = math.tan(math.radians(self.direction))
+        m = math.tan(math.radians(direction))
         b = self.pos[1] - (m*self.pos[0])
         min_distance = abs((m*neighbours[0].pos[0])-neighbours[0].pos[1]+b)/math.sqrt((m**2) + 1)
         min_pedestrian = neighbours[0]
