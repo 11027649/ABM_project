@@ -18,3 +18,5 @@ class Light(Agent):
         Update the state of the light.
         '''
         self.state = (self.state + 1) % 130
+
+
