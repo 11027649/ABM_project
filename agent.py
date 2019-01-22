@@ -360,6 +360,16 @@ class Pedestrian(Agent):
 
         return min_distance
 
+    def ped_velocity_interaction(self, neighbours):
+        """Calculates the interaction between pedesrians based off the angle of their movement"""
+        # Takes in a list of neighbours and returns a utility value
+        # The start value
+        Ak = 1
+        # cycles through neighbours and adds the utility (this is for if we want to incorperate flocking later, we just pass it a larger list and bam! This part is done
+        for neigh in neighbours:
+            Ak = Ak - (abs(self.direction - neigh.direction)/math.pi)
+        return Ak
+
 
     def traffic_red(self):
         """
