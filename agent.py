@@ -26,10 +26,10 @@ class Pedestrian(Agent):
         # Weights (for equation 1)
         # What is We' for equation 7??
         self.Ek_w = 1
-        self.Ok_w = .4
-        self.Pk_w = .6
-        self.Ak_w = .3
-        self.Ik_w = .1
+        self.Ok_w = 1
+        self.Pk_w = 1
+        self.Ak_w = 1
+        self.Ik_w = 1
 
         self.Ok_w_7 = .4
         self.Pk_w_7 = .6
