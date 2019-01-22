@@ -30,15 +30,16 @@ class Pedestrian(Agent):
         self.Pk_w = 1
         self.Ak_w = 1
         self.Ik_w = 1
-        # TODO: assign target point randomly (preference to right side?)
-        self.target_point = (10,0)
         self.speed_free = random.gauss(.134, .0342) # normal distribution of N(1.34, 0.342) m/s, but per (1/10s) timesteps
 
         # Set direction in degrees
+        # TODO: assign target point with preference to right side?
         if self.dir == "up":
             self.direction = 270
+            self.target_point = (random.uniform(23,27), 0)
         elif self.dir == "down":
             self.direction = 90
+            self.target_point = (random.uniform(23,27), 50)
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
@@ -48,7 +49,7 @@ class Pedestrian(Agent):
 
 
 
-    def step_new(self):
+    def step(self):
         """
         stepfunction based on Liu, 2014
         """
@@ -70,11 +71,11 @@ class Pedestrian(Agent):
             # print(self.dir, self.pos, next_pos, self.direction)
             # print()
 
-            # # TODO: de-comment this if we're running this step function
-            # # Move to new position
-            # self.model.space.move_agent(self, next_pos)
-            # # Finalize this step
-            # self.time += 1
+            # TODO: de-comment this if we're running this step function
+            # Move to new position
+            self.model.space.move_agent(self, next_pos)
+            # Finalize this step
+            self.time += 1
 
 
     def desired_speed(self, n_agents_in_cone, gamma=1.913, max_density=5.4):
@@ -171,9 +172,14 @@ class Pedestrian(Agent):
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
         next_pos = self.new_pos(chosen_velocity, direction)
 
-        # Calculate distance from possible next_pos to target point
-        # TODO: CHANGE TO DISTANCE TO PROJECTION TARGET POINT
-        target_dist = self.model.space.get_distance(next_pos, self.target_point)
+        # If the target point is not within vision:
+        if self.model.space.get_distance(self.pos, self.target_point) > self.R_vision_range:
+            # Calculate distance from possible next_pos to target point projection on vision field
+            target_proj = self.target_projection()
+            target_dist = self.model.space.get_distance(next_pos, target_proj)
+        # If Target point is within the vision field, calculate the distance to the real target point
+        else:
+            target_dist = self.model.space.get_distance(next_pos, self.target_point)
 
         # Calculate factors
         Ek = 1 - (target_dist - self.R_vision_range - self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
@@ -191,6 +197,21 @@ class Pedestrian(Agent):
         return self.Ek_w * Ek + self.Ok_w * Ok + \
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
+
+
+    def target_projection(self):
+        """
+        Returns coordinates of the targets projection on the vision range
+        """
+        # Distance in x and y coordinates to the target
+        dist_diff = [self.target_point[0]-self.pos[0], self.target_point[1]-self.pos[1]] 
+        # Distance to target
+        dist = math.sqrt(dist_diff[0]**2 + dist_diff[1]**2)
+        # Ratio of distance and projection
+        ratio = self.R_vision_range/dist
+
+        # Return position+distance to coordinates of the projection 
+        return (self.pos[0]+ratio*dist_diff[0], self.pos[1]+ratio*dist_diff[1])
 
 
     def dist_wall(self, direction):
@@ -360,7 +381,7 @@ class Pedestrian(Agent):
         return False
 
 
-    def step(self):
+    def step_old(self):
         '''
         This method should move the Sheep using the `random_move()` method implemented earlier, then conditionally reproduce.
         '''
