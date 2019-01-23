@@ -15,9 +15,11 @@ class Pedestrian(Agent):
         self.speed = speed
         self.time = time
 
+        self.remove = False
+
         # Liu, 2014 parameters
         self.vision_angle = 170  # Degrees
-        self.walls_x = [20, 30] # TODO: correct walls?
+        self.walls_x = [23*2, 27*2] # TODO: correct walls?
 
         # parameters
         self.N = 16 # Should be >= 2!
@@ -41,10 +43,10 @@ class Pedestrian(Agent):
         # TODO: assign target point with preference to right side?
         if self.dir == "up":
             self.direction = 270
-            self.target_point = (random.uniform(23,27), 0)
+            self.target_point = (random.uniform(24*2,26*2), 0)
         elif self.dir == "down":
             self.direction = 90
-            self.target_point = (random.uniform(23,27), 50)
+            self.target_point = (random.uniform(24*2,26*2), 50)
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
@@ -74,7 +76,18 @@ class Pedestrian(Agent):
 
             # TODO: de-comment this if we're running this step function
             # Move to new position
-            self.model.space.move_agent(self, next_pos)
+            # self.model.space.move_agent(self, next_pos)
+
+            # Try to move agent
+            try:
+                self.model.space.move_agent(self, next_pos)
+            except:
+                # If it gave an exeption and it is trying to go in the wrong direction
+                if ((self.dir == "up" and self.direction%360 <180) or
+                    (self.dir == "down" and self.direction%360 >180)):
+                    # Let it be removed by the step function in model.py
+                    self.remove = True
+
             # Finalize this step
             self.time += 1
 
