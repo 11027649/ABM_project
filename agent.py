@@ -589,12 +589,6 @@ class Car(Agent):
         '''
         Function to see if there is a car closeby in front of a car
         '''
-        for i in range(0, self.speed + 4):
-            for agent in self.model.space.get_neighbors((self.pos[0] + self.direction * (i + 1), self.pos[1]), radius = 0):
-                if isinstance(agent, Car) or isinstance(agent, Pedestrian):
-                    return i + 1
-
-        return 0
 
         car_neighbours = self.model.space.get_neighbors(self.pos, self.vision_range)
         min_dist = vision_range+1
@@ -606,6 +600,8 @@ class Car(Agent):
             return min_dist
         else:
             return 0
+
+
 
     def braking_distance(self):
         distance = 0
