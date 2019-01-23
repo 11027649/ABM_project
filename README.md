@@ -2,11 +2,11 @@
 For the ABM project in our Master, we will try to implement an Agent-Based traffic model.
 
 ## Authors
-Cormac Berkery,
-Jordan Earle,
+Cormac Berkery, (12288160)
+Jordan Earle, (12297127)
 Steven Schoenmaker, (10777679),
 Natasja Geitje Wezel, (11027649),
-Linda Wouters
+Linda Wouters (11000139)
 
 ## Planning
 ## Basic model:
