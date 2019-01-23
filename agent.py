@@ -15,9 +15,11 @@ class Pedestrian(Agent):
         self.speed = speed
         self.time = time
 
+        self.remove = False
+
         # Liu, 2014 parameters
         self.vision_angle = 170  # Degrees
-        self.walls_x = [20, 30] # TODO: correct walls?
+        self.walls_x = [23*2, 27*2] # TODO: correct walls?
 
         # parameters
         self.N = 16 # Should be >= 2!
@@ -41,10 +43,10 @@ class Pedestrian(Agent):
         # TODO: assign target point with preference to right side?
         if self.dir == "up":
             self.direction = 270
-            self.target_point = (random.uniform(23,27), 0)
+            self.target_point = (random.uniform(24*2,26*2), 0)
         elif self.dir == "down":
             self.direction = 90
-            self.target_point = (random.uniform(23,27), 50)
+            self.target_point = (random.uniform(24*2,26*2), 50)
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
@@ -74,7 +76,18 @@ class Pedestrian(Agent):
 
             # TODO: de-comment this if we're running this step function
             # Move to new position
-            self.model.space.move_agent(self, next_pos)
+            # self.model.space.move_agent(self, next_pos)
+
+            # Try to move agent
+            try:
+                self.model.space.move_agent(self, next_pos)
+            except:
+                # If it gave an exeption and it is trying to go in the wrong direction
+                if ((self.dir == "up" and self.direction%360 <180) or
+                    (self.dir == "down" and self.direction%360 >180)):
+                    # Let it be removed by the step function in model.py
+                    self.remove = True
+
             # Finalize this step
             self.time += 1
 
@@ -162,7 +175,7 @@ class Pedestrian(Agent):
             # Get closest pedestrian: min_distance, min_pedestrian.pos
             closest_ped = self.closest_pedestrian(peds_in_dir)
             cpil = self.closest_ped_on_line(peds_in_dir, direction)[1]
-            theta_vj = self.direction - cpil.direction
+            theta_vj = abs(self.direction - cpil.direction)
             # If no pedestrians in view, closest_ped distance is set at vision range
         else:
             closest_ped = self.R_vision_range
@@ -570,11 +583,19 @@ class Car(Agent):
         '''
         Function to see if there is a car closeby in front of a car
         '''
-        for i in range(0, 4):
-            for agent in self.model.space.get_neighbors((self.pos[0] + self.direction * (i + 1), self.pos[1]), radius = 0):
-                if isinstance(agent, Car) or isinstance(agent, Pedestrian):
-                    return i + 1
-        return 0
+
+        car_neighbours = self.model.space.get_neighbors(self.pos, self.vision_range)
+        min_dist = vision_range+1
+        if car_neighbours:
+            for neigh in car_neighbours:
+                new_dist = self.model.space.get_distance(self.pos, neigh.pos))
+                if(type(neigh) == Pedestrian) and new_dist<min_dist and self.dir == neigh.dir):
+                    min_dist = new_dist
+            return min_dist
+        else:
+            return 0
+
+
 
     def braking_distance(self):
         distance = 0
