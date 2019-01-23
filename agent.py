@@ -63,7 +63,7 @@ class Pedestrian(Agent):
         # Check traffic light and decide to move or not
         # Returns True if light is red
         # Move if not red (TODO: decide what to do with orange)
-        if self.traffic_red() is False:
+        if self.traffic_green():
             # TODO: decide what their choice is if on midsection or on middle of the road. Move to the spot where there is space?
 
             # Get list of pedestrians in the vision field
@@ -74,15 +74,11 @@ class Pedestrian(Agent):
             # Get new position and update direction
             next_pos, self.direction = self.choose_direction()
 
-            # TODO: de-comment this if we're running this step function
-            # Move to new position
-            # self.model.space.move_agent(self, next_pos)
-
-            # Try to move agent
+            # Try to move agent to next_pos
             try:
                 self.model.space.move_agent(self, next_pos)
             except:
-                # If it gave an exeption and it is trying to go in the wrong direction
+                # If it gave an exeption and the pedestrian is trying to go in the wrong direction
                 if ((self.dir == "up" and self.direction%360 <180) or
                     (self.dir == "down" and self.direction%360 >180)):
                     # Let it be removed by the step function in model.py
@@ -132,7 +128,7 @@ class Pedestrian(Agent):
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
-        pos_directions = self.possible_directions()  
+        pos_directions = self.possible_directions()
         for direction in pos_directions:
             # Calculate utility
             util, next_pos = self.calc_utility(direction, peds_in_180)
@@ -180,7 +176,7 @@ class Pedestrian(Agent):
         else:
             closest_ped = self.R_vision_range
             theta_vj = 0
-        
+
         # Distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
         closest_wall = self.dist_wall(direction)
 
@@ -202,21 +198,20 @@ class Pedestrian(Agent):
         Ok =  closest_wall/self.R_vision_range # distance to closest obstacle/vision range
         Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range
         # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
-
-        Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
+        Ak = 1 - math.radians(theta_vj)/math.pi  # flocking
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
 
         # Equation 7
-        # return -self.Ok_w_7 * (1-Ok) - \
-        # self.Pk_w_7 * (1-Pk) - self.Ak_w_7 * (1-Ak) - \
-        # self.Ik_w * (1-Ik), next_pos
+        return Ek -self.Ok_w_7 * (1-Ok) - \
+            self.Pk_w_7 * (1-Pk) - self.Ak_w_7 * (1-Ak) - \
+            self.Ik_w * (1-Ik), next_pos
 
-        # # Using equation 1 for now:
-        # TODO: Do we want to change to equation 7? I don't quite understand 7..
-        return self.Ek_w * Ek + self.Ok_w * Ok + \
-                self.Pk_w * Pk + self.Ak_w * Ak + \
-                self.Ik_w * Ik, next_pos
+        # # # Using equation 1 for now:
+        # # TODO: Do we want to change to equation 7? I don't quite understand 7..
+        # return self.Ek_w * Ek + self.Ok_w * Ok + \
+        #         self.Pk_w * Pk + self.Ak_w * Ak + \
+        #         self.Ik_w * Ik, next_pos
 
 
     def traject_angle(self, direction, peds_in_180, next_pos):
@@ -241,19 +236,19 @@ class Pedestrian(Agent):
         Returns coordinates of the targets projection on the vision range
         """
         # Distance in x and y coordinates to the target
-        dist_diff = [self.target_point[0]-self.pos[0], self.target_point[1]-self.pos[1]] 
+        dist_diff = [self.target_point[0]-self.pos[0], self.target_point[1]-self.pos[1]]
         # Distance to target
         dist = math.sqrt(dist_diff[0]**2 + dist_diff[1]**2)
         # Ratio of distance and projection
         ratio = self.R_vision_range/dist
 
-        # Return position+distance to coordinates of the projection 
+        # Return position+distance to coordinates of the projection
         return (self.pos[0]+ratio*dist_diff[0], self.pos[1]+ratio*dist_diff[1])
 
 
     def dist_wall(self, direction):
         """
-        Returns True if 
+        Returns True if
         """
         # Calculate furthest point the pedestrian can see
         max_x_pos = self.pos[0] + self.R_vision_range*np.cos(math.radians(direction))
@@ -411,71 +406,40 @@ class Pedestrian(Agent):
             Ak = Ak - (abs(self.direction - neigh.direction)/math.pi)
         return Ak
 
-
-    def traffic_red(self):
+    def traffic_green(self):
         """
         Returns true if light is red
         """
-        # Check if agent is in front of the traffic light (correct_side=True)
-        # TODO: Add light checking for midsection (and add midsection)
-        correct_side = False
-        if self.dir == "up":
-            own_light = 2
-            if self.pos[1] > int(self.model.space.y_max/2 + 2):
-                correct_side = True
-        else:
-            own_light = 6
-            if self.pos[1] < int(self.model.space.y_max/2 - 2):
-                correct_side = True
+        # TODO: Hardcoded coordinates (use actual light attribute?)
+        correct_side = True
 
-        # Iterate over all the agents
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 4):
-            # If the agent is a light, which is red or orange, which is your own light and you're in front of the light
-            if (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
-                return True
+        if self.dir == "up" and not self.pos[1] < 24.65:
+            # check where the pedestrian is and assign it to the right traffic light
+            if self.pos[1] > 29:
+                own_light = 4
+                correct_side = False
+            elif self.pos[1] >= 24.65 and self.pos[1] <= 25.35:
+                own_light = 3
+                correct_side = False
+        elif self.dir == "down" and not self.pos[1] > 25.35:
+            if self.pos[1] < 21:
+                own_light = 5
+                correct_side = False
+            elif self.pos[1] >= 24.65 and self.pos[1] <= 25.35:
+                own_light = 6
+                correct_side = False
 
-        return False
+        if not correct_side:
+            # iterate over all the agents to find the correct light
+            for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 9):
+                # if it's your own light, and it's not green
+                if (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light):
+                    return False
 
-
-    def step_old(self):
-        '''
-        This method should move the Sheep using the `random_move()` method implemented earlier, then conditionally reproduce.
-        '''
-
-        # check if there's a traffic light (and adjust speed accordingly)
-        changed = 0
-        correct_side = False
-        if self.dir == "up":
-            own_light = 6
-            if self.pos[1] > int(self.model.space.y_max/2 + 2 ):
-                correct_side = True
-        else:
-            own_light = 3
-            if self.pos[1] < int(self.model.space.y_max/2 - 2):
-                correct_side = True
-
-        # very inefficient code right here if we notice if the run time is too long
-
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
-            if self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
-                self.speed = 0
-                changed = 1
-            elif (changed == 0 and self.check_front() == 0) or (changed == 0 and self.check_front() == 0 and correct_side == False):
-                self.speed = 1
+        return True
 
 
-        # take a step
-        if self.dir is "up":
-            next_pos = (self.pos[0], self.pos[1] - self.speed)
-            self.model.space.move_agent(self, next_pos)
-        else:
-            next_pos = (self.pos[0], self.pos[1] + self.speed)
-            self.model.space.move_agent(self, next_pos)
-
-        self.time += 1
-        # DELETE
-
-    # this function is in both pedestrian and agent -> more efficient way?
+    # TODO this function is in both pedestrian and car -> more efficient way?
     def check_front(self):
         '''
         Function to see if there is a Pedestrian closeby in front
@@ -494,12 +458,12 @@ class Pedestrian(Agent):
         return 0
 
 
-        
+
 class Car(Agent):
-    def __init__(self, unique_id, model, pos, dir, speed=0.8, time=0):
+    def __init__(self, unique_id, model, pos, dir, speed=5, time=0):
         super().__init__(unique_id, model)
 
-        self.max_speed = 0.8
+        self.max_speed = 5
         self.pos = pos
         self.dir = dir
         self.speed = speed
@@ -529,40 +493,57 @@ class Car(Agent):
                 if current_state > 100:
                     if self.dir == "right":
                         if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
-                            self.speed = self.speed - 0.8/40
-                        
+                            self.speed = self.speed - 1
+
                     else:
                         if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
-                            self.speed = self.speed - 0.8/40
-                
+                            self.speed = self.speed - 1
+
 
                 # if the light is red, make sure to stop, even by slowing down more than 1 speed per step
                 elif current_state < 50:
                     if self.dir == "right":
                         if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
-                            self.speed = self.speed - 0.8/40
+                            self.speed = self.speed - 1
 
                     else:
                         if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
-                            self.speed = self.speed - 0.8/40
+                            self.speed = self.speed - 1
 
         # if there is a car in front and within speed, stop right behind it
         if self.check_front() > 0:
             if self.speed > 0:
+<<<<<<< HEAD
                 if self.braking_distance() > self.check_front():
                     self.speed = self.speed - 0.8/40
         
+=======
+                self.speed = self.check_front() - 4
+                if self.speed < 0:
+                    self.speed = 0
+
+>>>>>>> a46142cf103b9b72838ed14f6f07489182664db2
         # if there are no cars ahead and no traffic lights, speed up till max speed
         elif (self.speed == 0 and ((self.own_light[0] - 1) - self.pos[0]) > 0) or (self.speed < self.max_speed and self.correct_side == True):
-            self.speed = self.speed + 0.8/40
+            self.speed = self.speed + 1
 
         elif self.speed < self.max_speed and self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
             if current_state > 50 and current_state < 100:
+<<<<<<< HEAD
                 self.speed = self.speed + 0.8/40
-        elif self.speed < self.max_speed and self.correct_side == False:
-            self.speed = self.speed + 0.8/40
-        
+=======
+                self.speed = self.speed + 1
 
+>>>>>>> a46142cf103b9b72838ed14f6f07489182664db2
+        elif self.speed < self.max_speed and self.correct_side == False:
+            self.speed = self.speed + 1
+
+
+        if self.check_front() > 0:
+            if self.speed > 0:
+                self.speed = self.check_front() - 4
+                if self.speed < 0:
+                    self.speed = 0
         # take a step
         next_pos = (self.pos[0] + self.speed * self.direction, self.pos[1])
         self.model.space.move_agent(self, next_pos)
@@ -619,9 +600,6 @@ class Car(Agent):
 
     def braking_distance(self):
         distance = 0
-        current_speed = self.speed
-        # can be optimized
-        while current_speed > 0:
-            distance = distance + current_speed
-            current_speed = current_speed - 0.02
+        for i in range(1, self.speed + 1):
+            distance = distance + i
         return distance
