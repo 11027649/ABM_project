@@ -123,11 +123,12 @@ class Traffic(Model):
                     self.remove_agent(current_agent)
 
         # out of bounds checks for pedestrians
-        for schedule in [self.schedule_Car.agents, self.schedule_Pedestrian.agents]:
+        for schedule in [self.schedule_Pedestrian.agents]:
             for current_agent in schedule:
-                if current_agent.dir == "up" and current_agent.pos[1] - current_agent.speed_free<= 0:
+                print(current_agent.dir, current_agent.direction, current_agent.target_point, current_agent.pos[1], current_agent.speed_free, current_agent.pos[1] - current_agent.speed_free)
+                if (current_agent.dir == "up" and current_agent.pos[1] - current_agent.speed_free< 0) or current_agent.remove == True:
                     self.remove_agent(current_agent)
-                elif current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed_free >= self.y_max:
+                elif (current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed_free >= self.y_max) or current_agent.remove == True:
                     self.remove_agent(current_agent)
 
 
