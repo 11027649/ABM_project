@@ -513,28 +513,16 @@ class Car(Agent):
         # if there is a car in front and within speed, stop right behind it
         if self.check_front() > 0:
             if self.speed > 0:
-<<<<<<< HEAD
                 if self.braking_distance() > self.check_front():
                     self.speed = self.speed - 0.8/40
         
-=======
-                self.speed = self.check_front() - 4
-                if self.speed < 0:
-                    self.speed = 0
-
->>>>>>> a46142cf103b9b72838ed14f6f07489182664db2
         # if there are no cars ahead and no traffic lights, speed up till max speed
         elif (self.speed == 0 and ((self.own_light[0] - 1) - self.pos[0]) > 0) or (self.speed < self.max_speed and self.correct_side == True):
             self.speed = self.speed + 1
 
         elif self.speed < self.max_speed and self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
             if current_state > 50 and current_state < 100:
-<<<<<<< HEAD
                 self.speed = self.speed + 0.8/40
-=======
-                self.speed = self.speed + 1
-
->>>>>>> a46142cf103b9b72838ed14f6f07489182664db2
         elif self.speed < self.max_speed and self.correct_side == False:
             self.speed = self.speed + 1
 
