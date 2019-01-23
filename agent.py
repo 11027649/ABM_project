@@ -74,15 +74,11 @@ class Pedestrian(Agent):
             # Get new position and update direction
             next_pos, self.direction = self.choose_direction()
 
-            # TODO: de-comment this if we're running this step function
-            # Move to new position
-            # self.model.space.move_agent(self, next_pos)
-
-            # Try to move agent
+            # Try to move agent to next_pos
             try:
                 self.model.space.move_agent(self, next_pos)
             except:
-                # If it gave an exeption and it is trying to go in the wrong direction
+                # If it gave an exeption and the pedestrian is trying to go in the wrong direction
                 if ((self.dir == "up" and self.direction%360 <180) or
                     (self.dir == "down" and self.direction%360 >180)):
                     # Let it be removed by the step function in model.py
@@ -202,21 +198,20 @@ class Pedestrian(Agent):
         Ok =  closest_wall/self.R_vision_range # distance to closest obstacle/vision range
         Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range
         # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
-
-        Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
+        Ak = 1 - math.radians(theta_vj)/math.pi  # flocking
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
 
         # Equation 7
-        # return -self.Ok_w_7 * (1-Ok) - \
-        # self.Pk_w_7 * (1-Pk) - self.Ak_w_7 * (1-Ak) - \
-        # self.Ik_w * (1-Ik), next_pos
+        return Ek -self.Ok_w_7 * (1-Ok) - \
+            self.Pk_w_7 * (1-Pk) - self.Ak_w_7 * (1-Ak) - \
+            self.Ik_w * (1-Ik), next_pos
 
-        # # Using equation 1 for now:
-        # TODO: Do we want to change to equation 7? I don't quite understand 7..
-        return self.Ek_w * Ek + self.Ok_w * Ok + \
-                self.Pk_w * Pk + self.Ak_w * Ak + \
-                self.Ik_w * Ik, next_pos
+        # # # Using equation 1 for now:
+        # # TODO: Do we want to change to equation 7? I don't quite understand 7..
+        # return self.Ek_w * Ek + self.Ok_w * Ok + \
+        #         self.Pk_w * Pk + self.Ak_w * Ak + \
+        #         self.Ik_w * Ik, next_pos
 
 
     def traject_angle(self, direction, peds_in_180, next_pos):
