@@ -496,6 +496,12 @@ class Pedestrian(Agent):
 
         
 class Car(Agent):
+
+    # Car test:
+    # Can a traffic jam occur like in the NS model? 
+    # - create a very long road, and make the car in front slow down for a bit, and watch the emergent process througout ...
+    # ... the rest of the traffic
+    
     def __init__(self, unique_id, model, pos, dir, speed=0.8, time=0):
         super().__init__(unique_id, model)
 
@@ -504,7 +510,7 @@ class Car(Agent):
         self.dir = dir
         self.speed = speed
         self.time = time
-        self.vision_range = self.braking_distance() + self.speed
+        self.vision_range = self.braking_distance() + self.speed + 4
 
         # the correct_side is the side where the car is heading
         self.correct_side = False
@@ -519,7 +525,6 @@ class Car(Agent):
         '''
         Cars go straight for now.
         '''
-        print(self.check_front())
         # deteremines if the agent has passed his own traffic light
         if self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
             for i in self.model.space.get_neighbors(self.own_light, include_center = True, radius = 0):
@@ -540,24 +545,27 @@ class Car(Agent):
                 elif current_state < 50:
                     if self.dir == "right":
                         if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
-                            self.speed = self.speed - 0.8/40
+                            self.speed = self.speed - 0.8/20
 
                     else:
                         if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
-                            self.speed = self.speed - 0.8/40
+                            self.speed = self.speed - 0.8/20
+
 
         # if there is a car in front and within speed, stop right behind it
-        if self.check_front() > 0:
-            if self.speed > 0:
-                if self.braking_distance() > self.check_front():
-                    self.speed = self.speed - 0.8/40
-        
+        if self.check_front() > 0 and self.check_front() < self.braking_distance() and self.speed > 0:
+            self.speed = self.speed - 0.8/40
+
+        elif self.check_front() > 0 and self.check_front() > self.braking_distance():
+            self.speed = self.speed + 0.8/40
+
         # if there are no cars ahead and no traffic lights, speed up till max speed
         elif (self.speed == 0 and ((self.own_light[0] - 1) - self.pos[0]) > 0) or (self.speed < self.max_speed and self.correct_side == True):
             self.speed = self.speed + 0.8/40
 
         elif self.speed < self.max_speed and self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
             if current_state > 50 and current_state < 100:
+
                 self.speed = self.speed + 0.8/40
         elif self.speed < self.max_speed and self.correct_side == False:
             self.speed = self.speed + 0.8/40
@@ -577,7 +585,10 @@ class Car(Agent):
                     self.correct_side = True
 
         self.time += 1
-
+        if self.speed < 0:
+            self.speed = 0
+        if self.speed > 0.8:
+            self.speed = 0.8
 
     def check_front(self):
         '''
@@ -605,10 +616,10 @@ class Car(Agent):
                     # print(self.dir, neigh.dir)
                     if new_dist < min_dist and self.dir == neigh.dir:
                         if (self.dir == "right" and self.pos[0] < neigh.pos[0]) or (self.dir == "left" and self.pos[0] > neigh.pos[0]):
-                            min_dist = new_dist
+                            min_dist = new_dist - 3
                             # print(min_dist)
                 if min_dist is not 99999:
-                    return min_dist
+                    return min_dist 
                 else:
                     return 0
             else:
@@ -624,4 +635,4 @@ class Car(Agent):
         while current_speed > 0:
             distance = distance + current_speed
             current_speed = current_speed - 0.02
-        return distance
+        return distance + 2
