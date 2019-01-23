@@ -19,4 +19,6 @@ class Light(Agent):
         '''
         self.state = (self.state + 1) % 130
 
-
+# simultaneous strategy
+# 3 & 4 are the same
+# 5 & 6 are the same
