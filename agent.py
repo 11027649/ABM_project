@@ -580,8 +580,19 @@ class Car(Agent):
             for agent in self.model.space.get_neighbors((self.pos[0] + self.direction * (i + 1), self.pos[1]), radius = 0):
                 if isinstance(agent, Car) or isinstance(agent, Pedestrian):
                     return i + 1
-        
+
         return 0
+
+        car_neighbours = self.model.space.get_neighbors(self.pos, self.vision_range)
+        min_dist = vision_range+1
+        if car_neighbours:
+            for neigh in car_neighbours:
+                new_dist = self.model.space.get_distance(self.pos, neigh.pos))
+                if(type(neigh) == Pedestrian) and new_dist<min_dist and self.dir == neigh.dir):
+                    min_dist = new_dist
+            return min_dist
+        else:
+            return 0
 
     def braking_distance(self):
         distance = 0
