@@ -519,6 +519,7 @@ class Car(Agent):
         '''
         Cars go straight for now.
         '''
+        # print(self.check_front())
         # deteremines if the agent has passed his own traffic light
         if self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
             for i in self.model.space.get_neighbors(self.own_light, include_center = True, radius = 0):
@@ -548,8 +549,8 @@ class Car(Agent):
         # if there is a car in front and within speed, stop right behind it
         if self.check_front() > 0:
             if self.speed > 0:
-                if self.braking_distance() + 0.5 > self.check_front():
-                    self.speed = self.speed + 0.8/40
+                if self.braking_distance() > self.check_front():
+                    self.speed = self.speed - 0.8/40
         
         # if there are no cars ahead and no traffic lights, speed up till max speed
         elif (self.speed == 0 and ((self.own_light[0] - 1) - self.pos[0]) > 0) or (self.speed < self.max_speed and self.correct_side == True):
@@ -558,7 +559,6 @@ class Car(Agent):
         elif self.speed < self.max_speed and self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
             if current_state > 50 and current_state < 100:
                 self.speed = self.speed + 0.8/40
-        
         elif self.speed < self.max_speed and self.correct_side == False:
             self.speed = self.speed + 0.8/40
         
@@ -583,18 +583,38 @@ class Car(Agent):
         '''
         Function to see if there is a car closeby in front of a car
         '''
-
-        car_neighbours = self.model.space.get_neighbors(self.pos, self.vision_range)
-        min_dist = vision_range+1
-        if car_neighbours:
-            for neigh in car_neighbours:
-                new_dist = self.model.space.get_distance(self.pos, neigh.pos))
-                if(type(neigh) == Pedestrian) and new_dist<min_dist and self.dir == neigh.dir):
-                    min_dist = new_dist
-            return min_dist
+        # Find all the neighbours
+        # We may want to assign each car a car in front of it which we use instead of this.  That would be easier.
+        neighbours = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.vision_range)
+        min_dist = self.vision_range + 1
+        # if there are neighbours
+        # print("I can see this many things",  len(neighbours))
+        if neighbours:
+            car_neighbours = []
+            #Find those that are cars
+            for neigh in neighbours:
+                if (type(neigh) == Car):
+                    car_neighbours.append(neigh)
+            # if there are cars
+            # print("I can see this many cars", len(car_neighbours))
+            if car_neighbours:
+                min_dist = 99999
+                for neigh in car_neighbours:
+                    new_dist = self.model.space.get_distance(self.pos, neigh.pos)
+                    # Find the closest one
+                    # print(self.dir, neigh.dir)
+                    if new_dist < min_dist and self.dir == neigh.dir:
+                        if (self.dir == "right" and self.pos[0] < neigh.pos[0]) or (self.dir == "left" and self.pos[0] > neigh.pos[0]):
+                            min_dist = new_dist
+                            # print(min_dist)
+                if min_dist is not 99999:
+                    return min_dist
+                else:
+                    return 0
+            else:
+                return 0
         else:
             return 0
-
 
 
     def braking_distance(self):
