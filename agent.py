@@ -450,7 +450,7 @@ class Pedestrian(Agent):
             # iterate over all the agents to find the correct light
             for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 9):
                 # if it's your own light, and it's not green
-                if (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light):
+                if (isinstance(i,Light) and (i.state < 205 or i.state > 355) and i.light_id == own_light):
                     return False
 
         return True
