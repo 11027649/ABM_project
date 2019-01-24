@@ -24,14 +24,14 @@ class Pedestrian(Agent):
         # parameters
         self.N = 16 # Should be >= 2!
         self.R_vision_range = 3 # Meters
-        self.des_speed = 1 # Meters per time step
+        self.des_speed = None # Meters per time step
         # Weights (for equation 1)
         # What is We' for equation 7??
         self.Ek_w = 1
-        self.Ok_w = 1
-        self.Pk_w = 1
-        self.Ak_w = 1
-        self.Ik_w = 1
+        self.Ok_w = .4
+        self.Pk_w = .6
+        self.Ak_w = .3
+        self.Ik_w = .1
 
         self.Ok_w_7 = .4
         self.Pk_w_7 = .6
@@ -201,6 +201,11 @@ class Pedestrian(Agent):
         Ak = 1 - math.radians(theta_vj)/math.pi  # flocking
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
+        # print('utility', Ek -self.Ok_w_7 * (1-Ok) - \
+        #     self.Pk_w_7 * (1-Pk) - self.Ak_w_7 * (1-Ak) - \
+        #     self.Ik_w * (1-Ik), self.Ek_w * Ek + self.Ok_w * Ok + \
+        #         self.Pk_w * Pk + self.Ak_w * Ak + \
+        #         self.Ik_w * Ik)
 
         # Equation 7
         return Ek -self.Ok_w_7 * (1-Ok) - \
@@ -228,7 +233,6 @@ class Pedestrian(Agent):
         else:
             # Return the angle of the closest neighbours direction and the current pedestrians direction
             return abs(closest_neigh.direction - direction)
-
 
 
     def target_projection(self):
