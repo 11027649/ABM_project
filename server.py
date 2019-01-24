@@ -8,10 +8,11 @@ from agent import Car, Pedestrian, Light
 # You can change this to whatever you want. Make sure to make the different types
 # of agents distinguishable
 def agent_portrayal(agent):
+    #Red = Orange + Green and Red lights overlap for 5 time steps
     if type(agent) is Light:
-        if agent.state < 50:
+        if agent.state < 300:
             current_color = "Red"
-        elif agent.state < 100:
+        elif agent.state < 450:
             current_color = "Green"
         else:
             current_color = "Orange"

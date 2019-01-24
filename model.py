@@ -44,20 +44,37 @@ class Traffic(Model):
         Method that places the ligths for the visualization. The lights keep
         the agents from crossing when they are red.
         '''
+        #Simulatneous Strategy
 
         # car lights
         self.new_light((int(0.45 * self.x_max), int(0.6 * self.y_max)), 0, 1)
         self.new_light((int(0.55 * self.x_max), int(0.4 * self.y_max)), 0, 2)
 
-        # pedestrian lights
-        self.new_light((27 * 2, 20), 75, 3)
-        self.new_light((23 * 2, 30), 75, 6)
+        #"Up" lights
+        self.new_light((23 * 2, 30), 250, 6)
+        self.new_light((27 * 2, 24.65), 250, 4) #Median
 
+        #"Down" Lights
+        self.new_light((23 * 2, 25.35), 250, 5) #Median
+        self.new_light((27 * 2, 20), 250, 3)
 
-        # lights in the middle, not assigned for now and simultaneous with the
-        # other pedestrian lights
-        self.new_light((27 * 2, 24.65), 75, 4)
-        self.new_light((23 * 2, 25.35), 75, 5)
+        #Alternating strategy
+        """
+
+        # car lights
+        self.new_light((int(0.45 * self.x_max), int(0.6 * self.y_max)), 200, 1) #Bottom Light
+        self.new_light((int(0.55 * self.x_max), int(0.4 * self.y_max)), 0, 2) #Top Light
+
+        #"Up" lights
+        self.new_light((23 * 2, 30), 200, 6)
+        self.new_light((27 * 2, 24.65), 400, 4) #Median
+
+        #"Down" Lights
+        self.new_light((23 * 2, 25.35), 200, 5) #Median
+        self.new_light((27 * 2, 20), 400, 3)
+
+        """
+        
 
 
     def new_light(self, pos, state, light_id):
@@ -143,7 +160,7 @@ class Traffic(Model):
                 if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
                     car_near = True
 
-            if random.random() < 0.4 and car_near == False:
+            if random.random() < 0.8 and car_near == False:
                 self.new_car(pos, "right")
 
         else:
