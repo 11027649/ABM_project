@@ -1,5 +1,7 @@
 var ContinuousVisualization = function(height, width, context) {
 	// idk why we have to calculate the ratio here, but this seems to work
+	var testheight = height
+	var testwidth = width
 	var ratio = height / width
 	// just found out I have to calculate ratio2 here as well...??? this makes so little sense
 	var ratio2 = width / height
@@ -12,7 +14,7 @@ var ContinuousVisualization = function(height, width, context) {
 			var p = objects[i];
 
 			if (p.Shape == "rect"){
-				this.drawRectangle(p.x, p.y, 55, 25, p.Color);
+				this.drawRectangle(p.x, p.y, 3.7, 1.7, p.Color);
 			}
 			else if (p.Shape == 'circle'){
 				this.drawCircle(p.x, p.y, p.r, p.Color, p.Filled);
@@ -21,6 +23,7 @@ var ContinuousVisualization = function(height, width, context) {
 	};
 
 	this.drawCircle = function(x, y, radius, color, fill) {
+		console.log(radius)
 		var cx = x * width;
 		var cy = y * height;
 		var r = radius;
