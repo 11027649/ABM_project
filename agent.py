@@ -588,8 +588,8 @@ class Car(Agent):
         min_dist = vision_range+1
         if car_neighbours:
             for neigh in car_neighbours:
-                new_dist = self.model.space.get_distance(self.pos, neigh.pos))
-                if(type(neigh) == Pedestrian) and new_dist<min_dist and self.dir == neigh.dir):
+                new_dist = self.model.space.get_distance(self.pos, neigh.pos)
+                if(type(neigh) == Pedestrian and new_dist<min_dist and self.dir == neigh.dir):
                     min_dist = new_dist
             return min_dist
         else:
