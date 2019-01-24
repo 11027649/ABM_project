@@ -10,9 +10,9 @@ from agent import Car, Pedestrian, Light
 def agent_portrayal(agent):
     #Red = Orange + Green and Red lights overlap for 5 time steps
     if type(agent) is Light:
-        if agent.state < 205:
+        if agent.state < 300:
             current_color = "Red"
-        elif agent.state < 355:
+        elif agent.state < 450:
             current_color = "Green"
         else:
             current_color = "Orange"

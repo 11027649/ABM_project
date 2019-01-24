@@ -44,20 +44,37 @@ class Traffic(Model):
         Method that places the ligths for the visualization. The lights keep
         the agents from crossing when they are red.
         '''
-        
+        #Simulatneous Strategy
+
         # car lights
         self.new_light((int(0.45 * self.x_max), int(0.6 * self.y_max)), 0, 1)
         self.new_light((int(0.55 * self.x_max), int(0.4 * self.y_max)), 0, 2)
 
         #"Up" lights
+        self.new_light((23 * 2, 30), 250, 6)
+        self.new_light((27 * 2, 24.65), 250, 4) #Median
+
+        #"Down" Lights
+        self.new_light((23 * 2, 25.35), 250, 5) #Median
+        self.new_light((27 * 2, 20), 250, 3)
+
+        #Alternating strategy
+        """
+
+        # car lights
+        self.new_light((int(0.45 * self.x_max), int(0.6 * self.y_max)), 200, 1) #Bottom Light
+        self.new_light((int(0.55 * self.x_max), int(0.4 * self.y_max)), 0, 2) #Top Light
+
+        #"Up" lights
         self.new_light((23 * 2, 30), 200, 6)
-        self.new_light((27 * 2, 24.65), 200, 4) #Median
+        self.new_light((27 * 2, 24.65), 400, 4) #Median
 
         #"Down" Lights
         self.new_light((23 * 2, 25.35), 200, 5) #Median
-        self.new_light((27 * 2, 20), 200, 3)
+        self.new_light((27 * 2, 20), 400, 3)
 
-        #
+        """
+        
 
 
     def new_light(self, pos, state, light_id):
