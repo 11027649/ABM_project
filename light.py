@@ -18,11 +18,11 @@ class Light(Agent):
         '''
         Update the state of the light.
         '''
-        self.stateSlow = (self.stateSlow + 1) % 3
-        if self.stateSlow == 0:
-            self.state = (self.state + 1) % 405
+        #self.stateSlow = (self.stateSlow + 1) % 3
+        #if self.stateSlow == 0:
+         #   self.state = (self.state + 1) % 405
 
-        # self.state = (self.state + 1) % 405
+        self.state = (self.state + 1) % 450
 
 # simultaneous strategy
 # 3 & 4 are the same
