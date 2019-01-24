@@ -16,8 +16,14 @@ def agent_portrayal(agent):
         else:
             current_color = "Orange"
 
+    if type(agent) is Pedestrian:
+        if agent.dir == "up":
+            pedest_color = "Blue"
+        else:
+            pedest_color = "Purple"
+
     portrayal = {"Shape": "rect" if type(agent) is Car else "circle",
-                 "Color": "Blue" if type(agent) is Pedestrian
+                 "Color": pedest_color if type(agent) is Pedestrian
                  else current_color if type(agent) is Light
                  else "Pink",
                  "Filled": "true",
@@ -25,6 +31,7 @@ def agent_portrayal(agent):
                  "h": 25 if type(agent) is Car else None,
                  "r": 3 if type(agent) is not Car else None}
     return portrayal
+
 
 # Create a grid of 20 by 20 cells, and display it as 500 by 500 pixels
 space = SimpleCanvas(agent_portrayal)

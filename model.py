@@ -53,6 +53,7 @@ class Traffic(Model):
         self.new_light((27 * 2, 20), 75, 3)
         self.new_light((23 * 2, 30), 75, 6)
 
+
         # lights in the middle, not assigned for now and simultaneous with the
         # other pedestrian lights
         self.new_light((27 * 2, 24.65), 75, 4)
@@ -125,7 +126,7 @@ class Traffic(Model):
         # out of bounds checks for pedestrians
         for schedule in [self.schedule_Pedestrian.agents]:
             for current_agent in schedule:
-                print(current_agent.dir, current_agent.direction, current_agent.target_point, current_agent.pos[1], current_agent.speed_free, current_agent.pos[1] - current_agent.speed_free)
+                # print(current_agent.dir, current_agent.direction, current_agent.target_point, current_agent.pos[1], current_agent.speed_free, current_agent.pos[1] - current_agent.speed_free)
                 if (current_agent.dir == "up" and current_agent.pos[1] - current_agent.speed_free< 0) or current_agent.remove == True:
                     self.remove_agent(current_agent)
                 elif (current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed_free >= self.y_max) or current_agent.remove == True:
@@ -136,13 +137,24 @@ class Traffic(Model):
 
             # if there's place place a new car with probability 0.7
             pos = (2, self.y_max/2 + 2.5)
-            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 4):
+
+            car_near = False
+            for i in range(4):
+                if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
+                    car_near = True
+
+            if random.random() < 0.4 and car_near == False:
                 self.new_car(pos, "right")
 
         else:
             # if there's place place a new car with probability 0.7
             pos = (self.x_max - 3, self.y_max/2 - 2.5)
-            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 4):
+
+            car_near = False
+            for i in range(4):
+                if self.space.get_neighbors((pos[0] - 5 * i, pos[1]), include_center = True, radius = 2.5):
+                    car_near = True
+            if random.random() < 0.4 and car_near == False:
                 self.new_car(pos, "left")
 
 
@@ -175,7 +187,6 @@ class Traffic(Model):
         self.data = Data()
 
         for i in range(step_count):
-            printProgressBar(i, step_count)
             self.step()
 
         # return the data object so we can write all info from the datacollector too
