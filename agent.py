@@ -63,7 +63,7 @@ class Pedestrian(Agent):
         # Check traffic light and decide to move or not
         # Returns True if light is red
         # Move if not red (TODO: decide what to do with orange)
-        if self.traffic_red() is False:
+        if self.traffic_green():
             # TODO: decide what their choice is if on midsection or on middle of the road. Move to the spot where there is space?
 
             # Get list of pedestrians in the vision field
@@ -132,7 +132,7 @@ class Pedestrian(Agent):
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
-        pos_directions = self.possible_directions()  
+        pos_directions = self.possible_directions()
         for direction in pos_directions:
             # Calculate utility
             util, next_pos = self.calc_utility(direction, peds_in_180)
@@ -180,7 +180,7 @@ class Pedestrian(Agent):
         else:
             closest_ped = self.R_vision_range
             theta_vj = 0
-        
+
         # Distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
         closest_wall = self.dist_wall(direction)
 
@@ -241,19 +241,19 @@ class Pedestrian(Agent):
         Returns coordinates of the targets projection on the vision range
         """
         # Distance in x and y coordinates to the target
-        dist_diff = [self.target_point[0]-self.pos[0], self.target_point[1]-self.pos[1]] 
+        dist_diff = [self.target_point[0]-self.pos[0], self.target_point[1]-self.pos[1]]
         # Distance to target
         dist = math.sqrt(dist_diff[0]**2 + dist_diff[1]**2)
         # Ratio of distance and projection
         ratio = self.R_vision_range/dist
 
-        # Return position+distance to coordinates of the projection 
+        # Return position+distance to coordinates of the projection
         return (self.pos[0]+ratio*dist_diff[0], self.pos[1]+ratio*dist_diff[1])
 
 
     def dist_wall(self, direction):
         """
-        Returns True if 
+        Returns True if
         """
         # Calculate furthest point the pedestrian can see
         max_x_pos = self.pos[0] + self.R_vision_range*np.cos(math.radians(direction))
@@ -411,69 +411,39 @@ class Pedestrian(Agent):
             Ak = Ak - (abs(self.direction - neigh.direction)/math.pi)
         return Ak
 
-
-    def traffic_red(self):
+    def traffic_green(self):
         """
-        Returns true if light is red
+        Returns true if light is green
         """
-        # Check if agent is in front of the traffic light (correct_side=True)
-        # TODO: Add light checking for midsection (and add midsection)
-        correct_side = False
-        if self.dir == "up":
-            own_light = 2
-            if self.pos[1] > int(self.model.space.y_max/2 + 2):
-                correct_side = True
-        else:
-            own_light = 6
-            if self.pos[1] < int(self.model.space.y_max/2 - 2):
-                correct_side = True
+        # TODO: Hardcoded coordinates (use actual light attribute?)
+        correct_side = True
 
-        # Iterate over all the agents
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 4):
-            # If the agent is a light, which is red or orange, which is your own light and you're in front of the light
-            if (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
-                return True
+        if self.dir == "up" and not self.pos[1] < 24.65:
+            # check where the pedestrian is and assign it to the right traffic light
+            if self.pos[1] > 29:
+                own_light = 4
+                correct_side = False
+            elif self.pos[1] >= 24.65 and self.pos[1] <= 25.35:
+                own_light = 3
+                correct_side = False
+        elif self.dir == "down" and not self.pos[1] > 25.35:
+            if self.pos[1] < 21:
+                own_light = 5
+                correct_side = False
+            elif self.pos[1] >= 24.65 and self.pos[1] <= 25.35:
+                own_light = 6
+                correct_side = False
 
-        return False
+        if not correct_side:
+            # iterate over all the agents to find the correct light
+            for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 9):
+                # if it's your own light, and it's not green
+                if (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light):
+                    return False
 
-
-    def step_old(self):
-        '''
-        This method should move the Sheep using the `random_move()` method implemented earlier, then conditionally reproduce.
-        '''
-
-        # check if there's a traffic light (and adjust speed accordingly)
-        changed = 0
-        correct_side = False
-        if self.dir == "up":
-            own_light = 6
-            if self.pos[1] > int(self.model.space.y_max/2 + 2 ):
-                correct_side = True
-        else:
-            own_light = 3
-            if self.pos[1] < int(self.model.space.y_max/2 - 2):
-                correct_side = True
-
-        # very inefficient code right here if we notice if the run time is too long
-
-        for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 2):
-            if self.check_front() > 0 or (isinstance(i,Light) and (i.state < 50 or i.state > 100) and i.light_id == own_light and correct_side == True):
-                self.speed = 0
-                changed = 1
-            elif (changed == 0 and self.check_front() == 0) or (changed == 0 and self.check_front() == 0 and correct_side == False):
-                self.speed = 1
+        return True
 
 
-        # take a step
-        if self.dir is "up":
-            next_pos = (self.pos[0], self.pos[1] - self.speed)
-            self.model.space.move_agent(self, next_pos)
-        else:
-            next_pos = (self.pos[0], self.pos[1] + self.speed)
-            self.model.space.move_agent(self, next_pos)
-
-        self.time += 1
-        # DELETE
 
     # this function is in both pedestrian and agent -> more efficient way?
     def check_front(self):
@@ -494,14 +464,14 @@ class Pedestrian(Agent):
         return 0
 
 
-        
+
 class Car(Agent):
 
     # Car test:
-    # Can a traffic jam occur like in the NS model? 
+    # Can a traffic jam occur like in the NS model?
     # - create a very long road, and make the car in front slow down for a bit, and watch the emergent process througout ...
     # ... the rest of the traffic
-    
+
     def __init__(self, unique_id, model, pos, dir, speed=0.8, time=0):
         super().__init__(unique_id, model)
 
@@ -535,11 +505,11 @@ class Car(Agent):
                     if self.dir == "right":
                         if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
                             self.speed = self.speed - 0.8/40
-                        
+
                     else:
                         if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
                             self.speed = self.speed - 0.8/40
-                
+
 
                 # if the light is red, make sure to stop, even by slowing down more than 1 speed per step
                 elif current_state < 50:
@@ -569,7 +539,7 @@ class Car(Agent):
                 self.speed = self.speed + 0.8/40
         elif self.speed < self.max_speed and self.correct_side == False:
             self.speed = self.speed + 0.8/40
-        
+
 
         # take a step
         next_pos = (self.pos[0] + self.speed * self.direction, self.pos[1])
@@ -619,7 +589,7 @@ class Car(Agent):
                             min_dist = new_dist - 3
                             # print(min_dist)
                 if min_dist is not 99999:
-                    return min_dist 
+                    return min_dist
                 else:
                     return 0
             else:
