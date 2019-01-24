@@ -57,7 +57,20 @@ class Pedestrian(Agent):
         if abs(self.walls_x[0]-self.walls_x[1])<2*self.R_vision_range:
             raise ValueError("Walls are too close together for the dist_walls function to work correctly")
 
-
+    def on_road_side(self):
+        if self.dir == "up":
+            # check where the pedestrian is and assign it to the right traffic light
+            if self.pos[1] > 29.7 and self.pos[1] < 30.2:
+                return True
+            elif self.pos[1] > 24.65 and self.pos[1] < 25:
+                return True
+        elif self.dir == "down":
+            if self.pos[1] > 19.8 and self.pos[1] < 20.3:
+                return True
+            elif self.pos[1] > 25 and self.pos[1] < 25.35:
+                return True
+        else:
+            return False
 
     def step(self):
         """
@@ -66,7 +79,7 @@ class Pedestrian(Agent):
         # Check traffic light and decide to move or not
         # Returns True if light is red
         # Move if not red (TODO: decide what to do with orange)
-        if self.traffic_green():
+        if self.traffic_green() and not self.on_road_side():
             # TODO: decide what their choice is if on midsection or on middle of the road. Move to the spot where there is space?
 
             # Get list of pedestrians in the vision field
