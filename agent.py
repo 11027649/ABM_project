@@ -126,7 +126,6 @@ class Pedestrian(Agent):
         else:
             return 0
 
-
     def choose_direction(self):
         """
         Picks the direction with the highest utility
@@ -201,15 +200,15 @@ class Pedestrian(Agent):
 
 
         #Finds the pedestrians in the next step length
-        if len(peds_in_dir)>0:
-            peds_in_step = self.pedestrians_in_field(180,self.model.space.get_distance(self.pos,next_pos),peds_in_dir)
-            if len(peds_in_step)>0:
-                cpil = self.closest_ped_on_line(peds_in_step, direction)[1]
-                theta_vj = abs(self.direction - cpil.direction)
-            else:
-                theta_vj = 0
+        if len(peds_in_180)>0:
+            cpil = self.closest_ped_on_line(peds_in_180, direction)[1]
+            theta_vj = abs(self.direction - cpil.direction)
+
         else:
             theta_vj = 0
+
+
+        #print("The angle is", theta_vj)
 
         # If the target point is not within vision:
         if self.model.space.get_distance(self.pos, self.target_point) > self.R_vision_range:
@@ -389,7 +388,7 @@ class Pedestrian(Agent):
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
         # Find the terms for the equation for the line that will be passing through the current point in direction
-        print(type(neighbours))
+        #print(type(neighbours))
         if type(neighbours) == Pedestrian:
             m = math.tan(math.radians(direction))
             b = self.pos[1] - (m*self.pos[0])
@@ -397,7 +396,7 @@ class Pedestrian(Agent):
             min_distance = abs((m*neighbours.pos[0])-neighbours.pos[1]+b)/math.sqrt((m**2) + 1)
             min_pedestrian = neighbours
         else:
-            print(len(neighbours))
+            #print(len(neighbours))
             m = math.tan(math.radians(direction))
             b = self.pos[1] - (m*self.pos[0])
             # Calculate the first distance from the line (perpendicular distance and assign the min pedestrian
