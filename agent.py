@@ -15,6 +15,9 @@ class Pedestrian(Agent):
         self.speed = speed
         self.time = time
 
+        # Radius
+        self.radius = .2
+
         self.remove = False
 
         # Liu, 2014 parameters
@@ -173,16 +176,20 @@ class Pedestrian(Agent):
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # Get closest pedestrian: min_distance, min_pedestrian.pos
-            closest_ped = self.closest_pedestrian(peds_in_dir)
+            # TODO: check if negative
+            # TODO: WHY DOES THIS NOT WORK? DDDDDD:::::
+
+            print('peds', peds_in_dir)
+            closest_ped = self.closest_pedestrian(peds_in_dir) - 2*self.radius
             cpil = self.closest_ped_on_line(peds_in_dir, direction)[1]
             theta_vj = abs(self.direction - cpil.direction)
             # If no pedestrians in view, closest_ped distance is set at vision range
         else:
-            closest_ped = self.R_vision_range
+            closest_ped = self.R_vision_range-self.radius
             theta_vj = 0
 
         # Distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
-        closest_wall = self.dist_wall(direction)
+        closest_wall = self.dist_wall(direction)-self.radius
 
         # Determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
@@ -395,6 +402,7 @@ class Pedestrian(Agent):
         """
         This is used to find the closest pedestrian of a given included list of neighbours
         Returns distance to and the position of the closest pedestrian
+        TODO: check
         """
         min_distance = self.model.space.get_distance(self.pos, inter_neigh[0].pos)
         for i in range(1, len(inter_neigh)):
