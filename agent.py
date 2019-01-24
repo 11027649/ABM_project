@@ -180,12 +180,9 @@ class Pedestrian(Agent):
 
             # print('peds', peds_in_dir)
             closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2*self.radius
-            cpil = self.closest_ped_on_line(peds_in_dir, direction)[1]
-            theta_vj = abs(self.direction - cpil.direction)
             # If no pedestrians in view, closest_ped distance is set at vision range
         else:
             closest_ped = self.R_vision_range-self.radius
-            theta_vj = 0
 
         # Distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
         closest_wall = self.dist_wall(direction)-self.radius
@@ -198,8 +195,7 @@ class Pedestrian(Agent):
         #Finds the pedestrians in the next step length
         if len(peds_in_180)>0:
             cpil = self.closest_ped_on_line(peds_in_180, direction)[1]
-            theta_vj = abs(self.direction - cpil.direction)
-
+            theta_vj = self.theta_calc(cpil,direction)
         else:
             theta_vj = 0
 
@@ -257,6 +253,17 @@ class Pedestrian(Agent):
             # Return the angle of the closest neighbours direction and the current pedestrians direction
             return abs(closest_neigh.direction - direction)
 
+    def theta_calc(self, ped, angle):
+        """returns the angle given the pedestrians location and the directions"""
+        m = math.tan(math.radians(angle))
+        b = self.pos[1] - (m * self.pos[0])
+
+        if ped.pos[1] - (m*ped.pos[0])+b < 0 and ped.direction>angle and ped.direction < angle+math.radians(180):
+            return abs(angle - ped.direction)
+        elif ped.pos[1] - (m*ped.pos[0])+b > 0 and (ped.direction<angle or ped.direction > angle+math.radians(180)):
+            return abs(angle - ped.direction)
+        else:
+            return 0
 
     def target_projection(self):
         """
@@ -409,7 +416,7 @@ class Pedestrian(Agent):
                         min_distance = cur_distance
                     # if equal checks to see which is closer to the current position.
                     elif cur_distance == min_distance:
-                        if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours.pos):
+                        if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours[i].pos):
                             min_pedestrian = neighbours[i]
                             min_distance = cur_distance
 
