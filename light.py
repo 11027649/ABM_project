@@ -12,11 +12,18 @@ class Light(Agent):
         self.pos = pos
         self.state = state
         self.light_id = light_id
+        self.stateSlow = 0
 
     def step(self):
         '''
         Update the state of the light.
         '''
-        self.state = (self.state + 1) % 130
+        self.stateSlow = (self.stateSlow + 1) % 3
+        if self.stateSlow == 0:
+            self.state = (self.state + 1) % 130
 
+        # self.state = (self.state + 1) % 130
 
+# simultaneous strategy
+# 3 & 4 are the same
+# 5 & 6 are the same
