@@ -16,7 +16,7 @@ def agent_portrayal(agent):
         else:
             current_color = "Orange"
 
-    if type(agent) is Pedestrian:
+    elif type(agent) is Pedestrian:
         if agent.dir == "up":
             pedest_color = "Blue"
         else:
@@ -27,9 +27,9 @@ def agent_portrayal(agent):
                  else current_color if type(agent) is Light
                  else "Pink",
                  "Filled": "true",
-                 "w": 25 if type(agent) is Car else None,
-                 "h": 25 if type(agent) is Car else None,
-                 "r": 3 if type(agent) is not Car else None}
+                 "w": 3.7*15 if type(agent) is Car else None,
+                 "h": 1.7*15 if type(agent) is Car else None,
+                 "r": .2*15 if type(agent) is not Car else None}
     return portrayal
 
 
