@@ -51,12 +51,12 @@ class Traffic(Model):
         self.new_light((int(0.55 * self.x_max), int(0.4 * self.y_max)), 0, 2)
 
         #"Up" lights
-        self.new_light((23 * 2, 30), 200, 6)
-        self.new_light((27 * 2, 24.65), 200, 4) #Median
+        self.new_light((23 * 2, 30), 250, 6)
+        self.new_light((27 * 2, 24.65), 250, 4) #Median
 
         #"Down" Lights
-        self.new_light((23 * 2, 25.35), 200, 5) #Median
-        self.new_light((27 * 2, 20), 200, 3)
+        self.new_light((23 * 2, 25.35), 250, 5) #Median
+        self.new_light((27 * 2, 20), 250, 3)
 
         #Alternating strategy
         """

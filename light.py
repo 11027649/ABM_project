@@ -22,7 +22,7 @@ class Light(Agent):
         #if self.stateSlow == 0:
          #   self.state = (self.state + 1) % 405
 
-        self.state = (self.state + 1) % 450
+        self.state = (self.state + 1) % 500
 
 # simultaneous strategy
 # 3 & 4 are the same
