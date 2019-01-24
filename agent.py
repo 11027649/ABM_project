@@ -413,7 +413,7 @@ class Pedestrian(Agent):
                         min_distance = cur_distance
                     # if equal checks to see which is closer to the current position.
                     elif cur_distance == min_distance:
-                        if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours.pos):
+                        if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours[i].pos):
                             min_pedestrian = neighbours[i]
                             min_distance = cur_distance
 
