@@ -21,7 +21,6 @@ var ContinuousVisualization = function(height, width, context) {
 	};
 
 	this.drawCircle = function(x, y, radius, color, fill) {
-		console.log(radius)
 		var cx = x * width;
 		var cy = y * height;
 		var r = radius;

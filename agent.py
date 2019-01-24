@@ -594,6 +594,7 @@ class Car(Agent):
                 min_dist = 99999
                 for neigh in car_neighbours:
                     new_dist = self.model.space.get_distance(self.pos, neigh.pos)
+                    print(new_dist)
                     # Find the closest one
                     # print(self.dir, neigh.dir)
                     if new_dist < min_dist and self.dir == neigh.dir:
