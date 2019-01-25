@@ -396,6 +396,12 @@ class Pedestrian(Agent):
 
             The angle should be given in radians.
             """
+
+            angle = self.direction - 270
+
+            if angle < 0:
+                angle += 360
+
             ox, oy = origin
             px, py = point
 
