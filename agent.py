@@ -88,7 +88,7 @@ class Pedestrian(Agent):
 
             # Get list of pedestrians in the vision field
             peds_in_vision = self.pedestrians_in_field(self.vision_angle)
-            print("first things first", len(peds_in_vision))
+            # print("first things first", len(peds_in_vision))
 
             # Set desired_speed
             self.des_speed = self.desired_speed(len(peds_in_vision))
@@ -187,9 +187,9 @@ class Pedestrian(Agent):
         """
 
         # List of pedestrians in that direction
-        print("Pedestrians 180", self.unique_id, direction, len(peds_in_180))
+        # print("Pedestrians 180", self.unique_id, direction, len(peds_in_180))
         peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, .7)
-        print("Pedestrians in direction", self.unique_id, direction, len(peds_in_dir))
+        # print("Pedestrians in direction", self.unique_id, direction, len(peds_in_dir))
 
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
@@ -332,19 +332,23 @@ class Pedestrian(Agent):
         # get all surrounding neighbors
         neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
         rotatedNeighList = []
+        i = -1
         for neigh in neighbors:
-            rotatedNeighList.append(self.rotate(neigh.pos[0], self.pos[0]))
+            i = i + 1
+            rotatedNeighList.append(self.rotate(self.pos, neigh.pos, i))
         
         cone_neigh = []
         for rotatedNeigh in rotatedNeighList:
-            if self.dir == "up":
-                if rotatedNeigh[1] - self.pos[1] > math.tan(self.vision_angle) * abs(rotatedNeigh[0] - self.pos[0]):
-                    cone_neigh.append(rotatedNeigh)
+            if self.dir == "down":
+                if rotatedNeigh[1] - self.pos[1] > math.tan(90 - self.vision_angle / 2) * abs(rotatedNeigh[0] - self.pos[0]):
+                    cone_neigh.append(neighbors[rotatedNeigh[2]])
             else:
-                if rotatedNeigh[1] - self.pos[1] < -math.tan(self.vision_angle) * abs(rotatedNeigh[0] - self.pos[0]):
-                    cone_neigh.append(rotatedNeigh)
+                if rotatedNeigh[1] - self.pos[1] < -math.tan(90 - self.vision_angle / 2) * abs(rotatedNeigh[0] - self.pos[0]):
+                    cone_neigh.append(neighbors[rotatedNeigh[2]])
 
-
+        print('AAAAa')
+        print(self.unique_id)
+        print("dezeeee", cone_neigh)
         return cone_neigh
 
 
@@ -391,7 +395,7 @@ class Pedestrian(Agent):
 
         return inter_neighbors
 
-    def rotate(self, origin, point):
+    def rotate(self, origin, point, i):
         """
         Rotate a point counterclockwise by a given angle around a given origin.
 
@@ -402,13 +406,13 @@ class Pedestrian(Agent):
 
         if angle < 0:
             angle += 360
-
+        angle_rad = math.radians(angle)
         ox, oy = origin
         px, py = point
 
-        qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
-        qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
-        return qx, qy
+        qx = ox + math.cos(angle_rad) * (px - ox) - math.sin(angle_rad) * (py - oy)
+        qy = oy + math.sin(angle_rad) * (px - ox) + math.cos(angle_rad) * (py - oy)
+        return (qx, qy, i)
 
     def closest_ped_on_line(self, neighbours, direction):
         """
