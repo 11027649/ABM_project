@@ -53,7 +53,7 @@ class Pedestrian(Agent):
             self.direction = 90
             self.target_point = (random.uniform(24*2,26*2), 50)
             self.own_light1 = (53.46, 10.6)
-            self.own_light2 = (53.46, 16.2) #4
+            self.own_light2 = (53.46, 16.2)
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
@@ -152,7 +152,8 @@ class Pedestrian(Agent):
         # Loop over the possible directions
         max_util = [-10**6, None, None]
         pos_directions = self.possible_directions()
-        for direction in pos_directions:
+        #print(pos_directions)
+        for direction in pos_directions: #TODO I think this is where something may be going wrong
             # Calculate utility
             util, next_pos = self.calc_utility(direction, peds_in_180)
             # Check if this utility is higher than the previous
@@ -187,8 +188,9 @@ class Pedestrian(Agent):
         """
 
         # List of pedestrians in that direction
+        print("For pedestiran peds in 180", self.unique_id, len(peds_in_180))
         peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, .7)
-
+        print("For pedestiran peds in direction", self.unique_id, direction, len(peds_in_dir))
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # Get closest pedestrian: min_distance, min_pedestrian.pos
@@ -325,6 +327,10 @@ class Pedestrian(Agent):
         returns the number of pedestrians in the field
         """
         # Calculate the lower angle and the upper angle
+
+        #print(self.direction)
+        #print(vision_angle)
+        #print(vis_range)
         lower_angle = self.direction - (vision_angle / 2)
         upper_angle = self.direction + (vision_angle / 2)
 
@@ -335,25 +341,37 @@ class Pedestrian(Agent):
         u_rads = math.radians(upper_angle)
         l_rads = math.radians(lower_angle)
         # Calculate the end angles
-        dx1 = math.cos(l_rads) * vis_range
-        dy1 = math.sin(l_rads) * vis_range
-        dx2 = math.cos(u_rads) * vis_range
-        dy2 = math.sin(u_rads) * vis_range
+        # Is the signs and cosines backwards?
+        dx2 = math.cos(l_rads) * vis_range
+        dy2 = math.sin(l_rads) * vis_range
+        dx1 = math.cos(u_rads) * vis_range
+        dy1 = math.sin(u_rads) * vis_range
 
         # Calculate the points
         p1 = np.array([p0[0] + dx1, p0[1] + dy1])
         p2 = np.array([p0[0] + dx2, p0[1] + dy2])
+
         # Calculate the vectors
         v1 = p1-p0
-        v2 = p2-p0
+        v2 = p2-p1
+        v3 = p0-p2
 
         # Get the current neighbors
         cone_neigh = []
         # Loop to find if neighbor is within the cone
         for neigh in neighbours:
-            v3 = np.array(neigh.pos) - p0
+            print("neighbouring positoion" , neigh.pos)
+
+            pn = np.array(neigh.pos)
+            p1 = pn-p0
+            p2 = pn-p1
+            p3 = pn-p2
+
             # Append object to cone_neigh if its within vision cone
-            if (np.cross(v1, v3) * np.cross(v1, v2) >= 0 and np.cross(v2, v3) * np.cross(v2, v1) >= 0 and type(neigh) == Pedestrian):
+            print(np.sign(np.cross(v1,p1)))
+            print(np.sign(np.cross(v2, p2)))
+            print(np.sign(np.cross(v3, p3)))
+            if np.sign(np.cross(v1,p1)) == np.sign(np.cross(v2,p2)) == np.sign(np.cross(v3,p3)):
                 cone_neigh.append(neigh)
 
         return cone_neigh
@@ -387,6 +405,8 @@ class Pedestrian(Agent):
             # calculate the linear formula for the line
             m = math.tan(math.radians(angle))
             b = self.pos[1] - (m * self.pos[0])
+            #print(self.pos)
+            #print(m, b)
 
             # calcuate the y offset of the range of lines
             b_offset = offset / math.cos(angle)
@@ -396,8 +416,7 @@ class Pedestrian(Agent):
             b_bot = b - b_offset
 
             for neigh in neighbours:
-                if ((neigh.pos[1] - ((m * neigh.pos[0]) + b_top)) <= 0 and (
-                        neigh.pos[1] - ((m * neigh.pos[0]) + b_bot)) >= 0):
+                if ((neigh.pos[1] - ((m * neigh.pos[0]) + b_top)) <= 0 and (neigh.pos[1] - ((m * neigh.pos[0]) + b_bot)) >= 0):
                     inter_neighbors.append(neigh)
 
         return inter_neighbors
