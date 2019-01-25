@@ -53,7 +53,7 @@ class Pedestrian(Agent):
             self.direction = 90
             self.target_point = (random.uniform(24*2,26*2), 50)
             self.own_light1 = (53.46, 10.6)
-            self.own_light2 = (53.46, 16.2) #4
+            self.own_light2 = (53.46, 16.2)
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
@@ -87,16 +87,14 @@ class Pedestrian(Agent):
             # TODO: decide what their choice is if on midsection or on middle of the road. Move to the spot where there is space?
 
             # Get list of pedestrians in the vision field
-            peds_in_vision = self.pedestrians_in_field(self.vision_angle, self.R_vision_range, self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range))
+            peds_in_vision = self.pedestrians_in_field(self.vision_angle)
+            print("first things first", len(peds_in_vision))
+
             # Set desired_speed
             self.des_speed = self.desired_speed(len(peds_in_vision))
 
             # Get new position and update direction
             next_pos, self.direction = self.choose_direction()
-
-            # TODO: de-comment this if we're running this step function
-            # Move to new position
-            # self.model.space.move_agent(self, next_pos)
 
             # Try to move agent
             try:
@@ -147,14 +145,16 @@ class Pedestrian(Agent):
         """
 
         # For getting the neighbours in the front 180 degrees within vision range; for calc_utility
-        peds_in_180 = self.pedestrians_in_field(180, self.R_vision_range, self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range))
+        peds_in_180 = self.pedestrians_in_field(178)
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
         pos_directions = self.possible_directions()
-        for direction in pos_directions:
-            # Calculate utility
+
+        for direction in pos_directions: #TODO I think this is where something may be going wrong
+            # Calculate utility for every possible direction
             util, next_pos = self.calc_utility(direction, peds_in_180)
+
             # Check if this utility is higher than the previous
             if util > max_util[0]:
                 max_util = [util, next_pos, direction]
@@ -183,11 +183,13 @@ class Pedestrian(Agent):
 
     def calc_utility(self, direction, peds_in_180):
         """
-        Calculate the utility (equation 1 for now. Whats omega_e' in eq. 7?)
+        Calculate the utility for different directions.
         """
 
         # List of pedestrians in that direction
+        print("Pedestrians 180", self.unique_id, direction, len(peds_in_180))
         peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, .7)
+        print("Pedestrians in direction", self.unique_id, direction, len(peds_in_dir))
 
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
@@ -320,10 +322,16 @@ class Pedestrian(Agent):
         return (self.pos[0] + chosen_velocity*np.cos(math.radians(theta_chosen)), self.pos[1]+chosen_velocity*np.sin(math.radians(theta_chosen)))
 
 
-    def pedestrians_in_field(self, vision_angle, vis_range, neighbours):
+    def pedestrians_in_field(self, vision_angle):
         """
-        returns the pedestrians in the field
+            Returns the pedestrians that are in the cone that the pedestrian can
+            actually see in a certain vision_angle (which usually is 170, but
+            can also be a bit heigher to check the most outer parts.).
         """
+
+        # get all surrounding neighbors
+        neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
+
         # Calculate the lower angle and the upper angle
         lower_angle = self.direction - (vision_angle / 2)
         upper_angle = self.direction + (vision_angle / 2)
@@ -334,26 +342,41 @@ class Pedestrian(Agent):
         # Convert to radians for angle calcuation
         u_rads = math.radians(upper_angle)
         l_rads = math.radians(lower_angle)
-        # Calculate the end angles
-        dx1 = math.cos(l_rads) * vis_range
-        dy1 = math.sin(l_rads) * vis_range
-        dx2 = math.cos(u_rads) * vis_range
-        dy2 = math.sin(u_rads) * vis_range
 
-        # Calculate the points
+        # calculate the end points of the cones outer vectors
+        dx2 = math.cos(l_rads) * self.R_vision_range
+        dy2 = math.sin(l_rads) * self.R_vision_range
+
+        dx1 = math.cos(u_rads) * self.R_vision_range
+        dy1 = math.sin(u_rads) * self.R_vision_range
+        print("differences by goniometry", dx1, dx2, dy1,dy2)
+
         p1 = np.array([p0[0] + dx1, p0[1] + dy1])
         p2 = np.array([p0[0] + dx2, p0[1] + dy2])
+        print("i'm at", self.pos, vision_angle, self.direction, "the end points of my vision range are", p1, p2)
+
+
         # Calculate the vectors
         v1 = p1-p0
-        v2 = p2-p0
+        v2 = p2-p1
+        v3 = p0-p2
 
         # Get the current neighbors
         cone_neigh = []
         # Loop to find if neighbor is within the cone
-        for neigh in neighbours: 
-            v3 = np.array(neigh.pos) - p0
+        for neigh in neighbors:
+            print("own position ", self.pos, vision_angle, " neighbouring position " , neigh.pos)
+
+            pn = np.array(neigh.pos)
+            p1 = pn-p0
+            p2 = pn-p1
+            p3 = pn-p2
+
             # Append object to cone_neigh if its within vision cone
-            if (np.cross(v1, v3) * np.cross(v1, v2) >= 0 and np.cross(v2, v3) * np.cross(v2, v1) >= 0 and type(neigh) == Pedestrian):
+            print(np.sign(np.cross(v1, p1)))
+            print(np.sign(np.cross(v2, p2)))
+            print(np.sign(np.cross(v3, p3)))
+            if np.sign(np.cross(v1,p1)) == np.sign(np.cross(v2,p2)) == np.sign(np.cross(v3,p3)):
                 cone_neigh.append(neigh)
 
         return cone_neigh
@@ -388,7 +411,6 @@ class Pedestrian(Agent):
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
         # Find the terms for the equation for the line that will be passing through the current point in direction
-        #print(type(neighbours))
         if type(neighbours) == Pedestrian:
             m = math.tan(math.radians(direction))
             b = self.pos[1] - (m*self.pos[0])
@@ -396,7 +418,6 @@ class Pedestrian(Agent):
             min_distance = abs((m*neighbours.pos[0])-neighbours.pos[1]+b)/math.sqrt((m**2) + 1)
             min_pedestrian = neighbours
         else:
-            #print(len(neighbours))
             m = math.tan(math.radians(direction))
             b = self.pos[1] - (m*self.pos[0])
             # Calculate the first distance from the line (perpendicular distance and assign the min pedestrian
@@ -461,7 +482,7 @@ class Pedestrian(Agent):
         if self.dir == "up" and not self.pos[1] < 16:
             # check where the pedestrian is and assign it to the right traffic light
             if self.pos[1] > 21:
-                own_light = self.own_light1 
+                own_light = self.own_light1
                 correct_side = False
             elif self.pos[1] >= 16 and self.pos[1] <= 17:
                 own_light = self.own_light2
@@ -616,7 +637,6 @@ class Car(Agent):
         neighbours = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.vision_range)
         min_dist = self.vision_range + 1
         # if there are neighbours
-        # print("I can see this many things",  len(neighbours))
         if neighbours:
             car_neighbours = []
             #Find those that are cars
@@ -624,18 +644,14 @@ class Car(Agent):
                 if (type(neigh) == Car):
                     car_neighbours.append(neigh)
             # if there are cars
-            # print("I can see this many cars", len(car_neighbours))
             if car_neighbours:
                 min_dist = 99999
                 for neigh in car_neighbours:
                     new_dist = self.model.space.get_distance(self.pos, neigh.pos)
-                    # print(new_dist)
                     # Find the closest one
-                    # print(self.dir, neigh.dir)
                     if new_dist < min_dist and self.dir == neigh.dir:
                         if (self.dir == "right" and self.pos[0] < neigh.pos[0]) or (self.dir == "left" and self.pos[0] > neigh.pos[0]):
                             min_dist = new_dist - 3
-                            # print(min_dist)
                 if min_dist is not 99999:
                     return min_dist
                 else:
