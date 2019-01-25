@@ -176,24 +176,19 @@ class Traffic(Model):
         #         self.new_car(pos, "left")
 
 
+        # either up or down
         if random.random() < 1:
+            # if there's place, place a new pedestrian with a certain probability
+            pos = (self.x_max / 2 - 1 , self.y_max - 1)
 
-            # if there's place place a new car with probability 0.7
-            x = int(self.x_max / 2 - 1)
-            y = self.y_max - 1
-            pos = (x,y)
             if random.random() < 1 and not self.space.get_neighbors(pos, include_center = True, radius = .5):
                 self.new_pedestrian(pos, "up")
 
-        # else:
-        #     # if there's place place a new car with probability 0.7
-        #
-        #     x = int(self.x_max / 2 + 1)
-        #
-        #     y = 0
-        #     pos = (x,y)
-        #     if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
-        #         self.new_pedestrian(pos, "down")
+        else:
+            pos = (self.x_max / 2 + 1, 0)
+
+            if random.random() < 1 and not self.space.get_neighbors(pos, include_center = True, radius = .5):
+                self.new_pedestrian(pos, "down")
 
         # Save the statistics
         self.datacollector.collect(self)
