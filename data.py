@@ -56,9 +56,9 @@ class Data():
 
 
     def write_info(self, datacollector_data):
-        # datacollector_data is a pandas dataframe so\
+        # datacollector_data is a pandas dataframe so
         datacollector_data.to_csv(path_or_buf=self.filepath_info, mode='a', header=False)
-        
+
         with open(self.filepath_info, 'a', newline='') as datafile:
             datawriter = csv.writer(datafile)
             datawriter.writerow(["# Next iteration"])
