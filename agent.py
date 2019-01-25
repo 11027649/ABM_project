@@ -107,7 +107,7 @@ class Pedestrian(Agent):
             # TODO: Is .4 used as a radius here? Check if it still corresponds to the real radius
             # agent_area: pi*(0.4**2) = 0.5027
             # dens = agent_area/cone_area
-            dens = 0.0376
+            dens = 0.00941
         else:
             raise ValueError('Code only works for 170 degrees vision range for now')
 
@@ -143,7 +143,14 @@ class Pedestrian(Agent):
             # Check if this utility is higher than the previous
             if util > max_util[0]:
                 max_util = [util, next_pos, direction]
+        print('maximum', max_util)
 
+        # TODO: Just check all neighbours and see which are within range
+        neigbours = self.model.space.get_neighbors(self.pos, include_center = False, radius = .2)
+        if len(neigbours)> 0:
+            print('neighss', neigbours.pos)
+            raise ValueError('too close')
+            
         # Return next position and the direction
         return max_util[1], max_util[2]
 
@@ -180,9 +187,11 @@ class Pedestrian(Agent):
             # Get closest pedestrian: min_distance, min_pedestrian.pos
             # TODO: check if negative
             # TODO: WHY DOES THIS NOT WORK? DDDDDD:::::
-            closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2*self.radius
+            closest_ped_res = self.closest_pedestrian(peds_in_dir, direction)
+            closest_ped = closest_ped_res[0] - 2*self.radius
             cpil = self.closest_ped_on_line(peds_in_dir, direction)[1]
             theta_vj = abs(self.direction - cpil.direction)
+            print(closest_ped_res[1].pos)
             # If no pedestrians in view, closest_ped distance is set at vision range
         else:
             closest_ped = self.R_vision_range-self.radius
@@ -193,11 +202,8 @@ class Pedestrian(Agent):
 
         # Determine possible new position
         chosen_distance = min(self.des_speed, closest_ped, closest_wall)
-        chosen_distance = min(closest_ped, closest_wall)
-
-        print(self.pos, chosen_distance, self.des_speed, closest_ped, closest_wall)
         next_pos = self.new_pos(chosen_distance, direction)
-
+        print(self.pos, next_pos, self.des_speed, closest_ped, closest_wall)
 
         #Finds the pedestrians in the next step length
         if len(peds_in_180)>0:
@@ -439,7 +445,8 @@ class Pedestrian(Agent):
 
         min_distance = math.sqrt(c**2 + b**2)
 
-        return min_distance
+        return min_distance, min_neigh
+
 
     def ped_velocity_interaction(self, neighbours):
         """Calculates the interaction between pedesrians based off the angle of their movement"""
@@ -478,7 +485,7 @@ class Pedestrian(Agent):
             # iterate over all the agents to find the correct light
             for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 9):
                 # if it's your own light, and it's not green
-                if (isinstance(i,Light) and (i.state < 205 or i.state > 355) and i.light_id == own_light):
+                if (isinstance(i,Light) and (i.state < 300 or i.state > 450) and i.light_id == own_light):
                     return False
 
         return True

@@ -160,7 +160,7 @@ class Traffic(Model):
                 if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
                     car_near = True
 
-            if random.random() < 0.1 and car_near == False: # 0.03 rate
+            if random.random() < 0.03 and car_near == False: # 0.03 rate
                 self.new_car(pos, "right")
 
         else:
@@ -171,28 +171,28 @@ class Traffic(Model):
             for i in range(5):
                 if self.space.get_neighbors((pos[0] - 5 * i, pos[1]), include_center = True, radius = 2.5):
                     car_near = True
-            if random.random() < 0.1 and car_near == False: # 0.03 rate
+            if random.random() < 0.03 and car_near == False: # 0.03 rate
                 self.new_car(pos, "left")
 
 
-        # if random.random() < 0.5:
+        if random.random() < 0.5:
 
-        #     # if there's place place a new car with probability 0.7
-        #     x = int(self.x_max / 2 - 1)
-        #     y = self.y_max - 1
-        #     pos = (x,y)
-        #     if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
-        #         self.new_pedestrian(pos, "up")
+            # if there's place place a new car with probability 0.7
+            x = int(self.x_max / 2 - 1)
+            y = self.y_max - 1
+            pos = (x,y)
+            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
+                self.new_pedestrian(pos, "up")
 
-        # else:
-        #     # if there's place place a new car with probability 0.7
+        else:
+            # if there's place place a new car with probability 0.7
 
-        #     x = int(self.x_max / 2 + 1)
+            x = int(self.x_max / 2 + 1)
 
-        #     y = 0
-        #     pos = (x,y)
-        #     if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
-        #         self.new_pedestrian(pos, "down")
+            y = 0
+            pos = (x,y)
+            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
+                self.new_pedestrian(pos, "down")
 
         # Save the statistics
         self.datacollector.collect(self)
