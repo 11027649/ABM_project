@@ -74,7 +74,7 @@ class Traffic(Model):
         self.new_light((27 * 2, 20), 400, 3)
 
         """
-        
+
 
 
     def new_light(self, pos, state, light_id):
@@ -175,24 +175,25 @@ class Traffic(Model):
                 self.new_car(pos, "left")
 
 
-        # if random.random() < 0.5:
+        if random.random() < 0.5:
 
-        #     # if there's place place a new car with probability 0.7
-        #     x = int(self.x_max / 2 - 1)
-        #     y = self.y_max - 1
-        #     pos = (x,y)
-        #     if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
-        #         self.new_pedestrian(pos, "up")
+            # if there's place place a new car with probability 0.7
+            x = int(self.x_max / 2 - 1)
+            y = self.y_max - 1
+            pos = (x,y)
 
-        # else:
-        #     # if there's place place a new car with probability 0.7
+            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
+                self.new_pedestrian(pos, "up")
 
-        #     x = int(self.x_max / 2 + 1)
+        else:
+            # if there's place place a new car with probability 0.7
 
-        #     y = 0
-        #     pos = (x,y)
-        #     if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
-        #         self.new_pedestrian(pos, "down")
+            x = int(self.x_max / 2 + 1)
+
+            y = 0
+            pos = (x,y)
+            if random.random() < 0.7 and not self.space.get_neighbors(pos, include_center = True, radius = 2):
+                self.new_pedestrian(pos, "down")
 
         # Save the statistics
         self.datacollector.collect(self)

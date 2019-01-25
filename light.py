@@ -11,6 +11,7 @@ class Light(Agent):
 
         self.pos = pos
         self.state = state
+        self.update_color()
         self.light_id = light_id
         self.stateSlow = 0
 
@@ -23,6 +24,15 @@ class Light(Agent):
          #   self.state = (self.state + 1) % 405
 
         self.state = (self.state + 1) % 500
+        self.update_color()
+
+    def update_color(self):
+        if self.state <= 300:
+            self.color = "Red"
+        elif self.state <= 450:
+            self.color = "Green"
+        else:
+            self.color = "Orange"
 
 # simultaneous strategy
 # 3 & 4 are the same
