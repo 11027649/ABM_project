@@ -9,7 +9,7 @@ class SimpleCanvas(VisualizationElement):
         Instantiate a new SimpleCanvas
         '''
         self.portrayal_method = portrayal_method
-        self.canvas_height = 750
+        self.canvas_height = 300
         self.canvas_width = 1500
         new_element = ("new SimpleContinuousModule({}, {})".
                        format(self.canvas_width, self.canvas_height))

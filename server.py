@@ -8,16 +8,7 @@ from agent import Car, Pedestrian, Light
 # You can change this to whatever you want. Make sure to make the different types
 # of agents distinguishable
 def agent_portrayal(agent):
-    #Red = Orange + Green and Red lights overlap for 5 time steps
-    if type(agent) is Light:
-        if agent.state < 300:
-            current_color = "Red"
-        elif agent.state < 450:
-            current_color = "Green"
-        else:
-            current_color = "Orange"
-
-    elif type(agent) is Pedestrian:
+    if type(agent) is Pedestrian:
         if agent.dir == "up":
             pedest_color = "Blue"
         else:
@@ -25,7 +16,7 @@ def agent_portrayal(agent):
 
     portrayal = {"Shape": "rect" if type(agent) is Car else "circle",
                  "Color": pedest_color if type(agent) is Pedestrian
-                 else current_color if type(agent) is Light
+                 else agent.color if type(agent) is Light
                  else "Pink",
                  "Filled": "true",
                  "w": 3.7*15 if type(agent) is Car else None,
