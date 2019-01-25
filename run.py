@@ -24,11 +24,12 @@ else:
     results = Data()
 
     for i in range(iterations):
-        print("Iteration" + str(i))
+        printProgressBar(i, iterations)
+
         model = Traffic()
         model.run_model(steps, results)
         simulation_info = model.datacollector.get_model_vars_dataframe()
-    
+
         results.write_info(simulation_info)
-    
+
     print("Terminated normally! Have fun with your data ;-)")

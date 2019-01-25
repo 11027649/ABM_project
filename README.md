@@ -10,7 +10,7 @@ Linda Wouters (11000139)
 
 ## Planning
 ## Basic model:
-### Evironment:
+### Environment:
 * Single grid
 
 Pedestrian:

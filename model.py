@@ -45,7 +45,7 @@ class Traffic(Model):
         Method that places the ligths for the visualization. The lights keep
         the agents from crossing when they are red.
         '''
-        #Simulatneous Strategy
+        # Simultaneous Strategy
 
         # car lights
         self.new_light((44.54, 22.4), 0, 1)
@@ -204,4 +204,3 @@ class Traffic(Model):
 
         # return the data object so we can write all info from the datacollector too
         self.data.write_end_line()
-
