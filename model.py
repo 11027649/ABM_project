@@ -16,7 +16,7 @@ class Traffic(Model):
     The actual model class!
     '''
 
-    def __init__(self, y_max=50, x_max=100):
+    def __init__(self, y_max=20, x_max=100):
 
         super().__init__()
 
@@ -47,16 +47,16 @@ class Traffic(Model):
         #Simulatneous Strategy
 
         # car lights
-        self.new_light((int(0.45 * self.x_max), int(0.6 * self.y_max)), 0, 1)
-        self.new_light((int(0.55 * self.x_max), int(0.4 * self.y_max)), 0, 2)
+        self.new_light((int(0.45 * self.x_max), 16), 0, 1)
+        self.new_light((int(0.55 * self.x_max), 4), 0, 2)
 
         #"Up" lights
-        self.new_light((23 * 2, 30), 250, 6)
-        self.new_light((27 * 2, 24.65), 250, 4) #Median
+        self.new_light((23 * 2, 16), 250, 6)
+        self.new_light((27 * 2, 9.65), 250, 4) #Median
 
         #"Down" Lights
-        self.new_light((23 * 2, 25.35), 250, 5) #Median
-        self.new_light((27 * 2, 20), 250, 3)
+        self.new_light((23 * 2, 10.35), 250, 5) #Median
+        self.new_light((27 * 2, 4), 250, 3)
 
         #Alternating strategy
         """

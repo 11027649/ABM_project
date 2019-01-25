@@ -543,10 +543,10 @@ class Car(Agent):
         self.correct_side = False
         if self.dir == "right":
             self.direction = 1
-            self.own_light = (int(0.45 * model.x_max), int(0.6 * model.y_max))
+            self.own_light = (int(0.45 * model.x_max), 16)
         else:
             self.direction = -1
-            self.own_light = (int(0.55 * model.x_max), int(0.4 * model.y_max))
+            self.own_light = (int(0.55 * model.x_max), 4)
 
     def step(self):
         #Cars go straight for now.
