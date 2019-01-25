@@ -345,7 +345,7 @@ class Pedestrian(Agent):
         p2 = np.array([p0[0] + dx2, p0[1] + dy2])
         # Calculate the vectors
         v1 = p1-p0
-        v2 = p2-p1
+        v2 = p2-p0
 
         # Get the current neighbors
         cone_neigh = []
@@ -373,13 +373,13 @@ class Pedestrian(Agent):
 
         if (angle == 270 or angle == 90):
             for neigh in neighbours:
-                if (neigh.pos[0] > self.pos[0] - offset and neigh.pos[0] < self.pos[0] + offset):
+                if (neigh.pos[0] >= self.pos[0] - offset and neigh.pos[0] <= self.pos[0] + offset):
                     inter_neighbors.append(neigh)
 
         # Checks if the agent is looking left uor right
         elif (angle == 0 or angle == 180):
             for neigh in neighbours:
-                if (neigh.pos[1] > self.pos[1] - offset and neigh.pos[1] < self.pos[1] + offset):
+                if (neigh.pos[1] >= self.pos[1] - offset and neigh.pos[1] <= self.pos[1] + offset):
                     inter_neighbors.append(neigh)
 
                     # The agent is looking at an different non-exeption angle
