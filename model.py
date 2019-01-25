@@ -6,6 +6,7 @@ from mesa.datacollection import DataCollector
 from mesa.time import RandomActivation, RandomActivation
 
 from progressBar import printProgressBar
+
 from data import Data
 from agent import Pedestrian, Car, Light
 
@@ -16,7 +17,7 @@ class Traffic(Model):
     The actual model class!
     '''
 
-    def __init__(self, y_max=20, x_max=100):
+    def __init__(self, y_max=33, x_max=99):
 
         super().__init__()
 
@@ -47,16 +48,16 @@ class Traffic(Model):
         #Simulatneous Strategy
 
         # car lights
-        self.new_light((int(0.45 * self.x_max), 16), 0, 1)
-        self.new_light((int(0.55 * self.x_max), 4), 0, 2)
+        self.new_light((44.54, 22.4), 0, 1)
+        self.new_light((54.46, 10.6), 0, 2)
 
         #"Up" lights
-        self.new_light((23 * 2, 16), 250, 6)
-        self.new_light((27 * 2, 9.65), 250, 4) #Median
+        self.new_light((45.54, 22.4), 250, 6)
+        self.new_light((53.46, 16.2), 250, 4) #Median
 
         #"Down" Lights
-        self.new_light((23 * 2, 10.35), 250, 5) #Median
-        self.new_light((27 * 2, 4), 250, 3)
+        self.new_light((45.54, 16.8), 250, 5) #Median
+        self.new_light((53.46, 10.6), 250, 3)
 
         #Alternating strategy
         """
@@ -153,7 +154,7 @@ class Traffic(Model):
         if random.random() < 0.5:
 
             # if there's place place a new car with probability 0.7
-            pos = (0, self.y_max/2 + 2.5)
+            pos = (0, 19.5)
 
             car_near = False
             for i in range(5):
@@ -165,7 +166,7 @@ class Traffic(Model):
 
         else:
             # if there's place place a new car with probability 0.7
-            pos = (self.x_max - 1, self.y_max/2 - 2.5)
+            pos = (self.x_max - 1, 13.5)
 
             car_near = False
             for i in range(5):
