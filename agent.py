@@ -331,53 +331,19 @@ class Pedestrian(Agent):
 
         # get all surrounding neighbors
         neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
-
-        # Calculate the lower angle and the upper angle
-        lower_angle = self.direction - (vision_angle / 2)
-        upper_angle = self.direction + (vision_angle / 2)
-
-        # Change the current points to an np array for simplicity
-        p0 = np.array(self.pos)
-
-        # Convert to radians for angle calcuation
-        u_rads = math.radians(upper_angle)
-        l_rads = math.radians(lower_angle)
-
-        # calculate the end points of the cones outer vectors
-        dx2 = math.cos(l_rads) * self.R_vision_range
-        dy2 = math.sin(l_rads) * self.R_vision_range
-
-        dx1 = math.cos(u_rads) * self.R_vision_range
-        dy1 = math.sin(u_rads) * self.R_vision_range
-        print("differences by goniometry", dx1, dx2, dy1,dy2)
-
-        p1 = np.array([p0[0] + dx1, p0[1] + dy1])
-        p2 = np.array([p0[0] + dx2, p0[1] + dy2])
-        print("i'm at", self.pos, vision_angle, self.direction, "the end points of my vision range are", p1, p2)
-
-
-        # Calculate the vectors
-        v1 = p1-p0
-        v2 = p2-p1
-        v3 = p0-p2
-
-        # Get the current neighbors
-        cone_neigh = []
-        # Loop to find if neighbor is within the cone
+        rotatedNeighList = []
         for neigh in neighbors:
-            print("own position ", self.pos, vision_angle, " neighbouring position " , neigh.pos)
+            rotatedNeighList.append(self.rotate(neigh.pos[0], self.pos[0]))
+        
+        cone_neigh = []
+        for rotatedNeigh in rotatedNeighList:
+            if self.dir == "up":
+                if rotatedNeigh[1] - self.pos[1] > math.tan(self.vision_angle) * abs(rotatedNeigh[0] - self.pos[0]):
+                    cone_neigh.append(rotatedNeigh)
+            else:
+                if rotatedNeigh[1] - self.pos[1] < -math.tan(self.vision_angle) * abs(rotatedNeigh[0] - self.pos[0]):
+                    cone_neigh.append(rotatedNeigh)
 
-            pn = np.array(neigh.pos)
-            p1 = pn-p0
-            p2 = pn-p1
-            p3 = pn-p2
-
-            # Append object to cone_neigh if its within vision cone
-            print(np.sign(np.cross(v1, p1)))
-            print(np.sign(np.cross(v2, p2)))
-            print(np.sign(np.cross(v3, p3)))
-            if np.sign(np.cross(v1,p1)) == np.sign(np.cross(v2,p2)) == np.sign(np.cross(v3,p3)):
-                cone_neigh.append(neigh)
 
         return cone_neigh
 
@@ -389,28 +355,60 @@ class Pedestrian(Agent):
         Angle: the direction k
         Offset: 1.5*radius_of_pedestrian to both sides of the direction line
         """
+        # Checks if the agent is looking straight up or down
+        neighbours = conal_neighbours
+        inter_neighbors = []
 
-        def rotate(origin, point, angle):
-            """
-            Rotate a point counterclockwise by a given angle around a given origin.
+        if (angle == 270 or angle == 90):
+            for neigh in neighbours:
+                if (neigh.pos[0] >= self.pos[0] - offset and neigh.pos[0] <= self.pos[0] + offset):
+                    inter_neighbors.append(neigh)
 
-            The angle should be given in radians.
-            """
+        # Checks if the agent is looking left uor right
+        elif (angle == 0 or angle == 180):
+            for neigh in neighbours:
+                if (neigh.pos[1] >= self.pos[1] - offset and neigh.pos[1] <= self.pos[1] + offset):
+                    inter_neighbors.append(neigh)
 
-            angle = self.direction - 270
+                    # The agent is looking at an different non-exeption angle
+        else:
+            # calculate the linear formula for the line
+            m = math.tan(math.radians(angle))
+            b = self.pos[1] - (m * self.pos[0])
 
-            if angle < 0:
-                angle += 360
+            # calcuate the y offset of the range of lines
+            b_offset = offset / math.cos(angle)
 
-            ox, oy = origin
-            px, py = point
+            # calcuate the new intersection points based off the offset of the line
+            b_top = b + b_offset
+            b_bot = b - b_offset
 
-            qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
-            qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
-            return qx, qy
+            for neigh in neighbours:
+                if ((neigh.pos[1] - ((m * neigh.pos[0]) + b_top)) <= 0 and (
+                        neigh.pos[1] - ((m * neigh.pos[0]) + b_bot)) >= 0):
+                    inter_neighbors.append(neigh)
+
 
         return inter_neighbors
 
+    def rotate(self, origin, point):
+        """
+        Rotate a point counterclockwise by a given angle around a given origin.
+
+        The angle should be given in radians.
+        """
+
+        angle = self.direction - 270
+
+        if angle < 0:
+            angle += 360
+
+        ox, oy = origin
+        px, py = point
+
+        qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+        qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+        return qx, qy
 
     def closest_ped_on_line(self, neighbours, direction):
         """
