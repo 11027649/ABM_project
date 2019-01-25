@@ -66,7 +66,7 @@ class Pedestrian(Agent):
             # check where the pedestrian is and assign it to the right traffic light
             if self.pos[1] > 22.2 and self.pos[1] < 22.6:
                 return True
-            elif  self.pos[1] < 16.4 and self.pos[1] > 16:
+            elif self.pos[1] < 16.4 and self.pos[1] > 16:
                 return True
         elif self.dir == "down":
             if self.pos[1] < 10.8 and self.pos[1] > 10.4:
