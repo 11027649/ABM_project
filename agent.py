@@ -322,7 +322,7 @@ class Pedestrian(Agent):
 
     def pedestrians_in_field(self, vision_angle, vis_range, neighbours):
         """
-        returns the number of pedestrians in the field
+        returns the pedestrians in the field
         """
         # Calculate the lower angle and the upper angle
         lower_angle = self.direction - (vision_angle / 2)
@@ -350,7 +350,7 @@ class Pedestrian(Agent):
         # Get the current neighbors
         cone_neigh = []
         # Loop to find if neighbor is within the cone
-        for neigh in neighbours:
+        for neigh in neighbours: 
             v3 = np.array(neigh.pos) - p0
             # Append object to cone_neigh if its within vision cone
             if (np.cross(v1, v3) * np.cross(v1, v2) >= 0 and np.cross(v2, v3) * np.cross(v2, v1) >= 0 and type(neigh) == Pedestrian):
@@ -367,38 +367,18 @@ class Pedestrian(Agent):
         Offset: 1.5*radius_of_pedestrian to both sides of the direction line
         """
 
-        # Checks if the agent is looking straight up or down
-        neighbours = conal_neighbours
-        inter_neighbors = []
+        def rotate(origin, point, angle):
+            """
+            Rotate a point counterclockwise by a given angle around a given origin.
 
-        if (angle == 270 or angle == 90):
-            for neigh in neighbours:
-                if (neigh.pos[0] >= self.pos[0] - offset and neigh.pos[0] <= self.pos[0] + offset):
-                    inter_neighbors.append(neigh)
+            The angle should be given in radians.
+            """
+            ox, oy = origin
+            px, py = point
 
-        # Checks if the agent is looking left uor right
-        elif (angle == 0 or angle == 180):
-            for neigh in neighbours:
-                if (neigh.pos[1] >= self.pos[1] - offset and neigh.pos[1] <= self.pos[1] + offset):
-                    inter_neighbors.append(neigh)
-
-                    # The agent is looking at an different non-exeption angle
-        else:
-            # calculate the linear formula for the line
-            m = math.tan(math.radians(angle))
-            b = self.pos[1] - (m * self.pos[0])
-
-            # calcuate the y offset of the range of lines
-            b_offset = offset / math.cos(angle)
-
-            # calcuate the new intersection points based off the offset of the line
-            b_top = b + b_offset
-            b_bot = b - b_offset
-
-            for neigh in neighbours:
-                if ((neigh.pos[1] - ((m * neigh.pos[0]) + b_top)) <= 0 and (
-                        neigh.pos[1] - ((m * neigh.pos[0]) + b_bot)) >= 0):
-                    inter_neighbors.append(neigh)
+            qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
+            qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+            return qx, qy
 
         return inter_neighbors
 
@@ -502,7 +482,6 @@ class Pedestrian(Agent):
                     return False
 
         return True
-
 
 
     # this function is in both pedestrian and agent -> more efficient way?

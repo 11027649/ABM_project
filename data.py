@@ -47,6 +47,18 @@ class Data():
 
             datawriter.writerow([agent_type, agent_id, time_spent])
 
+
+    def write_end_line(self):
+        with open(self.filepath_spent_time, 'a', newline='') as csvfile:
+            datawriter = csv.writer(csvfile)
+
+            datawriter.writerow(["# Next iteration"])
+
+
     def write_info(self, datacollector_data):
         # datacollector_data is a pandas dataframe so\
         datacollector_data.to_csv(path_or_buf=self.filepath_info, mode='a', header=False)
+        
+        with open(self.filepath_info, 'a', newline='') as datafile:
+            datawriter = csv.writer(datafile)
+            datawriter.writerow(["# Next iteration"])

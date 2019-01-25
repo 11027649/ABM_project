@@ -4,6 +4,7 @@ from mesa.visualization.modules import ChartModule
 from SimpleContinuousModule import SimpleCanvas
 from model import Traffic
 from agent import Car, Pedestrian, Light
+from data import Data
 
 # You can change this to whatever you want. Make sure to make the different types
 # of agents distinguishable

@@ -108,10 +108,10 @@ class Traffic(Model):
         '''
         Method that removes an agent from the grid and the correct scheduler.
         '''
-        # TODO: decomment
-        # if self.data:
-        #     # save level of service by saving spended time in list
-        #     self.data.write_row_hist(type(agent).__name__, agent.unique_id, agent.time)
+
+        if self.data:
+            # save level of service by saving spended time in list
+            self.data.write_row_hist(type(agent).__name__, agent.unique_id, agent.time)
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
@@ -198,15 +198,15 @@ class Traffic(Model):
         # Save the statistics
         self.datacollector.collect(self)
 
-    def run_model(self, step_count=1):
+    def run_model(self, step_count, data):
         '''
         Method that runs the model for a specific amount of steps.
         '''
-        self.data = Data()
+        self.data = data
 
         for i in range(step_count):
             self.step()
 
         # return the data object so we can write all info from the datacollector too
-        # TODO: it might be nicer to also do the histogram stuff in the datacollector
-        return self.data
+        self.data.write_end_line()
+
