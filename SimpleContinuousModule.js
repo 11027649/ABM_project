@@ -69,21 +69,21 @@ var SimpleContinuousModule = function(canvas_width, canvas_height) {
 
 		//  draw the road (This color is Asphalt grey :-P)
 		context.fillStyle = "#282B2A";
-		context.fillRect(0, 67.5, canvas_width, 165)
+		context.fillRect(0, 166.675, canvas_width, 166.65)
 		context.stroke()
 
 		// draw the middle part of the road
 		context.fillStyle = "#2CB037";
-		context.fillRect(0, 142.5, canvas_width, 15)
+		context.fillRect(0, 242.425, canvas_width, 15.15)
 		context.stroke()
 
 		// draw zebra crossings
-		ys_zebra = [75, 93, 111, 129, 163, 182, 201, 220]
+		ys_zebra = [175, 192, 209, 226, 266, 283, 300, 317]
 		for (var i in ys_zebra) {
 			var p = ys_zebra[i];
-			var zebra_width = 60
+			var zebra_width = 60.6
 			context.fillStyle = "White";
-			context.fillRect((canvas_width/2) - (zebra_width/2),p,zebra_width,7)
+			context.fillRect((canvas_width/2) - (zebra_width/2),p,zebra_width,7.6)
 			context.stroke()
 		};
 

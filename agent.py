@@ -47,9 +47,13 @@ class Pedestrian(Agent):
         if self.dir == "up":
             self.direction = 270
             self.target_point = (random.uniform(24*2,26*2), 0)
+            self.own_light1 = (45.54, 22.4)
+            self.own_light2 = (45.54, 16.8)
         elif self.dir == "down":
             self.direction = 90
             self.target_point = (random.uniform(24*2,26*2), 50)
+            self.own_light1 = (53.46, 10.6)
+            self.own_light2 = (53.46, 16.2) #4
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
@@ -60,14 +64,14 @@ class Pedestrian(Agent):
     def on_road_side(self):
         if self.dir == "up":
             # check where the pedestrian is and assign it to the right traffic light
-            if self.pos[1] > 29.7 and self.pos[1] < 30.2:
+            if self.pos[1] > 22.2 and self.pos[1] < 22.6:
                 return True
-            elif self.pos[1] > 24.65 and self.pos[1] < 25:
+            elif  self.pos[1] < 16.4 and self.pos[1] > 16:
                 return True
         elif self.dir == "down":
-            if self.pos[1] > 19.8 and self.pos[1] < 20.3:
+            if self.pos[1] < 10.8 and self.pos[1] > 10.4:
                 return True
-            elif self.pos[1] > 25 and self.pos[1] < 25.35:
+            elif self.pos[1] < 17 and self.pos[1] > 16.6:
                 return True
         else:
             return False
@@ -474,27 +478,27 @@ class Pedestrian(Agent):
         # TODO: Hardcoded coordinates (use actual light attribute?)
         correct_side = True
 
-        if self.dir == "up" and not self.pos[1] < 24.65:
+        if self.dir == "up" and not self.pos[1] < 16:
             # check where the pedestrian is and assign it to the right traffic light
-            if self.pos[1] > 29:
-                own_light = 4
+            if self.pos[1] > 21:
+                own_light = self.own_light1 
                 correct_side = False
-            elif self.pos[1] >= 24.65 and self.pos[1] <= 25.35:
-                own_light = 3
+            elif self.pos[1] >= 16 and self.pos[1] <= 17:
+                own_light = self.own_light2
                 correct_side = False
-        elif self.dir == "down" and not self.pos[1] > 25.35:
-            if self.pos[1] < 21:
-                own_light = 5
+        elif self.dir == "down" and not self.pos[1] > 17:
+            if self.pos[1] < 11:
+                own_light = self.own_light1
                 correct_side = False
-            elif self.pos[1] >= 25 and self.pos[1] <= 25.35:
-                own_light = 6
+            elif self.pos[1] >= 16 and self.pos[1] <= 17:
+                own_light = self.own_light2
                 correct_side = False
 
         if not correct_side:
             # iterate over all the agents to find the correct light
-            for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 9):
+            for i in self.model.space.get_neighbors(own_light, include_center = True, radius = 0):
                 # if it's your own light, and it's not green
-                if (isinstance(i,Light) and not i.color == "Green" and i.light_id == own_light):
+                if not i.color == "Green":
                     return False
 
         return True
@@ -543,10 +547,10 @@ class Car(Agent):
         self.correct_side = False
         if self.dir == "right":
             self.direction = 1
-            self.own_light = (int(0.45 * model.x_max), 16)
+            self.own_light = (44.54, 22.4)
         else:
             self.direction = -1
-            self.own_light = (int(0.55 * model.x_max), 4)
+            self.own_light = (54.46, 10.6)
 
     def step(self):
         #Cars go straight for now.
