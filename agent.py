@@ -79,7 +79,7 @@ class Pedestrian(Agent):
         # Check traffic light and decide to move or not
         # Returns True if light is red
         # Move if not red (TODO: decide what to do with orange)
-        if self.traffic_green() and not self.on_road_side():
+        if self.traffic_green() or not self.on_road_side():
             # TODO: decide what their choice is if on midsection or on middle of the road. Move to the spot where there is space?
 
             # Get list of pedestrians in the vision field
@@ -486,7 +486,7 @@ class Pedestrian(Agent):
             if self.pos[1] < 21:
                 own_light = 5
                 correct_side = False
-            elif self.pos[1] >= 24.65 and self.pos[1] <= 25.35:
+            elif self.pos[1] >= 25 and self.pos[1] <= 25.35:
                 own_light = 6
                 correct_side = False
 
@@ -494,7 +494,7 @@ class Pedestrian(Agent):
             # iterate over all the agents to find the correct light
             for i in self.model.space.get_neighbors(self.pos, include_center = False, radius = 9):
                 # if it's your own light, and it's not green
-                if (isinstance(i,Light) and (i.state < 300 or i.state > 450) and i.light_id == own_light):
+                if (isinstance(i,Light) and not i.color == "Green" and i.light_id == own_light):
                     return False
 
         return True
@@ -556,8 +556,7 @@ class Car(Agent):
             for i in self.model.space.get_neighbors(self.own_light, include_center = True, radius = 0):
 
                 # if the light is orange and there is time to slow down regularly
-                current_state = i.state
-                if current_state > 450:
+                if i.color == "Orange":
                     if self.dir == "right":
                         if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
                             self.speed_change(-0.8/40)
@@ -568,7 +567,7 @@ class Car(Agent):
 
 
                 # if the light is red, make sure to stop, by slowing down twice the normal rate
-                elif current_state < 300:
+                elif i.color == "Red":
                     if self.dir == "right":
                         if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
                             self.speed_change(-0.8/20)
@@ -591,7 +590,7 @@ class Car(Agent):
             self.speed_change(0.8/40)
 
         elif self.speed < self.max_speed and self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
-            if current_state > 300 and current_state < 450:
+            if i.color == "Green":
                 self.speed_change(0.8/40)
 
         # elif self.speed < self.max_speed and self.correct_side == True:

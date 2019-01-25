@@ -74,7 +74,7 @@ class Traffic(Model):
         self.new_light((27 * 2, 20), 400, 3)
 
         """
-        
+
 
 
     def new_light(self, pos, state, light_id):
