@@ -212,8 +212,8 @@ class Pedestrian(Agent):
 
         #Finds the pedestrians in the next step length
         if len(peds_in_180)>0:
-            cpil = self.closest_ped_on_line(peds_in_180, direction)[1]
-            theta_vj = self.theta_calc(cpil,direction)
+            # cpil = self.closest_ped_on_line(peds_in_180, direction)[1]
+            theta_vj = self.theta_calc(peds_in_180,direction)
         else:
             theta_vj = 0
 
