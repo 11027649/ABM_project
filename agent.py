@@ -193,7 +193,7 @@ class Pedestrian(Agent):
             # Get closest pedestrian: min_distance, min_pedestrian.pos
             # TODO: check if negative
             # TODO: WHY DOES THIS NOT WORK? DDDDDD:::::
-
+            print('het werkt nog steeds')
             # print('peds', peds_in_dir)
             closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2*self.radius
             # If no pedestrians in view, closest_ped distance is set at vision range
@@ -406,32 +406,57 @@ class Pedestrian(Agent):
         """
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
-        for neighbours in neighboursList:
+        # Find the terms for the equation for the line that will be passing through the current point in direction
+        a = math.tan(math.radians(direction))
+        b = self.pos[1]
 
-            # Find the terms for the equation for the line that will be passing through the current point in direction
-            m = math.tan(math.radians(direction))
-            b = self.pos[1] - (m*self.pos[0])
-            # Calculate the first distance from the line (perpendicular distance and assign the min pedestrian
-            min_distance = abs((m*neighbours[0].pos[0])-neighbours[0].pos[1]+b)/math.sqrt((m**2) + 1)
-            min_pedestrian = neighbours[0]
-            # If there are more, check the rest
-            if len(neighbours)>1:
-                for i in range(1, len(neighbours)):
-                    # calculate the distance if the current neighbour
-                    cur_distance = abs((m * neighbours[i].pos[0]) - neighbours[i].pos[1] + b) / math.sqrt((m ** 2) + 1)
-                    # Checks distance against that stored
-                    if cur_distance < min_distance:
-                        min_pedestrian = neighbours[i]
-                        min_distance = cur_distance
-                    # if equal checks to see which is closer to the current position.
-                    elif cur_distance == min_distance:
-                        if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbours[i].pos):
-                            min_pedestrian = neighbours[i]
-                            min_distance = cur_distance
+        # y = a * (x - self.pos[0]) + b
+        min_distance = math.inf
+        for neighbour in neighboursList:
 
+            # calculate the distance of the current neighbour https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+            cur_distance = abs(a * neighbour.pos[0] - neighbour.pos[1] + b)/math.sqrt(a**2 + 1)
+
+            # Checks distance against that stored
+            if cur_distance < min_distance:
+                if self.rotatePedestrian(self.pos, neighbour.pos, direction)[0] > 0:
+                    side = 'right'
+                else:
+                    side = 'left'
+                min_pedestrian = neighbour
+                min_distance = cur_distance
+
+            # if equal checks to see which is closer to the current position.
+            elif cur_distance == min_distance:
+                if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbour.pos):
+                    if self.rotatePedestrian(self.pos, neighbour.pos, direction)[0] > 0:
+                        side = 'right'
+                    else:
+                        side = 'left' 
+                    min_pedestrian = neighbour
+                    min_distance = cur_distance
+        print(side)
                 # Returns the min distance and the corresponding pedestrian
-        return min_distance, min_pedestrian
+        return min_distance, min_pedestrian, side
 
+    # can prob be in 1 function
+    def rotatePedestrian(self, origin, point, direction):
+        """
+        Rotate a point counterclockwise by a given angle around a given origin.
+
+        The angle should be given in radians.
+        """
+
+        angle = direction - 270
+        if angle < 0:
+            angle += 360
+        angle_rad = math.radians(angle)
+        ox, oy = origin
+        px, py = point
+
+        qx = ox + math.cos(angle_rad) * (px - ox) - math.sin(angle_rad) * (py - oy)
+        qy = oy + math.sin(angle_rad) * (px - ox) + math.cos(angle_rad) * (py - oy)
+        return (qx, qy)
 
     def closest_pedestrian(self, inter_neigh, direction):
         """
