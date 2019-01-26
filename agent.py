@@ -417,20 +417,12 @@ class Pedestrian(Agent):
         qy = oy + math.sin(angle_rad) * (px - ox) + math.cos(angle_rad) * (py - oy)
         return (qx, qy, i)
 
-    def closest_ped_on_line(self, neighbours, direction):
+    def closest_ped_on_line(self, neighboursList, direction):
         """
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
-        print(neighbours)
+        for neighbours in neighboursList:
 
-        # Find the terms for the equation for the line that will be passing through the current point in direction
-        if type(neighbours) == Pedestrian:
-            m = math.tan(math.radians(direction))
-            b = self.pos[1] - (m*self.pos[0])
-            # Calculate the first distance from the line (perpendicular distance and assign the min pedestrian
-            min_distance = abs((m*neighbours.pos[0])-neighbours.pos[1]+b)/math.sqrt((m**2) + 1)
-            min_pedestrian = neighbours
-        else:
             m = math.tan(math.radians(direction))
             b = self.pos[1] - (m*self.pos[0])
             # Calculate the first distance from the line (perpendicular distance and assign the min pedestrian
@@ -451,7 +443,7 @@ class Pedestrian(Agent):
                             min_pedestrian = neighbours[i]
                             min_distance = cur_distance
 
-            # Returns the min distance and the corresponding pedestrian
+                # Returns the min distance and the corresponding pedestrian
         return min_distance, min_pedestrian
 
 
