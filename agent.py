@@ -104,6 +104,10 @@ class Pedestrian(Agent):
                     (self.dir == "down" and self.direction%360 >180)):
                     # Let it be removed by the step function in model.py
                     self.remove = True
+            
+            neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.radius)
+            if len(neighbors) > 0:
+                raise ValueError("COLLISION")
 
             # Finalize this step
             self.time += 1
@@ -187,7 +191,9 @@ class Pedestrian(Agent):
 
         # List of pedestrians in that direction
         peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, .7)
-
+        peds_in_dir = peds_in_180
+        print(len(peds_in_180))
+        print(len(peds_in_dir))
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # Get closest pedestrian: min_distance, min_pedestrian.pos
@@ -199,19 +205,20 @@ class Pedestrian(Agent):
             # If no pedestrians in view, closest_ped distance is set at vision range
         else:
             closest_ped = self.R_vision_range-self.radius
-
+        print(closest_ped)
         # Distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
         closest_wall = self.dist_wall(direction)-self.radius
 
         # Determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
         next_pos = self.new_pos(chosen_velocity, direction)
-
+        print(chosen_velocity, self.des_speed, closest_ped, closest_wall)
+        print(self.pos, next_pos)
 
         #Finds the pedestrians in the next step length
         if len(peds_in_180)>0:
-            # cpil = self.closest_ped_on_line(peds_in_180, direction)[1]
-            theta_vj = self.theta_calc(peds_in_180,direction)
+            cpil = self.closest_ped_on_line(peds_in_180, direction)[1]
+            theta_vj = self.theta_calc(cpil,direction)
         else:
             theta_vj = 0
 
@@ -477,10 +484,10 @@ class Pedestrian(Agent):
                 c = cur_distance
                 min_neigh = inter_neigh[i]
 
-        b = self.closest_ped_on_line([min_neigh], direction)[0]
+        # b = self.closest_ped_on_line([min_neigh], direction)[0]
 
-        min_distance = math.sqrt(c**2 + b**2)
-
+        # min_distance = math.sqrt(c**2 + b**2)
+        min_distance = c
         return min_distance
 
     def ped_velocity_interaction(self, neighbours):
