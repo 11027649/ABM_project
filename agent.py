@@ -119,7 +119,6 @@ class Pedestrian(Agent):
             # cone_area_170 = 13.3517
             # agent_area: pi*(0.4**2) = 0.5027
             # dens = agent_area/cone_area
-            # TODO: check if this is correct
             dens = 0.0376
         else:
             raise ValueError('Code only works for 170 degrees vision range for now')
@@ -176,7 +175,7 @@ class Pedestrian(Agent):
         theta_N = self.vision_angle/(self.N-1)
         pos_directions = []
         for i in range(self.N):
-            pos_directions.append((lower_angle+i*theta_N)%360)
+            pos_directions.append(lower_angle+i*theta_N)
 
         return pos_directions
 
@@ -194,10 +193,11 @@ class Pedestrian(Agent):
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # Get closest pedestrian: min_distance, min_pedestrian.pos
+            # TODO: check if negative
+            # TODO: WHY DOES THIS NOT WORK? DDDDDD:::::
+
+            # print('peds', peds_in_dir)
             closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2*self.radius
-            # Make sure closest_ped is not negative
-            if closest_ped < 0:
-                closest_ped = 0
             # If no pedestrians in view, closest_ped distance is set at vision range
         else:
             closest_ped = self.R_vision_range-self.radius
@@ -256,21 +256,20 @@ class Pedestrian(Agent):
                 self.Ik_w * Ik, next_pos
 
 
-    # def traject_angle(self, direction, peds_in_180, next_pos):
-    #     """
-    #     Returns the traject angle
-    #     """
-    #     # Get the visible neighbours (180)
-    #     # Get the end of the trajectory from the next_position
-    #     # Get the closest neighbour in this trajectory from this pedestrian to the next position of this pedestrian
-    #     # Should return False if there is no neighbour in view
-    #     closest_neigh = self.closest_ped_on_line(peds_in_180, direction)[1]
-    #     if closest_neigh is False:
-    #         return 0
-    #     else:
-    #         # Return the angle of the closest neighbours direction and the current pedestrians direction
-    #         return abs(closest_neigh.direction - direction)
-
+    def traject_angle(self, direction, peds_in_180, next_pos):
+        """
+        Returns the traject angle
+        """
+        # Get the visible neighbours (180)
+        # Get the end of the trajectory from the next_position
+        # Get the closest neighbour in this trajectory from this pedestrian to the next position of this pedestrian
+        # Should return False if there is no neighbour in view
+        closest_neigh = self.closest_ped_on_line(peds_in_180, direction)[1]
+        if closest_neigh is False:
+            return 0
+        else:
+            # Return the angle of the closest neighbours direction and the current pedestrians direction
+            return abs(closest_neigh.direction - direction)
 
     def theta_calc(self, ped, angle):
         """returns the angle given the pedestrians location and the directions"""
@@ -283,7 +282,6 @@ class Pedestrian(Agent):
             return abs(angle - ped.direction)
         else:
             return 0
-
 
     def target_projection(self):
         """
@@ -336,8 +334,8 @@ class Pedestrian(Agent):
         i = -1
         # rotate all the neigbours facing either up or down
         for neigh in neighbors:
-            if (type(neigh) == Pedestrian):
-                i = i + 1
+            i = i + 1
+            if isinstance(neigh, Pedestrian):
                 rotatedNeighList.append(self.rotate(self.pos, neigh.pos, i))
         
         cone_neigh = []
