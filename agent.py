@@ -334,8 +334,9 @@ class Pedestrian(Agent):
         i = -1
         # rotate all the neigbours facing either up or down
         for neigh in neighbors:
-            i = i + 1
-            rotatedNeighList.append(self.rotate(self.pos, neigh.pos, i))
+            if (type(neigh) == Pedestrian):
+                i = i + 1
+                rotatedNeighList.append(self.rotate(self.pos, neigh.pos, i))
         
         cone_neigh = []
 
@@ -378,7 +379,7 @@ class Pedestrian(Agent):
         else:
             # calculate the linear formula for the line
             m = math.tan(math.radians(angle))
-            b = self.pos[1] - (m * self.pos[0])
+            b = self.pos[1] + (m * self.pos[0])
 
             # calcuate the y offset of the range of lines
             b_offset = offset / math.cos(math.radians(angle))
@@ -391,7 +392,6 @@ class Pedestrian(Agent):
                 if ((neigh.pos[1] - ((m * neigh.pos[0]) + b_top)) <= 0 and (
                         neigh.pos[1] - ((m * neigh.pos[0]) + b_bot)) >= 0):
                     inter_neighbors.append(neigh)
-
 
         return inter_neighbors
 
