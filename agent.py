@@ -88,7 +88,6 @@ class Pedestrian(Agent):
 
             # Get list of pedestrians in the vision field
             peds_in_vision = self.pedestrians_in_field(self.vision_angle)
-            # print("first things first", len(peds_in_vision))
 
             # Set desired_speed
             self.des_speed = self.desired_speed(len(peds_in_vision))
@@ -145,7 +144,7 @@ class Pedestrian(Agent):
         """
 
         # For getting the neighbours in the front 180 degrees within vision range; for calc_utility
-        peds_in_180 = self.pedestrians_in_field(178)
+        peds_in_180 = self.pedestrians_in_field(180)
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
@@ -333,22 +332,23 @@ class Pedestrian(Agent):
         neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
         rotatedNeighList = []
         i = -1
+        # rotate all the neigbours facing either up or down
         for neigh in neighbors:
             i = i + 1
             rotatedNeighList.append(self.rotate(self.pos, neigh.pos, i))
         
         cone_neigh = []
+
+        # calculate if the pedestrians are within the 'viewing triangle'
         for rotatedNeigh in rotatedNeighList:
             if self.dir == "down":
-                if rotatedNeigh[1] - self.pos[1] > math.tan(90 - self.vision_angle / 2) * abs(rotatedNeigh[0] - self.pos[0]):
-                    cone_neigh.append(neighbors[rotatedNeigh[2]])
-            else:
-                if rotatedNeigh[1] - self.pos[1] < -math.tan(90 - self.vision_angle / 2) * abs(rotatedNeigh[0] - self.pos[0]):
+                if rotatedNeigh[1] - self.pos[1] > math.tan(math.radians(90 - (vision_angle / 2))) * abs(rotatedNeigh[0] - self.pos[0]):
                     cone_neigh.append(neighbors[rotatedNeigh[2]])
 
-        print('AAAAa')
-        print(self.unique_id)
-        print("dezeeee", cone_neigh)
+            else:
+                if rotatedNeigh[1] - self.pos[1] < -math.tan(math.radians(90 - (vision_angle / 2))) * abs(rotatedNeigh[0] - self.pos[0]):
+                    cone_neigh.append(neighbors[rotatedNeigh[2]])
+
         return cone_neigh
 
 
@@ -381,7 +381,7 @@ class Pedestrian(Agent):
             b = self.pos[1] - (m * self.pos[0])
 
             # calcuate the y offset of the range of lines
-            b_offset = offset / math.cos(angle)
+            b_offset = offset / math.cos(math.radians(angle))
 
             # calcuate the new intersection points based off the offset of the line
             b_top = b + b_offset
@@ -401,8 +401,10 @@ class Pedestrian(Agent):
 
         The angle should be given in radians.
         """
-
-        angle = self.direction - 270
+        if self.dir == 'up':
+            angle = self.direction - 270
+        else:
+            angle = self.direction - 90
 
         if angle < 0:
             angle += 360
