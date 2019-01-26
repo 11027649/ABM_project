@@ -209,7 +209,6 @@ class Pedestrian(Agent):
         print()
         print("pedS_in_180", len(peds_in_180))
         peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, 4*self.radius)
-        print(4*self.radius)
 
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
