@@ -412,7 +412,7 @@ class Pedestrian(Agent):
 
         intersecting = []
 
-        # tODO: can this be removed? Steven thinks yes
+        # tODO: change these accordingly
         # # checks if the agent is looking straight up or down
         # if (angle == 270 or angle == 90):
         #     for neigh in conal_neighbours:
