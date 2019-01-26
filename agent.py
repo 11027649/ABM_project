@@ -182,7 +182,7 @@ class Pedestrian(Agent):
 
     def calc_utility(self, direction, peds_in_180):
         """
-        Calculate the utility for different directions.
+        Calculate the utility for one out of possible directions.
         """
 
         # List of pedestrians in that direction
@@ -216,8 +216,6 @@ class Pedestrian(Agent):
             theta_vj = 0
 
 
-        #print("The angle is", theta_vj)
-
         # If the target point is not within vision:
         if self.model.space.get_distance(self.pos, self.target_point) > self.R_vision_range:
             # Calculate distance from possible next_pos to target point projection on vision field
@@ -236,23 +234,10 @@ class Pedestrian(Agent):
         Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
-        # print('utility', Ek -self.Ok_w_7 * (1-Ok) - \
-        #     self.Pk_w_7 * (1-Pk) - self.Ak_w_7 * (1-Ak) - \
-        #     self.Ik_w * (1-Ik), self.Ek_w * Ek + self.Ok_w * Ok + \
-        #         self.Pk_w * Pk + self.Ak_w * Ak + \
-        #         self.Ik_w * Ik)
 
-        # Equation 7
-        # return -self.Ok_w_7 * (1-Ok) - \
-        # self.Pk_w_7 * (1-Pk) - self.Ak_w_7 * (1-Ak) - \
-        # self.Ik_w * (1-Ik), next_pos
-
-        # # Using equation 1 for now:
-        # TODO: Do we want to change to equation 7? I don't quite understand 7..
         return self.Ek_w * Ek + self.Ok_w * Ok + \
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
-
 
     def traject_angle(self, direction, peds_in_180, next_pos):
         """
@@ -423,6 +408,7 @@ class Pedestrian(Agent):
         """
         for neighbours in neighboursList:
 
+            # Find the terms for the equation for the line that will be passing through the current point in direction
             m = math.tan(math.radians(direction))
             b = self.pos[1] - (m*self.pos[0])
             # Calculate the first distance from the line (perpendicular distance and assign the min pedestrian
