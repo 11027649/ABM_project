@@ -109,9 +109,9 @@ class Traffic(Model):
         Method that removes an agent from the grid and the correct scheduler.
         '''
 
-        if self.data:
-            # save level of service by saving spended time in list
-            self.data.write_row_hist(type(agent).__name__, agent.unique_id, agent.time)
+        # if self.data:
+        #     # save level of service by saving spended time in list
+        #     self.data.write_row_hist(type(agent).__name__, agent.unique_id, agent.time)
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
