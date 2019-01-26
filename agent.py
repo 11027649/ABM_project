@@ -26,7 +26,7 @@ class Pedestrian(Agent):
 
         # parameters
         self.N = 16 # Should be >= 2!
-        self.R_vision_range = 2 # Meters
+        self.R_vision_range = 3 # Meters
         self.des_speed = None # Meters per time step
         # Weights (for equation 1)
         # What is We' for equation 7??
@@ -53,7 +53,7 @@ class Pedestrian(Agent):
             self.direction = 90
             self.target_point = (random.uniform(24*2,26*2), 50)
             self.own_light1 = (53.46, 10.6)
-            self.own_light2 = (53.46, 16.2) #4
+            self.own_light2 = (53.46, 16.2)
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
@@ -84,22 +84,16 @@ class Pedestrian(Agent):
         # Returns True if light is red
         # Move if not red (TODO: decide what to do with orange)
         if self.traffic_green() or not self.on_road_side():
-        # if self.traffic_green():
-
             # TODO: decide what their choice is if on midsection or on middle of the road. Move to the spot where there is space?
 
             # Get list of pedestrians in the vision field
-            peds_in_vision = self.pedestrians_in_field(self.vision_angle, self.R_vision_range, self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range))
+            peds_in_vision = self.pedestrians_in_field(self.vision_angle)
+
             # Set desired_speed
             self.des_speed = self.desired_speed(len(peds_in_vision))
 
             # Get new position and update direction
             next_pos, self.direction = self.choose_direction()
-
-            # TODO: de-comment this if we're running this step function
-            # Move to new position
-            # self.model.space.move_agent(self, next_pos)
-            peds_in_180 = self.pedestrians_in_field(180, self.R_vision_range, self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range))
 
             # Try to move agent
             try:
@@ -111,16 +105,6 @@ class Pedestrian(Agent):
                     # Let it be removed by the step function in model.py
                     self.remove = True
 
-
-            # DEBUG: lets see if there is someone nearby
-            neighs = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.radius)
-            if len(neighs) >0:
-                for neigh in neighs:
-                    print('peds 180', peds_in_180)
-                    print(neigh.pos)
-                raise ValueError("COLLISSION")
-            # There is definitely a collision
-
             # Finalize this step
             self.time += 1
 
@@ -129,15 +113,14 @@ class Pedestrian(Agent):
         """
         Returns desired speed, using equation 8
         Takes as input the number of agents in vision field
-        # TODO: discuss if we want this
         """
         # TODO: Only works for vision angle of 170 degrees, is that okay?
         if self.vision_angle == 170:
             # cone_area_170 = 13.3517
-            # TODO: Is .4 used as a radius here? Check if it still corresponds to the real radius
             # agent_area: pi*(0.4**2) = 0.5027
             # dens = agent_area/cone_area
-            dens = 0.00941
+            # TODO: check if this is correct
+            dens = 0.0376
         else:
             raise ValueError('Code only works for 170 degrees vision range for now')
 
@@ -156,27 +139,26 @@ class Pedestrian(Agent):
         else:
             return 0
 
-
     def choose_direction(self):
         """
         Picks the direction with the highest utility
         """
 
         # For getting the neighbours in the front 180 degrees within vision range; for calc_utility
-        peds_in_180 = self.pedestrians_in_field(180, self.R_vision_range, self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range))
-        # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
+        peds_in_180 = self.pedestrians_in_field(180)
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
         pos_directions = self.possible_directions()
-        for direction in pos_directions:
-            # Calculate utility
+
+        for direction in pos_directions: #TODO I think this is where something may be going wrong
+            # Calculate utility for every possible direction
             util, next_pos = self.calc_utility(direction, peds_in_180)
+
             # Check if this utility is higher than the previous
             if util > max_util[0]:
                 max_util = [util, next_pos, direction]
-        print('maximum', max_util)
-            
+
         # Return next position and the direction
         return max_util[1], max_util[2]
 
@@ -201,49 +183,31 @@ class Pedestrian(Agent):
 
     def calc_utility(self, direction, peds_in_180):
         """
-        Calculate the utility (equation 1 for now. Whats omega_e' in eq. 7?)
+        Calculate the utility for different directions.
         """
 
         # List of pedestrians in that direction
-        # TODO: Check the offset
-        print()
-        print("pedS_in_180", len(peds_in_180))
-        peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, 4*self.radius)
+        # print("Pedestrians 180", self.unique_id, direction, len(peds_in_180))
+        peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, .7)
+        # print("Pedestrians in direction", self.unique_id, direction, len(peds_in_dir))
 
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # Get closest pedestrian: min_distance, min_pedestrian.pos
-            # TODO: check if negative
-            # TODO: WHY DOES THIS NOT WORK? DDDDDD:::::
-            closest_ped_res = self.closest_pedestrian(peds_in_dir, direction)
-            closest_ped = closest_ped_res[0] - 3*self.radius
+            closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2*self.radius
+            # Make sure closest_ped is not negative
             if closest_ped < 0:
                 closest_ped = 0
-            # cpil = self.closest_ped_on_line(peds_in_dir, direction)[1]
-            # theta_vj = abs(self.direction - cpil.direction)
-            print("closest_pos", closest_ped_res[1].pos)
             # If no pedestrians in view, closest_ped distance is set at vision range
         else:
-            print("no person in view")
             closest_ped = self.R_vision_range-self.radius
 
         # Distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
         closest_wall = self.dist_wall(direction)-self.radius
 
         # Determine possible new position
-        chosen_distance = min(self.des_speed, closest_ped, closest_wall)
-        next_pos = self.new_pos(chosen_distance, direction)
-        # # TODO DEBUG
-        print('direction', direction)
-        print('selfpos', self.pos, 'next_pos', next_pos, 'chosen speed', chosen_distance, 'possible speeds', self.des_speed, closest_ped, closest_wall)
-        dist_new_old = math.sqrt((self.pos[0]-next_pos[0])**2+(self.pos[1]-next_pos[1])**2)
-        print('real step', dist_new_old)
-
-        # if dist_new_old > chosen_distance+.00001:
-        #     raise ValueError('peop')
-
-        # if closest_ped < self.des_speed:
-        #     raise ValueError("hier??")
+        chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
+        next_pos = self.new_pos(chosen_velocity, direction)
 
 
         #Finds the pedestrians in the next step length
@@ -266,9 +230,9 @@ class Pedestrian(Agent):
             target_dist = self.model.space.get_distance(next_pos, self.target_point)
 
         # Calculate factors
-        Ek = 1 - (target_dist - self.R_vision_range + self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
+        Ek = 1 - (target_dist - self.R_vision_range - self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
         Ok =  closest_wall/self.R_vision_range # distance to closest obstacle/vision range
-        Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range TODO: -radius?
+        Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range
         # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
 
         Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
@@ -292,20 +256,21 @@ class Pedestrian(Agent):
                 self.Ik_w * Ik, next_pos
 
 
-    def traject_angle(self, direction, peds_in_180, next_pos):
-        """
-        Returns the traject angle
-        """
-        # Get the visible neighbours (180)
-        # Get the end of the trajectory from the next_position
-        # Get the closest neighbour to this trajectory from this pedestrian to the next position of this pedestrian
-        # Should return False if there is no neighbour in view
-        closest_neigh = self.closest_ped_on_line(peds_in_180, direction)[1]
-        if closest_neigh is False:
-            return 0
-        else:
-            # Return the angle of the closest neighbours direction and the current pedestrians direction
-            return abs(closest_neigh.direction - direction)
+    # def traject_angle(self, direction, peds_in_180, next_pos):
+    #     """
+    #     Returns the traject angle
+    #     """
+    #     # Get the visible neighbours (180)
+    #     # Get the end of the trajectory from the next_position
+    #     # Get the closest neighbour in this trajectory from this pedestrian to the next position of this pedestrian
+    #     # Should return False if there is no neighbour in view
+    #     closest_neigh = self.closest_ped_on_line(peds_in_180, direction)[1]
+    #     if closest_neigh is False:
+    #         return 0
+    #     else:
+    #         # Return the angle of the closest neighbours direction and the current pedestrians direction
+    #         return abs(closest_neigh.direction - direction)
+
 
     def theta_calc(self, ped, angle):
         """returns the angle given the pedestrians location and the directions"""
@@ -318,6 +283,7 @@ class Pedestrian(Agent):
             return abs(angle - ped.direction)
         else:
             return 0
+
 
     def target_projection(self):
         """
@@ -350,60 +316,52 @@ class Pedestrian(Agent):
             return self.R_vision_range
 
 
-    def new_pos(self, chosen_distance, theta_chosen):
+    def new_pos(self, chosen_velocity, theta_chosen):
         """
         Returns new position using self.pos, the velocity and angle
         """
-        return (self.pos[0] + chosen_distance*np.cos(math.radians(theta_chosen)), self.pos[1]+chosen_distance*np.sin(math.radians(theta_chosen)))
+        return (self.pos[0] + chosen_velocity*np.cos(math.radians(theta_chosen)), self.pos[1]+chosen_velocity*np.sin(math.radians(theta_chosen)))
 
 
-    def pedestrians_in_field(self, vision_angle, vis_range, neighbours):
+    def pedestrians_in_field(self, vision_angle):
         """
-        returns the number of pedestrians in the field
+            Returns the pedestrians that are in the cone that the pedestrian can
+            actually see in a certain vision_angle (which usually is 170, but
+            can also be a bit heigher to check the most outer parts.).
         """
-        # Calculate the lower angle and the upper angle
-        lower_angle = self.direction - (vision_angle / 2)
-        upper_angle = self.direction + (vision_angle / 2)
 
-        # Change the current points to an np array for simplicity
-        p0 = np.array(self.pos)
-
-        # Convert to radians for angle calcuation
-        u_rads = math.radians(upper_angle)
-        l_rads = math.radians(lower_angle)
-        # Calculate the end angles
-        dx1 = math.cos(l_rads) * vis_range
-        dy1 = math.sin(l_rads) * vis_range
-        dx2 = math.cos(u_rads) * vis_range
-        dy2 = math.sin(u_rads) * vis_range
-
-        # Calculate the points
-        p1 = np.array([p0[0] + dx1, p0[1] + dy1])
-        p2 = np.array([p0[0] + dx2, p0[1] + dy2])
-        # Calculate the vectors
-        v1 = p1-p0
-        v2 = p2-p0
-
-        # Get the current neighbors
+        # get all surrounding neighbors
+        neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
+        rotatedNeighList = []
+        i = -1
+        # rotate all the neigbours facing either up or down
+        for neigh in neighbors:
+            if (type(neigh) == Pedestrian):
+                i = i + 1
+                rotatedNeighList.append(self.rotate(self.pos, neigh.pos, i))
+        
         cone_neigh = []
-        # Loop to find if neighbor is within the cone
-        for neigh in neighbours:
-            v3 = np.array(neigh.pos) - p0
-            # Append object to cone_neigh if its within vision cone
-            if (np.cross(v1, v3) * np.cross(v1, v2) >= 0 and np.cross(v2, v3) * np.cross(v2, v1) >= 0 and type(neigh) == Pedestrian):
-                cone_neigh.append(neigh)
+
+        # calculate if the pedestrians are within the 'viewing triangle'
+        for rotatedNeigh in rotatedNeighList:
+            if self.dir == "down":
+                if rotatedNeigh[1] - self.pos[1] > math.tan(math.radians(90 - (vision_angle / 2))) * abs(rotatedNeigh[0] - self.pos[0]):
+                    cone_neigh.append(neighbors[rotatedNeigh[2]])
+
+            else:
+                if rotatedNeigh[1] - self.pos[1] < -math.tan(math.radians(90 - (vision_angle / 2))) * abs(rotatedNeigh[0] - self.pos[0]):
+                    cone_neigh.append(neighbors[rotatedNeigh[2]])
 
         return cone_neigh
 
 
     def pedestrian_intersection(self, conal_neighbours, angle, offset):
-        """This function will check the map for intersections from the given angle and the offset
+        """This fucntion will check the map for intersections from the given angle and the offset
         and return a list of neighbours that match those crieria
         Conal_neighbours: the objects within the vision field
         Angle: the direction k
-        Offset: 1.5*radius_of_pedestrian to both sides of the direction line (space for your own movement, plus the radius of another pedestrian)
+        Offset: 1.5*radius_of_pedestrian to both sides of the direction line
         """
-
         # Checks if the agent is looking straight up or down
         neighbours = conal_neighbours
         inter_neighbors = []
@@ -413,20 +371,20 @@ class Pedestrian(Agent):
                 if (neigh.pos[0] >= self.pos[0] - offset and neigh.pos[0] <= self.pos[0] + offset):
                     inter_neighbors.append(neigh)
 
-        # Checks if the agent is looking left our right
+        # Checks if the agent is looking left uor right
         elif (angle == 0 or angle == 180):
             for neigh in neighbours:
                 if (neigh.pos[1] >= self.pos[1] - offset and neigh.pos[1] <= self.pos[1] + offset):
                     inter_neighbors.append(neigh)
 
-        # The agent is looking at an different non-exeption angle
+                    # The agent is looking at an different non-exeption angle
         else:
             # calculate the linear formula for the line
             m = math.tan(math.radians(angle))
-            b = self.pos[1] - (m * self.pos[0])
+            b = self.pos[1] + (m * self.pos[0])
 
             # calcuate the y offset of the range of lines
-            b_offset = offset / math.cos(angle)
+            b_offset = offset / math.cos(math.radians(angle))
 
             # calcuate the new intersection points based off the offset of the line
             b_top = b + b_offset
@@ -439,13 +397,32 @@ class Pedestrian(Agent):
 
         return inter_neighbors
 
+    def rotate(self, origin, point, i):
+        """
+        Rotate a point counterclockwise by a given angle around a given origin.
+
+        The angle should be given in radians.
+        """
+        if self.dir == 'up':
+            angle = self.direction - 270
+        else:
+            angle = self.direction - 90
+
+        if angle < 0:
+            angle += 360
+        angle_rad = math.radians(angle)
+        ox, oy = origin
+        px, py = point
+
+        qx = ox + math.cos(angle_rad) * (px - ox) - math.sin(angle_rad) * (py - oy)
+        qy = oy + math.sin(angle_rad) * (px - ox) + math.cos(angle_rad) * (py - oy)
+        return (qx, qy, i)
 
     def closest_ped_on_line(self, neighbours, direction):
         """
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
         # Find the terms for the equation for the line that will be passing through the current point in direction
-        #print(type(neighbours))
         if type(neighbours) == Pedestrian:
             m = math.tan(math.radians(direction))
             b = self.pos[1] - (m*self.pos[0])
@@ -453,7 +430,6 @@ class Pedestrian(Agent):
             min_distance = abs((m*neighbours.pos[0])-neighbours.pos[1]+b)/math.sqrt((m**2) + 1)
             min_pedestrian = neighbours
         else:
-            #print(len(neighbours))
             m = math.tan(math.radians(direction))
             b = self.pos[1] - (m*self.pos[0])
             # Calculate the first distance from the line (perpendicular distance and assign the min pedestrian
@@ -492,14 +468,11 @@ class Pedestrian(Agent):
                 c = cur_distance
                 min_neigh = inter_neigh[i]
 
-        # TODO: uncomment
-        # b = self.closest_ped_on_line(min_neigh, direction)[0]
+        b = self.closest_ped_on_line(min_neigh, direction)[0]
 
-        # min_distance = math.sqrt(c**2 + b**2)
-        min_distance = c
+        min_distance = math.sqrt(c**2 + b**2)
 
-        return min_distance, min_neigh
-
+        return min_distance
 
     def ped_velocity_interaction(self, neighbours):
         """Calculates the interaction between pedesrians based off the angle of their movement"""
@@ -521,7 +494,7 @@ class Pedestrian(Agent):
         if self.dir == "up" and not self.pos[1] < 16:
             # check where the pedestrian is and assign it to the right traffic light
             if self.pos[1] > 21:
-                own_light = self.own_light1 
+                own_light = self.own_light1
                 correct_side = False
             elif self.pos[1] >= 16 and self.pos[1] <= 17:
                 own_light = self.own_light2
@@ -542,7 +515,6 @@ class Pedestrian(Agent):
                     return False
 
         return True
-
 
 
     # this function is in both pedestrian and agent -> more efficient way?
@@ -677,7 +649,6 @@ class Car(Agent):
         neighbours = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.vision_range)
         min_dist = self.vision_range + 1
         # if there are neighbours
-        # print("I can see this many things",  len(neighbours))
         if neighbours:
             car_neighbours = []
             #Find those that are cars
@@ -685,18 +656,14 @@ class Car(Agent):
                 if (type(neigh) == Car):
                     car_neighbours.append(neigh)
             # if there are cars
-            # print("I can see this many cars", len(car_neighbours))
             if car_neighbours:
                 min_dist = 99999
                 for neigh in car_neighbours:
                     new_dist = self.model.space.get_distance(self.pos, neigh.pos)
-                    # print(new_dist)
                     # Find the closest one
-                    # print(self.dir, neigh.dir)
                     if new_dist < min_dist and self.dir == neigh.dir:
                         if (self.dir == "right" and self.pos[0] < neigh.pos[0]) or (self.dir == "left" and self.pos[0] > neigh.pos[0]):
                             min_dist = new_dist - 3
-                            # print(min_dist)
                 if min_dist is not 99999:
                     return min_dist
                 else:
