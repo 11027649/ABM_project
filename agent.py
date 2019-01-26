@@ -176,7 +176,7 @@ class Pedestrian(Agent):
         pos_directions = []
         for i in range(self.N):
             pos_directions.append(lower_angle+i*theta_N)
-        print('pos_directions', pos_directions)
+        # print('pos_directions', pos_directions)
         return pos_directions
 
 
@@ -193,7 +193,7 @@ class Pedestrian(Agent):
             # Get closest pedestrian: min_distance, min_pedestrian.pos
             # TODO: check if negative
             # TODO: WHY DOES THIS NOT WORK? DDDDDD:::::
-            print('het werkt nog steeds')
+            # print('het werkt nog steeds')
             # print('peds', peds_in_dir)
             closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2*self.radius
             # If no pedestrians in view, closest_ped distance is set at vision range
@@ -439,10 +439,9 @@ class Pedestrian(Agent):
                     else:
                         side = 'left' 
                     min_pedestrian = neighbour
-                    min_distance = cur_distance
-        
-        print(side)
-                # Returns the min distance and the corresponding pedestrian
+                    min_distance = cur_distance     
+        # print(side)
+        # Returns the min distance and the corresponding pedestrian
         return min_distance, min_pedestrian, side
 
     # can prob be in 1 function
