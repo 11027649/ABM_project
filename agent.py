@@ -176,7 +176,7 @@ class Pedestrian(Agent):
         pos_directions = []
         for i in range(self.N):
             pos_directions.append(lower_angle+i*theta_N)
-
+        print('pos_directions', pos_directions)
         return pos_directions
 
 
@@ -351,40 +351,40 @@ class Pedestrian(Agent):
 
         intersecting = []
 
-        # checks if the agent is looking straight up or down
-        if (angle == 270 or angle == 90):
-            for neigh in conal_neighbours:
-                if neigh.pos[0] >= (self.pos[0] - offset) and neigh.pos[0] <= (self.pos[0] + offset):
-                    intersecting.append(neigh)
+        # # checks if the agent is looking straight up or down
+        # if (angle == 270 or angle == 90):
+        #     for neigh in conal_neighbours:
+        #         if neigh.pos[0] >= (self.pos[0] - offset) and neigh.pos[0] <= (self.pos[0] + offset):
+        #             intersecting.append(neigh)
 
-        # checks if the agent is looking left or right
-        elif (angle == 0 or angle == 180):
-            for neigh in conal_neighbours:
-                if neigh.pos[1] >= (self.pos[1] - offset) and neigh.pos[1] <= (self.pos[1] + offset):
-                    intersecting.append(neigh)
+        # # checks if the agent is looking left or right
+        # elif (angle == 0 or angle == 180):
+        #     for neigh in conal_neighbours:
+        #         if neigh.pos[1] >= (self.pos[1] - offset) and neigh.pos[1] <= (self.pos[1] + offset):
+        #             intersecting.append(neigh)
 
-        else:
+        # else:
             # calculate the linear formula for the line
-            slope = math.tan(math.radians(angle))
-            b = self.pos[1] + (slope * self.pos[0])
+        slope = math.tan(math.radians(angle))
+        b = self.pos[1]
 
-            # calcuate the y offset of the range of lines
-            ##### HELP (is this correct?)
-            b_offset = offset / math.cos(math.radians(angle))
+        # calcuate the y offset of the range of lines
 
-            # calcuate the new intersection points based off the offset of the line
-            b_top = b + b_offset
-            b_bot = b - b_offset
+        b_offset = offset / math.cos(math.radians(360 - angle))
 
-            for neigh in neighbours:
-                # these are the heights of the offset lines at the x position of the neighbour
-                y_top = slope * neigh.pos[0] + b_top
-                y_bot = slope * neigh.pos[0] + b_bot
+        # calcuate the new intersection points based off the offset of the line
+        b_top = b + b_offset
+        b_bot = b - b_offset
 
-                if neigh.pos[1] >= y_top and neigh.pos[1] <= y_bot:
-                    intersecting.append(neigh)
+        for neigh in conal_neighbours:
+            # these are the heights of the offset lines at the x position of the neighbour
+            y_top = slope * (neigh.pos[0] - self.pos[0]) + b_top
+            y_bot = slope * (neigh.pos[0] - self.pos[0]) + b_bot
 
-        return inter_neighbors
+            if neigh.pos[1] <= y_top and neigh.pos[1] >= y_bot:
+                intersecting.append(neigh)
+        print(intersecting)
+        return intersecting
 
     def rotate(self, origin, point, i):
         """
@@ -424,7 +424,7 @@ class Pedestrian(Agent):
 
             # Checks distance against that stored
             if cur_distance < min_distance:
-                if self.rotatePedestrian(self.pos, neighbour.pos, direction)[0] > 0:
+                if self.rotatePedestrian(self.pos, neighbour.pos, direction)[0] < self.pos[0]:
                     side = 'right'
                 else:
                     side = 'left'
@@ -434,12 +434,13 @@ class Pedestrian(Agent):
             # if equal checks to see which is closer to the current position.
             elif cur_distance == min_distance:
                 if self.model.space.get_distance(self.pos, min_pedestrian.pos) > self.model.space.get_distance(self.pos, neighbour.pos):
-                    if self.rotatePedestrian(self.pos, neighbour.pos, direction)[0] > 0:
+                    if self.rotatePedestrian(self.pos, neighbour.pos, direction)[0] < self.pos[0]:
                         side = 'right'
                     else:
                         side = 'left' 
                     min_pedestrian = neighbour
                     min_distance = cur_distance
+        
         print(side)
                 # Returns the min distance and the corresponding pedestrian
         return min_distance, min_pedestrian, side
@@ -477,7 +478,7 @@ class Pedestrian(Agent):
                 c = cur_distance
                 min_neigh = inter_neigh[i]
 
-        b = self.closest_ped_on_line(min_neigh, direction)[0]
+        b = self.closest_ped_on_line([min_neigh], direction)[0]
 
         min_distance = math.sqrt(c**2 + b**2)
 
