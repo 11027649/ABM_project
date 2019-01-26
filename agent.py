@@ -186,9 +186,7 @@ class Pedestrian(Agent):
         """
 
         # List of pedestrians in that direction
-        # print("Pedestrians 180", self.unique_id, direction, len(peds_in_180))
         peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, .7)
-        # print("Pedestrians in direction", self.unique_id, direction, len(peds_in_dir))
 
         # Get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
@@ -330,14 +328,17 @@ class Pedestrian(Agent):
 
         # get all surrounding neighbors
         neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
+
         rotatedNeighList = []
         i = -1
         # rotate all the neigbours facing either up or down
         for neigh in neighbors:
+
             i = i + 1
+
             if isinstance(neigh, Pedestrian):
                 rotatedNeighList.append(self.rotate(self.pos, neigh.pos, i))
-        
+
         cone_neigh = []
 
         # calculate if the pedestrians are within the 'viewing triangle'
@@ -420,6 +421,8 @@ class Pedestrian(Agent):
         """
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
+        print(neighbours)
+
         # Find the terms for the equation for the line that will be passing through the current point in direction
         if type(neighbours) == Pedestrian:
             m = math.tan(math.radians(direction))
