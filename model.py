@@ -38,6 +38,8 @@ class Traffic(Model):
 
         # This is required for the datacollector to work
         self.running = True
+
+        self.data = False
         self.datacollector.collect(self)
 
     def place_lights(self):
@@ -109,9 +111,9 @@ class Traffic(Model):
         Method that removes an agent from the grid and the correct scheduler.
         '''
 
-        # if self.data:
-        #     # save level of service by saving spended time in list
-        #     self.data.write_row_hist(type(agent).__name__, agent.unique_id, agent.time)
+        if self.data:
+            # save level of service by saving spended time in list
+            self.data.write_row_hist(type(agent).__name__, agent.unique_id, agent.time)
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
@@ -144,40 +146,39 @@ class Traffic(Model):
         # out of bounds checks for pedestrians
         for schedule in [self.schedule_Pedestrian.agents]:
             for current_agent in schedule:
-                # print(current_agent.dir, current_agent.direction, current_agent.target_point, current_agent.pos[1], current_agent.speed_free, current_agent.pos[1] - current_agent.speed_free)
                 if (current_agent.dir == "up" and current_agent.pos[1] - current_agent.speed_free< 0) or current_agent.remove == True:
                     self.remove_agent(current_agent)
                 elif (current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed_free >= self.y_max) or current_agent.remove == True:
                     self.remove_agent(current_agent)
 
 
-        # if random.random() < 0.5:
-        #
-        #     # if there's place place a new car with probability 0.7
-        #     pos = (0, 19.5)
-        #
-        #     car_near = False
-        #     for i in range(5):
-        #         if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
-        #             car_near = True
-        #
-        #     if random.random() < 0.03 and car_near == False:
-        #         self.new_car(pos, "right")
-        #
-        # else:
-        #     # if there's place place a new car with probability 0.7
-        #     pos = (self.x_max - 1, 13.5)
-        #
-        #     car_near = False
-        #     for i in range(5):
-        #         if self.space.get_neighbors((pos[0] - 5 * i, pos[1]), include_center = True, radius = 2.5):
-        #             car_near = True
-        #     if random.random() < 0.03 and car_near == False:
-        #         self.new_car(pos, "left")
+        if random.random() < 0.5:
+
+            # if there's place place a new car with probability 0.7
+            pos = (0, 19.5)
+
+            car_near = False
+            for i in range(5):
+                if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
+                    car_near = True
+
+            if random.random() < 0.03 and car_near == False:
+                self.new_car(pos, "right")
+
+        else:
+            # if there's place place a new car with probability 0.7
+            pos = (self.x_max - 1, 13.5)
+
+            car_near = False
+            for i in range(5):
+                if self.space.get_neighbors((pos[0] - 5 * i, pos[1]), include_center = True, radius = 2.5):
+                    car_near = True
+            if random.random() < 0.03 and car_near == False:
+                self.new_car(pos, "left")
 
 
         # either up or down
-        if random.random() < 1:
+        if random.random() < 0.5:
             # if there's place, place a new pedestrian with a certain probability
             pos = (self.x_max / 2 - 1 , self.y_max - 1)
             pos = (random.uniform(24*2,26*2),  self.y_max - 1)
