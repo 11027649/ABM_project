@@ -82,6 +82,8 @@ class Pedestrian(Agent):
 
             # get new position and update direction
             next_pos, self.direction = self.choose_direction()
+            print('gekozen direction', self.direction)
+            print()
 
             # try to move agent
             try:
@@ -97,7 +99,12 @@ class Pedestrian(Agent):
             # self test, this should never happen: if it does, something is wrong in our code
             neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.radius)
             if len(neighbors) > 0:
-                raise ValueError("COLLISION")
+                for i in neighbors:
+                    if type(i) != Light:
+                        print(self.pos)
+                        print(self.dir)
+                        print(i)
+                        raise ValueError("COLLISION")
 
             # Finalize this step
             self.time += 1
@@ -295,19 +302,18 @@ class Pedestrian(Agent):
         peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, self.radius*4)
         
         # DEBUG
+        print('True angle', direction)
         print()
-        print(direction)
-
         # get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # get closest pedestrian: min_distance, min_pedestrian.pos
-            closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2*self.radius
+            closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 4 * self.radius
             # if no pedestrians in view, closest_ped distance is set at vision range
         else:
-            closest_ped = self.R_vision_range-2*self.radius
+            closest_ped = self.R_vision_range-4*self.radius
 
         # distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
-        closest_wall = self.dist_wall(direction) - 2*self.radius
+        closest_wall = self.dist_wall(direction) - 4*self.radius
 
         # determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
@@ -417,40 +423,34 @@ class Pedestrian(Agent):
         """
 
         intersecting = []
-
-        # tODO: change these accordingly
-        # # checks if the agent is looking straight up or down
-        # if (angle == 270 or angle == 90):
-        #     for neigh in conal_neighbours:
-        #         if neigh.pos[0] >= (self.pos[0] - offset) and neigh.pos[0] <= (self.pos[0] + offset):
-        #             intersecting.append(neigh)
-
-        # # checks if the agent is looking left or right
-        # elif (angle == 0 or angle == 180):
-        #     for neigh in conal_neighbours:
-        #         if neigh.pos[1] >= (self.pos[1] - offset) and neigh.pos[1] <= (self.pos[1] + offset):
-        #             intersecting.append(neigh)
-
-        # else:
-            # calculate the linear formula for the line
-        slope = math.tan(math.radians(angle))
+    
+        slope = math.tan(math.radians(360 - angle))
         b = self.pos[1]
+
         # calcuate the y offset of the range of lines
-        if angle > 89 and angle <= 90:
-            angle = 89
-        if angle > 90 and angle < 91:
-            angle = 91
+        # if angle > 89 and angle <= 90:
+        #     angle = 89
+        # if angle > 90 and angle < 91:
+        #     angle = 91
 
-        if angle > 269 and angle <= 270:
-            angle = 89
-        if angle > 270 and angle < 271:
-            angle = 271
+        # if angle > 260 and angle <= 270:
+        #     angle = 250
+        # if angle > 270 and angle < 280:
+        #     angle = 280
 
-        b_offset = abs(offset / math.cos(math.radians((360 - angle))))
+
+        if angle > 270:
+            angle = 360 - angle
+        elif angle > 180:
+            angle = angle - 180 
+        elif angle > 90:
+            angle = 180 - angle
+
+        b_offset = abs(offset / math.cos(math.radians((angle))))
         
         print('angle', angle)
         print('offset', b_offset)
-
+        print('slope', slope)
         # calcuate the new intersection points based off the offset of the line
         b_top = b + b_offset
         b_bot = b - b_offset
@@ -460,13 +460,19 @@ class Pedestrian(Agent):
             y_top = slope * (neigh.pos[0] - self.pos[0]) + b_top
             y_bot = slope * (neigh.pos[0] - self.pos[0]) + b_bot
 
-            if neigh.pos[1] <= y_top and neigh.pos[1] >= y_bot:
-                intersecting.append(neigh)
+
+            if angle > 78:
+                if neigh.pos[0] < self.pos[0] + offset and neigh.pos[0] > self.pos[0] - offset:
+                    intersecting.append(neigh)
+            else:
+                if neigh.pos[1] <= y_top and neigh.pos[1] >= y_bot:
+                    intersecting.append(neigh)
                 
+        print(intersecting)
         return intersecting
 
     def closest_ped_on_line(self, neighboursList, direction):
-        """
+        """intersecting
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
         # Find the terms for the equation for the line that will be passing through the current point in direction
