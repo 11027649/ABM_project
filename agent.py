@@ -436,6 +436,15 @@ class Pedestrian(Agent):
         slope = math.tan(math.radians(angle))
         b = self.pos[1]
         # calcuate the y offset of the range of lines
+        if angle > 89 and angle <= 90:
+            angle = 89
+        if angle > 90 and angle < 91:
+            angle = 91
+
+        if angle > 269 and angle <= 270:
+            angle = 89
+        if angle > 270 and angle < 271:
+            angle = 271
 
         b_offset = abs(offset / math.cos(math.radians((360 - angle))))
         
