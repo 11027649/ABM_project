@@ -39,7 +39,7 @@ class Data():
 
             datawriter.writerow(['# This is a generated file to store info about the model'])
             datawriter.writerow(['# This header might contain more information if we actually changing parameters'])
-            datawriter.writerow(['time_step', 'pedestrian_count', 'car_count'])
+            datawriter.writerow(['time_step', 'pedestrian_count', 'car_count', 'mid_section_count'])
 
     def write_row_hist(self, agent_type, agent_id, time_spent):
         with open(self.filepath_spent_time, 'a', newline='') as csvfile:

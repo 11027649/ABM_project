@@ -31,7 +31,8 @@ class Traffic(Model):
 
         self.datacollector = DataCollector(
              {"Pedestrians": lambda m: self.schedule_Pedestrian.get_agent_count(),
-              "Cars": lambda m: self.schedule_Car.get_agent_count()})
+              "Cars": lambda m: self.schedule_Car.get_agent_count(),
+              "Midsection": lambda m: self.check_median()})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
         self.place_lights()
@@ -193,8 +194,6 @@ class Traffic(Model):
             if random.random() < 1 and not self.space.get_neighbors(pos, include_center = True, radius = .5):
                 self.new_pedestrian(pos, "down")
 
-        # Checks the number of people in the median
-        print("The number of people in the median is: ", self.check_median())
 
         # Save the statistics
         self.datacollector.collect(self)
@@ -205,7 +204,6 @@ class Traffic(Model):
         # Starts by getting the neighbours in the desired area
         neighbours = self.space.get_neighbors(middle_pos, radius=median_width+2, include_center=True)
 
-        print("The number of neighbours in the area are:", len(neighbours))
         median_neighbours = []
 
         # Cycle through the neighbours checking for pedestrians and for their positions to be within the desired area.

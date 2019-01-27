@@ -280,7 +280,7 @@ class Pedestrian(Agent):
         theta_N = self.vision_angle/(self.N-1)
         pos_directions = []
         for i in range(self.N):
-            pos_directions.append(lower_angle+i*theta_N)
+            pos_directions.append((lower_angle+i*theta_N)%360)
 
         return pos_directions
 
@@ -290,7 +290,13 @@ class Pedestrian(Agent):
         """
 
         # list of pedestrians in that direction
-        peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, .7)
+        # DEBUG (put in all surrounding neighbours)
+        # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
+        peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, self.radius*4)
+        
+        # DEBUG
+        print()
+        print(direction)
 
         # get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
@@ -298,10 +304,10 @@ class Pedestrian(Agent):
             closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2*self.radius
             # if no pedestrians in view, closest_ped distance is set at vision range
         else:
-            closest_ped = self.R_vision_range-self.radius
+            closest_ped = self.R_vision_range-2*self.radius
 
         # distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
-        closest_wall = self.dist_wall(direction) - self.radius
+        closest_wall = self.dist_wall(direction) - 2*self.radius
 
         # determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
