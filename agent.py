@@ -287,7 +287,7 @@ class Pedestrian(Agent):
         theta_N = self.vision_angle/(self.N-1)
         pos_directions = []
         for i in range(self.N):
-            pos_directions.append(lower_angle+i*theta_N)
+            pos_directions.append((lower_angle+i*theta_N)%360)
 
         return pos_directions
 
