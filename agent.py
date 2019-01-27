@@ -298,7 +298,7 @@ class Pedestrian(Agent):
 
         # list of pedestrians in that direction
         # DEBUG (put in all surrounding neighbours)
-        peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
+        # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
         peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, self.radius*4)
         
         # DEBUG
@@ -311,12 +311,12 @@ class Pedestrian(Agent):
             closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2*self.radius
             # if no pedestrians in view, closest_ped distance is set at vision range
         else:
-            closest_ped = self.R_vision_range-self.radius
+            closest_ped = self.R_vision_range-2*self.radius
 
         # DEBUG
         print('len(peds_in_180):', len(peds_in_180), 'len(peds_in_dir):', len(peds_in_dir), 'closest_ped:',closest_ped)
         # distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
-        closest_wall = self.dist_wall(direction) - self.radius
+        closest_wall = self.dist_wall(direction) - 2*self.radius
 
         # determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
