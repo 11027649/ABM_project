@@ -96,8 +96,8 @@ class Pedestrian(Agent):
 
             # self test, this should never happen: if it does, something is wrong in our code
             neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.radius)
-            if len(neighbors) > 0:
-                raise ValueError("COLLISION")
+            # if len(neighbors) > 0:
+            #     raise ValueError("COLLISION")
 
             # Finalize this step
             self.time += 1
