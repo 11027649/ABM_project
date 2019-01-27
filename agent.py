@@ -30,9 +30,9 @@ class Pedestrian(Agent):
         self.des_speed = None # Meters per time step
         # Weights (for equation 1)
         # What is We' for equation 7??
-        self.Ek_w = 1
+        self.Ek_w = .7
         self.Ok_w = .4
-        self.Pk_w = .6
+        self.Pk_w = .8
         self.Ak_w = .3
         self.Ik_w = .1
 
@@ -241,10 +241,15 @@ class Pedestrian(Agent):
         Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
-
+        # Equation 1
         return self.Ek_w * Ek + self.Ok_w * Ok + \
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
+        # Equation 7
+        # return Ek -self.Ok_w_7 * (1-Ok) - \
+        #     self.Pk_w_7 * (1-Pk) - self.Ak_w_7 * (1-Ak) - \
+        #     self.Ik_w * (1-Ik), next_pos    
+
 
     def traject_angle(self, direction, peds_in_180, next_pos):
         """
