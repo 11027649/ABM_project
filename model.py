@@ -191,8 +191,30 @@ class Traffic(Model):
             if random.random() < 1 and not self.space.get_neighbors(pos, include_center = True, radius = .5):
                 self.new_pedestrian(pos, "down")
 
+        # Checks the number of people in the median
+        print("The number of people in the median is: ", self.check_median())
+
         # Save the statistics
         self.datacollector.collect(self)
+
+    def check_median(self, middle_pos = (50,16.5), median_width = 3, median_height = 1):
+        """Used for getting the number of pedestrians in the median, though it could be used for any height band."""
+
+        # Starts by getting the neighbours in the desired area
+        neighbours = self.space.get_neighbors(middle_pos, radius=median_width+2, include_center=True)
+
+        print("The number of neighbours in the area are:", len(neighbours))
+        median_neighbours = []
+
+        # Cycle through the neighbours checking for pedestrians and for their positions to be within the desired area.
+
+        for neigh in neighbours:
+            if type(neigh) == Pedestrian and neigh.pos[1]>=middle_pos[1]-(.5*median_height) and neigh.pos[1]<=middle_pos[1]+(.5*median_height):
+                median_neighbours.append(neigh)
+
+        # Returns the number of pedestrians found in the area.
+        return len(median_neighbours)
+
 
     def run_model(self, step_count, data):
         '''
