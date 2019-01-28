@@ -101,8 +101,8 @@ class Pedestrian(Agent):
             if len(neighbors) > 0:
                 for i in neighbors:
                     if type(i) != Light:
-                        print(self.pos)
-                        print(self.dir)
+                        print('error pos', self.pos)
+                        print('error dir', self.dir)
                         print(i)
                         raise ValueError("COLLISION")
 
@@ -447,6 +447,7 @@ class Pedestrian(Agent):
             angle = 180 - angle
 
         b_offset = abs(offset / math.cos(math.radians((angle))))
+        print('pos', self.pos)
         print('I should see all of those at least once', conal_neighbours)
         print('angle', angle)
         print('offset', b_offset)
