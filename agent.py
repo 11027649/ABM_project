@@ -257,7 +257,7 @@ class Pedestrian(Agent):
         """
 
         # for getting the neighbours in the front 180 degrees within vision range; for calc_utility
-        peds_in_180 = self.pedestrians_in_field(180)
+        peds_in_180 = self.pedestrians_in_field(360)
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
@@ -299,7 +299,7 @@ class Pedestrian(Agent):
         # list of pedestrians in that direction
         # DEBUG (put in all surrounding neighbours)
         # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
-        peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, self.radius*4)
+        peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, self.radius*2)
         
         # DEBUG
         print('True angle', direction)
@@ -307,10 +307,10 @@ class Pedestrian(Agent):
         # get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # get closest pedestrian: min_distance, min_pedestrian.pos
-            closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 4 * self.radius
+            closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2 * self.radius
             # if no pedestrians in view, closest_ped distance is set at vision range
         else:
-            closest_ped = self.R_vision_range-4*self.radius
+            closest_ped = self.R_vision_range-2*self.radius
 
         # distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
         closest_wall = self.dist_wall(direction) - 4*self.radius
@@ -447,7 +447,7 @@ class Pedestrian(Agent):
             angle = 180 - angle
 
         b_offset = abs(offset / math.cos(math.radians((angle))))
-        
+        print('I should see all of those at least once', conal_neighbours)
         print('angle', angle)
         print('offset', b_offset)
         print('slope', slope)
