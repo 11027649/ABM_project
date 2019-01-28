@@ -75,7 +75,7 @@ class Pedestrian(Agent):
         # check if traffic light is green or if on road side
         if not self.on_road_side() or self.traffic_green():
             # get list of pedestrians in the vision field
-            peds_in_vision = self.pedestrians_in_field(self.vision_angle)
+            peds_in_vision = self.pedestrians_in_field(self.vision_angle, self.direction)
 
             # get desired_speed
             self.des_speed = self.desired_speed(len(peds_in_vision))
@@ -163,7 +163,7 @@ class Pedestrian(Agent):
 
         return True
 
-    def pedestrians_in_field(self, vision_angle):
+    def pedestrians_in_field(self, vision_angle, dir_try):
         """
             Returns the pedestrians that are in the cone that the pedestrian can
             actually see in a certain vision_angle (which usually is 170, but
@@ -181,7 +181,7 @@ class Pedestrian(Agent):
             i = i + 1
 
             if isinstance(neigh, Pedestrian):
-                rotatedNeighList.append(self.rotate(self.pos, neigh.pos, i))
+                rotatedNeighList.append(self.rotate(self.pos, neigh.pos, i, dir_try))
 
         cone_neigh = []
 
@@ -197,7 +197,7 @@ class Pedestrian(Agent):
 
         return cone_neigh
 
-    def rotate(self, origin, point, i):
+    def rotate(self, origin, point, i, dir_try):
         """
         Rotate a point counterclockwise by a given angle around a given origin.
         The angle should be given in radians.
@@ -205,9 +205,9 @@ class Pedestrian(Agent):
         """
 
         if self.dir == 'up':
-            angle = self.direction - 270
+            angle = dir_try - 270
         else:
-            angle = self.direction - 90
+            angle = dir_try - 90
 
         if angle < 0:
             angle += 360
@@ -257,7 +257,7 @@ class Pedestrian(Agent):
         """
 
         # for getting the neighbours in the front 180 degrees within vision range; for calc_utility
-        peds_in_180 = self.pedestrians_in_field(360)
+        peds_in_180 = self.pedestrians_in_field(180, self.direction)
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
@@ -299,6 +299,7 @@ class Pedestrian(Agent):
         # list of pedestrians in that direction
         # DEBUG (put in all surrounding neighbours)
         # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
+        peds_in_180 = self.pedestrians_in_field(180, direction)
         peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, self.radius*2)
         
         # DEBUG
