@@ -164,6 +164,7 @@ class Pedestrian(Agent):
             return False
 
         return True
+
     def pedestrians_in_field(self, vision_angle):
         """
             Returns the pedestrians that are in the cone that the pedestrian can
@@ -251,7 +252,7 @@ class Pedestrian(Agent):
         """
 
         # for getting the neighbours in the front 180 degrees within vision range; for calc_utility
-        peds_in_180 = self.pedestrians_in_field(170)
+        peds_in_180 = self.pedestrians_in_field(180)
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
@@ -309,8 +310,8 @@ class Pedestrian(Agent):
         else:
             closest_ped = self.R_vision_range-2*self.radius
 
-        # distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
-        closest_wall = self.dist_wall(direction) - 4*self.radius
+        # distance to road 'wall', if no pedestrians in view, closest_wall is set at vision range
+        closest_wall = self.dist_wall(direction) - self.radius
         # set negative distance to 0
         if closest_wall < 0:
             closest_wall = 0
@@ -337,7 +338,7 @@ class Pedestrian(Agent):
             target_dist = self.model.space.get_distance(next_pos, self.target_point)
 
         # calculate factors
-        Ek = 1 - (target_dist - self.R_vision_range - self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
+        Ek = 1 - (target_dist - self.R_vision_range + self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
         Ok =  closest_wall/self.R_vision_range # distance to closest obstacle/vision range
         Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range
         # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
@@ -349,6 +350,8 @@ class Pedestrian(Agent):
                 self.Ik_w * Ik, next_pos
 
     def inertia(self, direction):
+        """Returns the inertia, based on the difference between the current direction (self.direction)
+        and the possible direction"""
         # Calculate absolute difference in angles
         diff = direction-self.direction
         # Make difference positive
