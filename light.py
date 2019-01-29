@@ -24,6 +24,9 @@ class Light(Agent):
         elif self.model.strategy == "Free":
             self.free()
 
+        if self.unique_id == 1 or self.unique_id == 2:
+            self.closest_car()
+
     def simultaneous(self):
         if self.state <= 300:
             self.color = "Red"
@@ -35,6 +38,26 @@ class Light(Agent):
     def free(self):
         self.color = "Green"
 
+    def closest_car(self):
+
+        center = 2.5
+        if self.unique_id == 1:
+            direction = -1
+        elif self.unique_id == 2:
+            direction = 1
+        # checks for neighbors 10 times with a radius of 2.6 in steps of 5 (sees entire road)
+        for i in range(10):
+            neighbours = self.model.space.get_neighbors((self.pos[0] + (center + i * (2.5 * 2)) * direction, 16.5 - 3 * direction), include_center = True, radius = 2.6)
+
+            if len(neighbours) > 0:
+                min_distance = math.inf
+                for neigh in neighbours:
+                    cur_distance = abs(self.pos[0] - neigh.pos[0])
+                    if cur_distance < min_distance:
+                        min_distance = cur_distance
+                return min_distance
+
+            
 # simultaneous strategy
 # 3 & 4 are the same
 # 5 & 6 are the same
