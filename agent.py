@@ -14,21 +14,18 @@ class Pedestrian(Agent):
         self.dir = dir
         self.speed = speed
         self.time = time
-
-        # Radius
-        self.radius = .2
-
-        self.remove = False
+        self.des_speed = None # Meters per time step
 
         # Liu, 2014 parameters
-        self.vision_angle = 170  # Degrees
         self.walls_x = [45.54, 53.46] # TODO: correct walls?
         self.walls_y = [10, 23] # TODO: correct walls?
         self.neighbours = []
+
         # parameters
-        self.N = 16 # Should be >= 2!
+        self.vision_angle = 170  # Degrees
+        self.radius = .2 # radius
+        self.N = 16 #  number of possible directions Should be >= 2!
         self.R_vision_range = 3 # Meters
-        self.des_speed = None # Meters per time step
         # Weights (for equation 1)
         # What is We' for equation 7??
         self.Ek_w = 1
@@ -36,13 +33,19 @@ class Pedestrian(Agent):
         self.Pk_w = .6
         self.Ak_w = .3
         self.Ik_w = .1
+        self.speed_mean = .134
+        self.speed_sd = .0342
+        self.target_x = (24*2,26*2)
+        self.gamma = 1.913
+        self.max_density = 5.4
 
-        self.Ok_w_7 = .4
-        self.Pk_w_7 = .6
-        self.Ak_w_7 = .3
-        self.Ik_w_7 = .1
-        self.speed_free = random.gauss(.134, .0342**2) # normal distribution of N(1.34, 0.342^2) m/s, but per (1/10s) timesteps
 
+        # self.Ok_w_7 = .4
+        # self.Pk_w_7 = .6
+        # self.Ak_w_7 = .3
+        # self.Ik_w_7 = .1
+
+        self.speed_free = random.gauss(self.speed_mean, self.speed_sd**2) # normal distribution of N(1.34, 0.342^2) m/s, but per (1/10s) timesteps
 
         # Set direction in degrees
         # TODO: assign target point with preference to right side?
@@ -56,6 +59,9 @@ class Pedestrian(Agent):
             self.own_light = 2
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
+
+        # For out of bound check
+        self.remove = False
 
         # Check if walls are far enough for dist_walls function
         if abs(self.walls_x[0]-self.walls_x[1])<2*self.R_vision_range:
@@ -212,7 +218,7 @@ class Pedestrian(Agent):
 
         return (qx, qy, i)
 
-    def desired_speed(self, n_agents_in_cone, gamma=1.913, max_density=5.4):
+    def desired_speed(self, n_agents_in_cone):
         """
         Returns desired speed, using equation 8 of Liu. Input is the number of
         agents in the vision field. This number is used to calculate the density
@@ -233,7 +239,7 @@ class Pedestrian(Agent):
         # calculate cone density
         cone_density = n_agents_in_cone * dens
         # calculate the desired speed (see eq. 8, Liu)
-        des_speed = self.speed_free*(1 - np.exp(-gamma*((1/cone_density)-(1/max_density))))
+        des_speed = self.speed_free*(1 - np.exp(-self.gamma*((1/cone_density)-(1/self.max_density))))
 
         # if the pedestrian wants to go backwards, return 0.
         if des_speed >= 0:
@@ -340,6 +346,7 @@ class Pedestrian(Agent):
         Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
         Ik = self.inertia(direction) # Difference in angle of current and possible directions
 
+        # Equation 1
         return self.Ek_w * Ek + self.Ok_w * Ok + \
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
