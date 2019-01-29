@@ -153,29 +153,29 @@ class Traffic(Model):
                     self.remove_agent(current_agent)
 
 
-        if random.random() < 0.5:
+        # if random.random() < 0.5:
 
-            # if there's place place a new car with probability 0.7
-            pos = (0, 19.5)
+        #     # if there's place place a new car with probability 0.7
+        #     pos = (0, 19.5)
 
-            car_near = False
-            for i in range(5):
-                if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
-                    car_near = True
+        #     car_near = False
+        #     for i in range(5):
+        #         if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
+        #             car_near = True
 
-            if random.random() < 0.03 and car_near == False:
-                self.new_car(pos, "right")
+        #     if random.random() < 0.5 and car_near == False:
+        #         self.new_car(pos, "right")
 
-        else:
-            # if there's place place a new car with probability 0.7
-            pos = (self.x_max - 1, 13.5)
+        # else:
+        #     # if there's place place a new car with probability 0.7
+        #     pos = (self.x_max - 1, 13.5)
 
-            car_near = False
-            for i in range(5):
-                if self.space.get_neighbors((pos[0] - 5 * i, pos[1]), include_center = True, radius = 2.5):
-                    car_near = True
-            if random.random() < 0.03 and car_near == False:
-                self.new_car(pos, "left")
+        #     car_near = False
+        #     for i in range(5):
+        #         if self.space.get_neighbors((pos[0] - 5 * i, pos[1]), include_center = True, radius = 2.5):
+        #             car_near = True
+        #     if random.random() < 0.5 and car_near == False:
+        #         self.new_car(pos, "left")
 
 
         # either up or down
@@ -184,14 +184,14 @@ class Traffic(Model):
             # pos = (self.x_max / 2 - 1 , self.y_max - 1)
             pos = (random.uniform(24*2,26*2),  self.y_max - 1)
 
-            if random.random() < 0.5 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
+            if random.random() < 0.4 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "up")
 
         else:
             # pos = (self.x_max / 2 + 1, 0)
             pos = (random.uniform(24*2,26*2),  0)
 
-            if random.random() < 0.5 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
+            if random.random() < 0.4 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "down")
 
 

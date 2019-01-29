@@ -318,7 +318,7 @@ class Pedestrian(Agent):
         # determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
         next_pos = self.new_pos(chosen_velocity, direction)
-        print(chosen_velocity, self.des_speed, closest_ped, closest_wall)
+        print('velocities', chosen_velocity, self.des_speed, closest_ped, closest_wall)
 
         # finds the pedestrians in the next step length
         if len(peds_in_180)>0:
