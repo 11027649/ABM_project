@@ -165,16 +165,16 @@ class Traffic(Model):
 
 
         # # either up or down
-        # if random.random() < 0.5:
+        if random.random() < 0.5:
         #     # if there's place, place a new pedestrian with a certain probability
-        #     # pos = (self.x_max / 2 - 1 , self.y_max - 1)
+            pos = (self.x_max / 2 - 1 , self.y_max - 1)
         #     pos = (random.uniform(24*2,26*2),  self.y_max - 1)
 
             if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "up")
 
         # else:
-        #     # pos = (self.x_max / 2 + 1, 0)
+            pos = (self.x_max / 2 + 1, 0)
         #     pos = (random.uniform(24*2,26*2),  0)
 
             if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):

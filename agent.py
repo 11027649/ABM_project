@@ -680,7 +680,7 @@ class Car(Agent):
                 for neigh in car_neighbours:
                     new_dist = self.model.space.get_distance(self.pos, neigh.pos)
                     # Find the closest one
-                    if (new_dist < min_dist and self.dir is neigh.dir) or type(neigh) is Pedestrian:
+                    if (new_dist < min_dist and self.dir is neigh.dir) or (type(neigh) is Pedestrian and (neigh.pos[1] > 11 and neigh.pos[1] < 16) or (neigh.pos[1] > 17 and neigh.pos[1] < 22)):
                         if (self.dir == "right" and self.pos[0] < neigh.pos[0]) or (self.dir == "left" and self.pos[0] > neigh.pos[0]):
                             min_dist = new_dist - 3
                 if min_dist is not 99999:
