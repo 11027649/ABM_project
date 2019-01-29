@@ -110,6 +110,7 @@ class Pedestrian(Agent):
                         print('error dir', self.dir)
                         print('waar hij in loopt', i.pos)
                         print(i)
+                        print('dist', math.sqrt((self.pos[0]-i.pos[0])**2+(self.pos[1]-i.pos[1])**2))
                         raise ValueError("COLLISION")
 
             # Finalize this step
@@ -317,6 +318,7 @@ class Pedestrian(Agent):
         # determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
         next_pos = self.new_pos(chosen_velocity, direction)
+        print(chosen_velocity, self.des_speed, closest_ped, closest_wall)
 
         # finds the pedestrians in the next step length
         if len(peds_in_180)>0:
