@@ -24,6 +24,8 @@ class Traffic(Model):
         self.y_max = y_max
         self.x_max = x_max
 
+        self.strategy = "Simultaneous"
+
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
         self.schedule_Pedestrian = RandomActivation(self)
@@ -38,6 +40,7 @@ class Traffic(Model):
 
         self.lights = []
         self.place_lights()
+
 
         # we don't want to collect data when running the visualization
         self.data = False
@@ -57,11 +60,11 @@ class Traffic(Model):
         self.new_light((44.5, 22.4), 0)
         self.new_light((54.5, 10.6), 0)
 
-        #"Up" lights
+        # "Down" lights
         self.new_light((53.5, 10.6), 250)
         self.new_light((53.5, 16.2), 250) #Median
 
-        #"Down" Lights
+        # "Up" Lights
         self.new_light((45.5, 16.8), 250) #Median
         self.new_light((45.5, 22.4), 250)
 
