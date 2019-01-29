@@ -27,17 +27,17 @@ class Pedestrian(Agent):
         self.N = 16 #  number of possible directions Should be >= 2!
         self.R_vision_range = 3 # Meters
         # Weights (for equation 1)
-        # What is We' for equation 7??
         self.Ek_w = 1
         self.Ok_w = .4
         self.Pk_w = .6
         self.Ak_w = .3
         self.Ik_w = .1
-        self.speed_mean = .134
+        # Other variables
+        self.speed_mean = .134 # for max speed
         self.speed_sd = .0342
-        self.target_x = (24*2,26*2)
-        self.gamma = 1.913
-        self.max_density = 5.4
+        self.target_x = (24*2,26*2) # boundaries of walls
+        self.gamma = 1.913 # gamma for desired speed
+        self.max_density = 5.4 # maximum density in the cone # TODO: Check what this means exactly
 
 
         # self.Ok_w_7 = .4
