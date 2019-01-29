@@ -22,7 +22,7 @@ class Pedestrian(Agent):
 
         # Liu, 2014 parameters
         self.vision_angle = 170  # Degrees
-        self.walls_x = [23*2, 27*2] # TODO: correct walls?
+        self.walls_x = [45.54, 53.46] # TODO: correct walls?
         self.neighbours = []
         # parameters
         self.N = 16 # Should be >= 2!
@@ -318,7 +318,7 @@ class Pedestrian(Agent):
         # distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
         closest_wall = self.dist_wall(direction) - 4*self.radius
         # set negative distance to 0
-        if closest_wall <0:
+        if closest_wall < 0:
             closest_wall = 0
 
         # determine possible new position
