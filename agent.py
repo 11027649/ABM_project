@@ -4,7 +4,7 @@ from mesa.space import ContinuousSpace
 import random
 import math
 import numpy as np
-
+from numba import jit
 from light import Light
 
 class Pedestrian(Agent):
@@ -85,10 +85,10 @@ class Pedestrian(Agent):
 
             # get new position and update direction
             next_pos, self.direction = self.choose_direction()
-            print('gekozen direction', self.direction)
-            print('current pos', self.pos)
-            print('next pos', next_pos)
-            print()
+            # print('gekozen direction', self.direction)
+            # print('current pos', self.pos)
+            # print('next pos', next_pos)
+            # print()
 
             # try to move agent
             try:
@@ -169,7 +169,6 @@ class Pedestrian(Agent):
                     return False
 
         return True
-
     def pedestrians_in_field(self, vision_angle):
         """
             Returns the pedestrians that are in the cone that the pedestrian can
@@ -302,8 +301,8 @@ class Pedestrian(Agent):
         peds_in_dir = self.pedestrian_intersection(direction, self.radius*2 + 0.01)
         
         # DEBUG
-        print('True angle', direction)
-        print()
+        # print('True angle', direction)
+        # print()
         # get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # get closest pedestrian: min_distance, min_pedestrian.pos
@@ -324,7 +323,7 @@ class Pedestrian(Agent):
         # determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
         next_pos = self.new_pos(chosen_velocity, direction)
-        print('velocities', chosen_velocity, self.des_speed, closest_ped, closest_wall)
+        # print('velocities', chosen_velocity, self.des_speed, closest_ped, closest_wall)
 
         # finds the pedestrians in the next step length
         if len(peds_in_180)>0:
@@ -465,8 +464,8 @@ class Pedestrian(Agent):
             rotatedPed = self.rotate_intersection(self.pos, neighbour.pos, angle)
             if rotatedPed[0] >= self.pos[0] - self.radius and rotatedPed[1] >= self.pos[1] - offset and rotatedPed[1] <= self.pos[1] + offset:
                 intersecting.append(neighbour)
-        print('aaa')
-        print(intersecting)
+        # print('aaa')
+        # print(intersecting)
         return intersecting
 
     def closest_ped_on_line(self, neighboursList, direction):
