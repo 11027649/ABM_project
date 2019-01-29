@@ -299,7 +299,7 @@ class Pedestrian(Agent):
         # list of pedestrians in that direction
         # DEBUG (put in all surrounding neighbours)
         # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
-        peds_in_dir = self.pedestrian_intersection(direction, self.radius*2)
+        peds_in_dir = self.pedestrian_intersection(direction, self.radius*2 + 0.01)
         
         # DEBUG
         print('True angle', direction)
