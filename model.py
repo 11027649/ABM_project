@@ -27,6 +27,7 @@ class Traffic(Model):
         # self.strategy = "Free"
         self.strategy = "Simultaneous"
 
+
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
         self.schedule_Pedestrian = RandomActivation(self)
@@ -211,8 +212,10 @@ class Traffic(Model):
         Method that runs the model for a specific amount of steps.
         '''
         self.data = data
+        data.generate_headers(self.strategy)
 
         for i in range(step_count):
+            printProgressBar(i, step_count)
             self.step()
 
         # return the data object so we can write all info from the datacollector too
