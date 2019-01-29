@@ -317,6 +317,9 @@ class Pedestrian(Agent):
 
         # distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
         closest_wall = self.dist_wall(direction) - 4*self.radius
+        # set negative distance to 0
+        if closest_wall <0:
+            closest_wall = 0
 
         # determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
