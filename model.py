@@ -24,7 +24,8 @@ class Traffic(Model):
         self.y_max = y_max
         self.x_max = x_max
 
-        self.strategy = "Free"
+        # self.strategy = "Free"
+        self.strategy = "Simultaneous"
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
@@ -41,7 +42,6 @@ class Traffic(Model):
         self.lights = []
         self.place_lights()
 
-
         # we don't want to collect data when running the visualization
         self.data = False
 
@@ -53,8 +53,9 @@ class Traffic(Model):
         '''
         Method that places the ligths for the visualization. The lights keep
         the agents from crossing when they are red.
+        The ligths are agents, but they never move (so their positions are
+        hardcoded here.)
         '''
-        # Simultaneous Strategy
 
         # car lights
         self.new_light((44.5, 22.4), 0)
