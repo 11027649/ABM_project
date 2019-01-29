@@ -23,6 +23,7 @@ class Pedestrian(Agent):
         # Liu, 2014 parameters
         self.vision_angle = 170  # Degrees
         self.walls_x = [45.54, 53.46] # TODO: correct walls?
+        self.walls_y = [10, 23] # TODO: correct walls?
         self.neighbours = []
         # parameters
         self.N = 16 # Should be >= 2!
@@ -159,6 +160,7 @@ class Pedestrian(Agent):
             return False
 
         return True
+
     def pedestrians_in_field(self, vision_angle):
         """
             Returns the pedestrians that are in the cone that the pedestrian can
@@ -246,7 +248,7 @@ class Pedestrian(Agent):
         """
 
         # for getting the neighbours in the front 180 degrees within vision range; for calc_utility
-        peds_in_180 = self.pedestrians_in_field(170)
+        peds_in_180 = self.pedestrians_in_field(180)
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
@@ -304,8 +306,8 @@ class Pedestrian(Agent):
         else:
             closest_ped = self.R_vision_range-2*self.radius
 
-        # distance to road 'wall', if no pedestrians in view, closest_ped is set at vision range
-        closest_wall = self.dist_wall(direction) - 4*self.radius
+        # distance to road 'wall', if no pedestrians in view, closest_wall is set at vision range
+        closest_wall = self.dist_wall(direction) - self.radius
         # set negative distance to 0
         if closest_wall < 0:
             closest_wall = 0
@@ -332,33 +334,33 @@ class Pedestrian(Agent):
             target_dist = self.model.space.get_distance(next_pos, self.target_point)
 
         # calculate factors
-        Ek = 1 - (target_dist - self.R_vision_range - self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
+        Ek = 1 - (target_dist - self.R_vision_range + self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
         Ok =  closest_wall/self.R_vision_range # distance to closest obstacle/vision range
         Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range
         # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
-
         Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
-        Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
+        Ik = self.inertia(direction) # Difference in angle of current and possible directions
 
         return self.Ek_w * Ek + self.Ok_w * Ok + \
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
 
-    def traject_angle(self, direction, peds_in_180, next_pos):
-        """
-        Returns the traject angle
-        TODO: This function is never called?????????
-        """
-        # Get the visible neighbours (180)
-        # Get the end of the trajectory from the next_position
-        # Get the closest neighbour in this trajectory from this pedestrian to the next position of this pedestrian
-        # Should return False if there is no neighbour in view
-        closest_neigh = self.closest_ped_on_line(peds_in_180, direction)[1]
-        if closest_neigh is False:
-            return 0
-        else:
-            # Return the angle of the closest neighbours direction and the current pedestrians direction
-            return abs(closest_neigh.direction - direction)
+
+    def inertia(self, direction):
+        """Returns the inertia, based on the difference between the current direction (self.direction)
+        and the possible direction"""
+        # Calculate absolute difference in angles
+        diff = direction-self.direction
+        # Make difference positive
+        if diff < 0:
+            diff +=360
+        # Get smallest difference angle
+        if diff > 180:
+            diff = 360-diff
+            
+        # Return inertia
+        return diff/(self.vision_angle/2)
+
 
     def theta_angle(self, direction, ped, side):
         """Returns the angle between direction and the angle of the closest
