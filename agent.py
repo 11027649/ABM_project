@@ -84,10 +84,6 @@ class Pedestrian(Agent):
 
             # get new position and update direction
             next_pos, self.direction = self.choose_direction()
-            # print('gekozen direction', self.direction)
-            # print('current pos', self.pos)
-            # print('next pos', next_pos)
-            # print()
 
             # try to move agent
             try:

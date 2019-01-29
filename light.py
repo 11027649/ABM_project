@@ -22,7 +22,6 @@ class Light(Agent):
         if self.model.strategy == "Simultaneous":
             self.simultaneous()
         elif self.model.strategy == "Free":
-            
             self.free()
 
     def simultaneous(self):

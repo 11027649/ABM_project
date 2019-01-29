@@ -42,7 +42,6 @@ class Traffic(Model):
         self.lights = []
         self.place_lights()
 
-
         # we don't want to collect data when running the visualization
         self.data = False
 
@@ -54,8 +53,9 @@ class Traffic(Model):
         '''
         Method that places the ligths for the visualization. The lights keep
         the agents from crossing when they are red.
+        The ligths are agents, but they never move (so their positions are
+        hardcoded here.)
         '''
-        # Simultaneous Strategy
 
         # car lights
         self.new_light((44.5, 22.4), 0)
