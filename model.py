@@ -24,6 +24,9 @@ class Traffic(Model):
         self.y_max = y_max
         self.x_max = x_max
 
+        # self.strategy = "Free"
+        self.strategy = "Simultaneous"
+
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
         self.schedule_Pedestrian = RandomActivation(self)
@@ -38,6 +41,7 @@ class Traffic(Model):
 
         self.lights = []
         self.place_lights()
+
 
         # we don't want to collect data when running the visualization
         self.data = False
@@ -57,11 +61,11 @@ class Traffic(Model):
         self.new_light((44.5, 22.4), 0)
         self.new_light((54.5, 10.6), 0)
 
-        #"Up" lights
+        # "Down" lights
         self.new_light((53.5, 10.6), 250)
         self.new_light((53.5, 16.2), 250) #Median
 
-        #"Down" Lights
+        # "Up" Lights
         self.new_light((45.5, 16.8), 250) #Median
         self.new_light((45.5, 22.4), 250)
 
@@ -165,16 +169,16 @@ class Traffic(Model):
 
 
         # # either up or down
-        # if random.random() < 0.5:
+        if random.random() < 0.5:
         #     # if there's place, place a new pedestrian with a certain probability
-        #     # pos = (self.x_max / 2 - 1 , self.y_max - 1)
+            pos = (self.x_max / 2 - 1 , self.y_max - 1)
         #     pos = (random.uniform(24*2,26*2),  self.y_max - 1)
 
             if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "up")
 
         # else:
-        #     # pos = (self.x_max / 2 + 1, 0)
+            pos = (self.x_max / 2 + 1, 0)
         #     pos = (random.uniform(24*2,26*2),  0)
 
             if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):

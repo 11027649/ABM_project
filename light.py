@@ -11,23 +11,30 @@ class Light(Agent):
 
         self.pos = pos
         self.state = state
-
-        self.update_color()
+        self.color = "Red"
 
     def step(self):
         '''
         Update the state of the light.
         '''
         self.state = (self.state + 1) % 500
-        self.update_color()
 
-    def update_color(self):
+        if self.model.strategy == "Simultaneous":
+            self.simultaneous()
+        elif self.model.strategy == "Free":
+            
+            self.free()
+
+    def simultaneous(self):
         if self.state <= 300:
             self.color = "Red"
         elif self.state <= 450:
             self.color = "Green"
         else:
             self.color = "Orange"
+
+    def free(self):
+        self.color = "Green"
 
 # simultaneous strategy
 # 3 & 4 are the same
