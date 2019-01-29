@@ -83,6 +83,8 @@ class Pedestrian(Agent):
             # get new position and update direction
             next_pos, self.direction = self.choose_direction()
             print('gekozen direction', self.direction)
+            print('current pos', self.pos)
+            print('next pos', next_pos)
             print()
 
             # try to move agent
@@ -257,7 +259,7 @@ class Pedestrian(Agent):
         """
 
         # for getting the neighbours in the front 180 degrees within vision range; for calc_utility
-        peds_in_180 = self.pedestrians_in_field(360)
+        peds_in_180 = self.pedestrians_in_field(170)
 
         # Loop over the possible directions
         max_util = [-10**6, None, None]
@@ -343,7 +345,7 @@ class Pedestrian(Agent):
 
         Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
-
+        Ak = 0
 
         return self.Ek_w * Ek + self.Ok_w * Ok + \
                 self.Pk_w * Pk + self.Ak_w * Ak + \
@@ -447,7 +449,6 @@ class Pedestrian(Agent):
             angle = 180 - angle
 
         b_offset = abs(offset / math.cos(math.radians((angle))))
-        print('pos', self.pos)
         print('I should see all of those at least once', conal_neighbours)
         print('angle', angle)
         print('offset', b_offset)
@@ -468,7 +469,7 @@ class Pedestrian(Agent):
             else:
                 if neigh.pos[1] <= y_top and neigh.pos[1] >= y_bot:
                     intersecting.append(neigh)
-                
+
         print(intersecting)
         return intersecting
 
@@ -543,7 +544,6 @@ class Pedestrian(Agent):
                 min_neigh = inter_neigh[i]
 
         # b = self.closest_ped_on_line([min_neigh], direction)[0]
-
         # min_distance = math.sqrt(c**2 + b**2)
         min_distance = c
         return min_distance
