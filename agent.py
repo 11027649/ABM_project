@@ -43,18 +43,17 @@ class Pedestrian(Agent):
         self.speed_free = random.gauss(.134, .0342) # normal distribution of N(1.34, 0.342) m/s, but per (1/10s) timesteps
         # isn't it plusmines 0.342, so it's supposed to be half of it?
 
+
         # Set direction in degrees
         # TODO: assign target point with preference to right side?
         if self.dir == "up":
             self.direction = 270
             self.target_point = (random.uniform(24*2,26*2), 0)
-            self.own_light1 = (45.54, 22.4)
-            self.own_light2 = (45.54, 16.8)
+            self.own_light = 5
         elif self.dir == "down":
             self.direction = 90
             self.target_point = (random.uniform(24*2,26*2), 50)
-            self.own_light1 = (53.46, 10.6)
-            self.own_light2 = (53.46, 16.2)
+            self.own_light = 2
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
@@ -148,25 +147,20 @@ class Pedestrian(Agent):
         # check where the pedestrian is and assign it to the right traffic light
         if self.dir == "up" and not self.pos[1] < 16:
             if self.pos[1] > 21:
-                own_light = self.own_light1
                 correct_side = False
             elif self.pos[1] >= 16 and self.pos[1] <= 17:
-                own_light = self.own_light2
+                self.own_light = 4
                 correct_side = False
         elif self.dir == "down" and not self.pos[1] > 17:
             if self.pos[1] < 11:
-                own_light = self.own_light1
                 correct_side = False
             elif self.pos[1] >= 16 and self.pos[1] <= 17:
-                own_light = self.own_light2
+                self.own_light = 3
                 correct_side = False
 
-        if not correct_side:
-            # iterate over all the agents to find the correct light
-            for i in self.model.space.get_neighbors(own_light, include_center = True, radius = 0):
-                # if it's your own light, and it's not green
-                if not i.color == "Green":
-                    return False
+
+        if not correct_side and not self.model.lights[self.own_light].color is "Green":
+            return False
 
         return True
 
@@ -300,7 +294,7 @@ class Pedestrian(Agent):
         # DEBUG (put in all surrounding neighbours)
         # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
         peds_in_dir = self.pedestrian_intersection(direction, self.radius*2)
-        
+
         # DEBUG
         print('True angle', direction)
         print()
@@ -375,11 +369,11 @@ class Pedestrian(Agent):
         """Returns the angle between direction and the angle of the closest
         pedestrian to that line. If the velocities do not cross, theta=0.
         """
-        
+
         # Errorcheck
         if side != "left" and side != "right":
             raise ValueError("side should be 'left' or 'right', not", side)
-        
+
         # For pedestrian on left side with angle to the right (i.e. crossing direction)
         elif side == "left":
             # If area for angle is in two pieces (divided by radian=0 line)
@@ -394,9 +388,9 @@ class Pedestrian(Agent):
             # If area for angle is in ONE piece
             else:
                 if ped.direction > direction and ped.direction < (direction+180):
-                    return ped.direction-direction        
-            
-            
+                    return ped.direction-direction
+
+
         # For pedestrian on right side with angle to the left (i.e. crossing direction)
         elif side == "right":
             # If area for angle is in two pieces (divided by radian=0 line)
@@ -412,7 +406,7 @@ class Pedestrian(Agent):
             else:
                 if ped.direction < direction and ped.direction > (direction+180)%360:
                     return direction-ped.direction
-                
+
         return 0
 
     def target_projection(self):
@@ -591,37 +585,35 @@ class Car(Agent):
         self.correct_side = False
         if self.dir == "right":
             self.direction = 1
-            self.own_light = (44.54, 22.4)
+            self.own_light = 0
         else:
             self.direction = -1
-            self.own_light = (54.46, 10.6)
+            self.own_light = 1
 
     def step(self):
-        #Cars go straight for now.
+        # cars go straight for now.
         self.speed_changed = False
-        # deteremines if the agent has passed his own traffic light
-        if self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
-            for i in self.model.space.get_neighbors(self.own_light, include_center = True, radius = 0):
+        light = self.model.lights[self.own_light]
 
-                # if the light is orange and there is time to slow down regularly
-                if i.color == "Orange":
-                    if self.dir == "right":
-                        if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
-                            self.speed_change(-0.8/40)
+        # determines if the agent has passed his own traffic light
+        if self.correct_side == False and (self.vision_range > (light.pos[0] - self.pos[0]) * self.direction):
 
-                    else:
-                        if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
-                            self.speed_change(-0.8/40)
-
+            # if the light is orange and there is time to slow down regularly
+            if light.color == "Orange":
+                if self.dir == "right":
+                    if self.braking_distance() > ((light.pos[0] - 1) - self.pos[0]):
+                        self.speed_change(-0.8/40)
+                else:
+                    if self.braking_distance() > self.pos[0] - (light.pos[0] + 1):
+                        self.speed_change(-0.8/40)
 
                 # if the light is red, make sure to stop, by slowing down twice the normal rate
-                elif i.color == "Red":
+            elif light.color == "Red":
                     if self.dir == "right":
-                        if self.braking_distance() > ((self.own_light[0] - 1) - self.pos[0]):
+                        if self.braking_distance() > ((light.pos[0] - 1) - self.pos[0]):
                             self.speed_change(-0.8/20)
-
                     else:
-                        if self.braking_distance() > self.pos[0] - (self.own_light[0] + 1):
+                        if self.braking_distance() > self.pos[0] - (light.pos[0] + 1):
                             self.speed_change(-0.8/20)
 
 
@@ -633,16 +625,12 @@ class Car(Agent):
             self.speed_change(0.8/40)
 
         # if there are no cars ahead and no traffic lights, speed up till max speed
-        # (self.speed == 0 and ((self.own_light[0] - 1) - self.pos[0]) > 0) or
         elif (self.speed < self.max_speed and self.correct_side == True):
             self.speed_change(0.8/40)
 
-        elif self.speed < self.max_speed and self.correct_side == False and (self.vision_range > (self.own_light[0] - self.pos[0]) * self.direction):
-            if i.color == "Green":
+        elif self.speed < self.max_speed and self.correct_side == False and (self.vision_range > (light.pos[0] - self.pos[0]) * self.direction):
+            if light.color == "Green":
                 self.speed_change(0.8/40)
-
-        # elif self.speed < self.max_speed and self.correct_side == True:
-        #     self.speed_change(0.8/40)
 
         # take a step
         next_pos = (self.pos[0] + self.speed * self.direction, self.pos[1])
@@ -651,10 +639,10 @@ class Car(Agent):
         # checks if the traffic light has been passed (this information is used in next time step)
         if self.correct_side == False:
             if self.dir == "right":
-                if self.pos[0] > (self.own_light[0] - 1):
+                if self.pos[0] > (light.pos[0] - 1):
                     self.correct_side = True
             else:
-                if self.pos[0] < (self.own_light[0] + 1):
+                if self.pos[0] < (light.pos[0] + 1):
                     self.correct_side = True
 
         self.time += 1
@@ -685,7 +673,7 @@ class Car(Agent):
             car_neighbours = []
             #Find those that are cars
             for neigh in neighbours:
-                if (type(neigh) == Car):
+                if type(neigh) is Car or type(neigh) is Pedestrian:
                     car_neighbours.append(neigh)
             # if there are cars
             if car_neighbours:
@@ -693,7 +681,7 @@ class Car(Agent):
                 for neigh in car_neighbours:
                     new_dist = self.model.space.get_distance(self.pos, neigh.pos)
                     # Find the closest one
-                    if new_dist < min_dist and self.dir == neigh.dir:
+                    if (new_dist < min_dist and self.dir is neigh.dir) or type(neigh) is Pedestrian:
                         if (self.dir == "right" and self.pos[0] < neigh.pos[0]) or (self.dir == "left" and self.pos[0] > neigh.pos[0]):
                             min_dist = new_dist - 3
                 if min_dist is not 99999:

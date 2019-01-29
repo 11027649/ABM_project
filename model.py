@@ -35,12 +35,15 @@ class Traffic(Model):
               "Midsection": lambda m: self.check_median()})
 
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
+
+        self.lights = []
         self.place_lights()
 
-        # This is required for the datacollector to work
-        self.running = True
-
+        # we don't want to collect data when running the visualization
         self.data = False
+
+        # this is required for the datacollector to work
+        self.running = True
         self.datacollector.collect(self)
 
     def place_lights(self):
@@ -51,41 +54,24 @@ class Traffic(Model):
         # Simultaneous Strategy
 
         # car lights
-        self.new_light((44.54, 22.4), 0, 1)
-        self.new_light((54.46, 10.6), 0, 2)
+        self.new_light((44.5, 22.4), 0)
+        self.new_light((54.5, 10.6), 0)
 
         #"Up" lights
-        self.new_light((45.54, 22.4), 250, 6)
-        self.new_light((53.46, 16.2), 250, 4) #Median
+        self.new_light((53.5, 10.6), 250)
+        self.new_light((53.5, 16.2), 250) #Median
 
         #"Down" Lights
-        self.new_light((45.54, 16.8), 250, 5) #Median
-        self.new_light((53.46, 10.6), 250, 3)
-
-        #Alternating strategy
-        """
-
-        # car lights
-        self.new_light((int(0.45 * self.x_max), int(0.6 * self.y_max)), 200, 1) #Bottom Light
-        self.new_light((int(0.55 * self.x_max), int(0.4 * self.y_max)), 0, 2) #Top Light
-
-        #"Up" lights
-        self.new_light((23 * 2, 30), 200, 6)
-        self.new_light((27 * 2, 24.65), 400, 4) #Median
-
-        #"Down" Lights
-        self.new_light((23 * 2, 25.35), 200, 5) #Median
-        self.new_light((27 * 2, 20), 400, 3)
-
-        """
+        self.new_light((45.5, 16.8), 250) #Median
+        self.new_light((45.5, 22.4), 250)
 
 
-
-    def new_light(self, pos, state, light_id):
+    def new_light(self, pos, state):
         '''
         Method that creates a new agent, and adds it to the correct scheduler.
         '''
-        light = Light(self.next_id(), self, pos, state, light_id)
+        light = Light(self.next_id(), self, pos, state)
+        self.lights.append(light)
         self.space.place_agent(light, pos)
         getattr(self, 'schedule_Light').add(light)
 
@@ -153,29 +139,29 @@ class Traffic(Model):
                     self.remove_agent(current_agent)
 
 
-        # if random.random() < 0.5:
+        if random.random() < 0.5:
 
-        #     # if there's place place a new car with probability 0.7
-        #     pos = (0, 19.5)
+            # if there's place place a new car with probability 0.7
+            pos = (0, 19.5)
 
-        #     car_near = False
-        #     for i in range(5):
-        #         if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
-        #             car_near = True
+            car_near = False
+            for i in range(5):
+                if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
+                    car_near = True
 
-        #     if random.random() < 0.5 and car_near == False:
-        #         self.new_car(pos, "right")
+            if random.random() < 0.5 and car_near == False:
+                self.new_car(pos, "right")
 
-        # else:
-        #     # if there's place place a new car with probability 0.7
-        #     pos = (self.x_max - 1, 13.5)
+        else:
+            # if there's place place a new car with probability 0.7
+            pos = (self.x_max - 1, 13.5)
 
-        #     car_near = False
-        #     for i in range(5):
-        #         if self.space.get_neighbors((pos[0] - 5 * i, pos[1]), include_center = True, radius = 2.5):
-        #             car_near = True
-        #     if random.random() < 0.5 and car_near == False:
-        #         self.new_car(pos, "left")
+            car_near = False
+            for i in range(5):
+                if self.space.get_neighbors((pos[0] - 5 * i, pos[1]), include_center = True, radius = 2.5):
+                    car_near = True
+            if random.random() < 0.5 and car_near == False:
+                self.new_car(pos, "left")
 
 
         # either up or down
@@ -184,14 +170,14 @@ class Traffic(Model):
             # pos = (self.x_max / 2 - 1 , self.y_max - 1)
             pos = (random.uniform(24*2,26*2),  self.y_max - 1)
 
-            if random.random() < 0.4 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
+            if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "up")
 
         else:
             # pos = (self.x_max / 2 + 1, 0)
             pos = (random.uniform(24*2,26*2),  0)
 
-            if random.random() < 0.4 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
+            if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "down")
 
 

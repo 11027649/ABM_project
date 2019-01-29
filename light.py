@@ -6,23 +6,18 @@ import math
 import numpy as np
 
 class Light(Agent):
-    def __init__(self, unique_id, model, pos, state, light_id):
+    def __init__(self, unique_id, model, pos, state):
         super().__init__(unique_id, model)
 
         self.pos = pos
         self.state = state
+
         self.update_color()
-        self.light_id = light_id
-        self.stateSlow = 0
 
     def step(self):
         '''
         Update the state of the light.
         '''
-        #self.stateSlow = (self.stateSlow + 1) % 3
-        #if self.stateSlow == 0:
-         #   self.state = (self.state + 1) % 405
-
         self.state = (self.state + 1) % 500
         self.update_color()
 
