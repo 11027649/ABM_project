@@ -23,7 +23,7 @@ class Pedestrian(Agent):
         # Liu, 2014 parameters
         self.vision_angle = 170  # Degrees
         self.walls_x = [23*2, 27*2] # TODO: correct walls?
-
+        self.neighbours = []
         # parameters
         self.N = 16 # Should be >= 2!
         self.R_vision_range = 3 # Meters
@@ -75,6 +75,9 @@ class Pedestrian(Agent):
         # check if traffic light is green or if on road side
         if not self.on_road_side() or self.traffic_green():
             # get list of pedestrians in the vision field
+            # TODO: check if we can do it with only 180
+            self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
+
             peds_in_vision = self.pedestrians_in_field(self.vision_angle)
 
             # get desired_speed
@@ -105,6 +108,7 @@ class Pedestrian(Agent):
                     if type(i) != Light:
                         print('error pos', self.pos)
                         print('error dir', self.dir)
+                        print('waar hij in loopt', i.pos)
                         print(i)
                         raise ValueError("COLLISION")
 
@@ -173,13 +177,11 @@ class Pedestrian(Agent):
         """
 
         # get all surrounding neighbors
-        neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
 
         rotatedNeighList = []
         i = -1
         # rotate all the neigbours facing either up or down
-        for neigh in neighbors:
-
+        for neigh in self.neighbours:
             i = i + 1
 
             if isinstance(neigh, Pedestrian):
@@ -189,13 +191,8 @@ class Pedestrian(Agent):
 
         # calculate if the pedestrians are within the 'viewing triangle'
         for rotatedNeigh in rotatedNeighList:
-            if self.dir == "down":
-                if rotatedNeigh[1] - self.pos[1] > math.tan(math.radians(90 - (vision_angle / 2))) * abs(rotatedNeigh[0] - self.pos[0]):
-                    cone_neigh.append(neighbors[rotatedNeigh[2]])
-
-            else:
-                if rotatedNeigh[1] - self.pos[1] < -math.tan(math.radians(90 - (vision_angle / 2))) * abs(rotatedNeigh[0] - self.pos[0]):
-                    cone_neigh.append(neighbors[rotatedNeigh[2]])
+            if rotatedNeigh[1] - self.pos[1] < -math.tan(math.radians(90 - (vision_angle / 2))) * abs(rotatedNeigh[0] - self.pos[0]):
+                cone_neigh.append(self.neighbours[rotatedNeigh[2]])
 
         return cone_neigh
 
@@ -206,15 +203,15 @@ class Pedestrian(Agent):
         # TODO: Move this function to a helper functions file?
         """
 
-        if self.dir == 'up':
-            angle = self.direction - 270
-        else:
-            angle = self.direction - 90
+        # if self.dir == 'up':
+        rot_angle = self.direction - 270
+        # else:
+        #     angle = self.direction - 90
 
-        if angle < 0:
-            angle += 360
+        if rot_angle < 0:
+            rot_angle += 360
 
-        angle_rad = math.radians(angle)
+        angle_rad = math.radians(rot_angle)
 
         ox, oy = origin
         px, py = point
@@ -301,7 +298,7 @@ class Pedestrian(Agent):
         # list of pedestrians in that direction
         # DEBUG (put in all surrounding neighbours)
         # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
-        peds_in_dir = self.pedestrian_intersection(peds_in_180, direction, self.radius*2)
+        peds_in_dir = self.pedestrian_intersection(direction, self.radius*2)
         
         # DEBUG
         print('True angle', direction)
@@ -414,7 +411,7 @@ class Pedestrian(Agent):
         """
         return (self.pos[0] + chosen_velocity*np.cos(math.radians(theta_chosen)), self.pos[1]+chosen_velocity*np.sin(math.radians(theta_chosen)))
 
-    def pedestrian_intersection(self, conal_neighbours, angle, offset):
+    def pedestrian_intersection(self, angle, offset):
         """
         Input: conal_neighbours, the neighbours that the pedestrian can see.
         The function will check for intersections on the given angle. For this we
@@ -425,51 +422,11 @@ class Pedestrian(Agent):
         """
 
         intersecting = []
-    
-        slope = math.tan(math.radians(360 - angle))
-        b = self.pos[1]
-
-        # calcuate the y offset of the range of lines
-        # if angle > 89 and angle <= 90:
-        #     angle = 89
-        # if angle > 90 and angle < 91:
-        #     angle = 91
-
-        # if angle > 260 and angle <= 270:
-        #     angle = 250
-        # if angle > 270 and angle < 280:
-        #     angle = 280
-
-
-        if angle > 270:
-            angle = 360 - angle
-        elif angle > 180:
-            angle = angle - 180 
-        elif angle > 90:
-            angle = 180 - angle
-
-        b_offset = abs(offset / math.cos(math.radians((angle))))
-        print('I should see all of those at least once', conal_neighbours)
-        print('angle', angle)
-        print('offset', b_offset)
-        print('slope', slope)
-        # calcuate the new intersection points based off the offset of the line
-        b_top = b + b_offset
-        b_bot = b - b_offset
-
-        for neigh in conal_neighbours:
-            # these are the heights of the offset lines at the x position of the neighbour
-            y_top = slope * (neigh.pos[0] - self.pos[0]) + b_top
-            y_bot = slope * (neigh.pos[0] - self.pos[0]) + b_bot
-
-
-            if angle > 78:
-                if neigh.pos[0] < self.pos[0] + offset and neigh.pos[0] > self.pos[0] - offset:
-                    intersecting.append(neigh)
-            else:
-                if neigh.pos[1] <= y_top and neigh.pos[1] >= y_bot:
-                    intersecting.append(neigh)
-
+        for neighbour in self.neighbours:
+            rotatedPed = self.rotate_intersection(self.pos, neighbour.pos, angle)
+            if rotatedPed[0] >= self.pos[0] - self.radius and rotatedPed[1] >= self.pos[1] - offset and rotatedPed[1] <= self.pos[1] + offset:
+                intersecting.append(neighbour)
+        print('aaa')
         print(intersecting)
         return intersecting
 
@@ -511,6 +468,24 @@ class Pedestrian(Agent):
         return min_distance, min_pedestrian, side
 
     # TODO: can prob be in 1 function
+
+    def rotate_intersection(self, origin, point, angle):
+        """
+        Rotate a point counterclockwise by a given angle around a given origin.
+
+        The angle should be given in radians.
+        """
+
+        if angle < 0:
+            angle += 360
+        angle_rad = math.radians(angle)
+        ox, oy = origin
+        px, py = point
+
+        qx = ox + math.cos(angle_rad) * (px - ox) + math.sin(angle_rad) * (py - oy)
+        qy = oy - math.sin(angle_rad) * (px - ox) + math.cos(angle_rad) * (py - oy)
+        return (qx, qy)
+
     def rotatePedestrian(self, origin, point, direction):
         """
         Rotate a point counterclockwise by a given angle around a given origin.
