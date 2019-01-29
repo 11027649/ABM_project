@@ -102,15 +102,15 @@ class Pedestrian(Agent):
 
             # self test, this should never happen: if it does, something is wrong in our code
             neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.radius)
-            if len(neighbors) > 0:
-                for i in neighbors:
-                    if type(i) != Light:
-                        print('error pos', self.pos)
-                        print('error dir', self.dir)
-                        print('waar hij in loopt', i.pos)
-                        print(i)
-                        print('dist', math.sqrt((self.pos[0]-i.pos[0])**2+(self.pos[1]-i.pos[1])**2))
-                        raise ValueError("COLLISION")
+            # if len(neighbors) > 0:
+            #     for i in neighbors:
+            #         if type(i) != Light:
+            #             print('error pos', self.pos)
+            #             print('error dir', self.dir)
+            #             print('waar hij in loopt', i.pos)
+            #             print(i)
+            #             print('dist', math.sqrt((self.pos[0]-i.pos[0])**2+(self.pos[1]-i.pos[1])**2))
+            #             raise ValueError("COLLISION")
 
             # Finalize this step
             self.time += 1
@@ -680,9 +680,15 @@ class Car(Agent):
                 for neigh in car_neighbours:
                     new_dist = self.model.space.get_distance(self.pos, neigh.pos)
                     # Find the closest one
-                    if (new_dist < min_dist and self.dir is neigh.dir) or (type(neigh) is Pedestrian and (neigh.pos[1] > 11 and neigh.pos[1] < 16) or (neigh.pos[1] > 17 and neigh.pos[1] < 22)):
+                    if (new_dist < min_dist and self.dir is neigh.dir):
                         if (self.dir == "right" and self.pos[0] < neigh.pos[0]) or (self.dir == "left" and self.pos[0] > neigh.pos[0]):
                             min_dist = new_dist - 3
+
+                    elif type(neigh) is Pedestrian and (new_dist < min_dist):
+                        if (neigh.pos[1] > 11 and neigh.pos[1] < 16) or (neigh.pos[1] > 17 and neigh.pos[1] < 22):
+                            if (self.dir == "right" and self.pos[0] + 1.8 < neigh.pos[0]) or (self.dir == "left" and self.pos[0] - 1.8 > neigh.pos[0]):
+                                min_dist = new_dist - 3
+
                 if min_dist is not 99999:
                     return min_dist
                 else:
