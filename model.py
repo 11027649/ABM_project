@@ -21,6 +21,10 @@ class Traffic(Model):
 
         super().__init__()
 
+        # Do I need this?
+        self.car_light = False
+        self.ped_light = True
+
         self.y_max = y_max
         self.x_max = x_max
 
