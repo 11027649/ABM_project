@@ -17,7 +17,6 @@ class Pedestrian(Agent):
 
         # Radius
         self.radius = .2
-
         self.remove = False
 
         # Liu, 2014 parameters
