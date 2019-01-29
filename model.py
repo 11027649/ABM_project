@@ -141,11 +141,7 @@ class Traffic(Model):
 
         if random.random() < 0.5:
 
-<<<<<<< HEAD
-        #     # if there's place place a new car with probability 0.7
-=======
             # if there's place place a new car with probability 0.7
->>>>>>> fc4a3e01ae3427301f895dde303227ab063c6eb8
             pos = (0, 19.5)
 
             car_near = False
@@ -174,25 +170,15 @@ class Traffic(Model):
         #     # pos = (self.x_max / 2 - 1 , self.y_max - 1)
         #     pos = (random.uniform(24*2,26*2),  self.y_max - 1)
 
-<<<<<<< HEAD
-        #     if random.random() < 0.05 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
-        #         self.new_pedestrian(pos, "up")
-=======
             if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "up")
->>>>>>> fc4a3e01ae3427301f895dde303227ab063c6eb8
 
         # else:
         #     # pos = (self.x_max / 2 + 1, 0)
         #     pos = (random.uniform(24*2,26*2),  0)
 
-<<<<<<< HEAD
-        #     if random.random() < 0.05 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
-        #         self.new_pedestrian(pos, "down")
-=======
             if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "down")
->>>>>>> fc4a3e01ae3427301f895dde303227ab063c6eb8
 
 
         # Save the statistics
