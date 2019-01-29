@@ -24,6 +24,7 @@ class Traffic(Model):
         self.y_max = y_max
         self.x_max = x_max
 
+        # self.strategy = "Free"
         self.strategy = "Simultaneous"
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
