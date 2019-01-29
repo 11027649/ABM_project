@@ -349,6 +349,7 @@ class Pedestrian(Agent):
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
 
+
     def inertia(self, direction):
         """Returns the inertia, based on the difference between the current direction (self.direction)
         and the possible direction"""
@@ -363,6 +364,7 @@ class Pedestrian(Agent):
             
         # Return inertia
         return diff/(self.vision_angle/2)
+
 
     def theta_angle(self, direction, ped, side):
         """Returns the angle between direction and the angle of the closest
