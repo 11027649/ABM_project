@@ -308,6 +308,9 @@ class Pedestrian(Agent):
         if len(peds_in_dir) > 0:
             # get closest pedestrian: min_distance, min_pedestrian.pos
             closest_ped = self.closest_pedestrian(peds_in_dir, direction) - 2 * self.radius
+            # set negative distance to 0
+            if closest_ped < 0:
+                closest_ped = 0
             # if no pedestrians in view, closest_ped distance is set at vision range
         else:
             closest_ped = self.R_vision_range-2*self.radius
