@@ -21,6 +21,9 @@ class Traffic(Model):
 
         super().__init__()
 
+        # Do I need this? 
+        self.waiting_for_car = False
+
         self.y_max = y_max
         self.x_max = x_max
 

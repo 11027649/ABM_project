@@ -35,6 +35,32 @@ class Light(Agent):
         else:
             self.color = "Orange"
 
+    def simultaneous_step(self):
+        """Not sure if this will be needed"""
+        # First check for car
+
+
+    def simultaneous_car(self):
+        """The light profile for the car lights"""
+        if self.color == "Green":
+            self.state _+= 1
+            if self.state == 40:
+                self.color = "Orange"
+        elif self.color == "Orange":
+            self.state += 1
+            # Placehodler ToDo Figure out when it should tip over
+            if self.state == 60:
+                self.color = "Red"
+        elif self.model.
+        closest_car = self.closest_car()
+        if
+
+
+    def simultaneous_ped(self):
+        """The light profile for the pedestrian lights"""
+
+
+
     def free(self):
         self.color = "Green"
 
