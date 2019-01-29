@@ -4,7 +4,7 @@ from mesa.space import ContinuousSpace
 import random
 import math
 import numpy as np
-from numba import jit
+
 from light import Light
 
 class Pedestrian(Agent):
@@ -17,6 +17,7 @@ class Pedestrian(Agent):
 
         # Radius
         self.radius = .2
+
         self.remove = False
 
         # Liu, 2014 parameters
@@ -292,7 +293,7 @@ class Pedestrian(Agent):
         # DEBUG (put in all surrounding neighbours)
         # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
         peds_in_dir = self.pedestrian_intersection(direction, self.radius*2 + 0.01)
-        
+
         # DEBUG
         # print('True angle', direction)
         # print()
