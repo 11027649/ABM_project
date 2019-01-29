@@ -41,8 +41,7 @@ class Pedestrian(Agent):
         self.Pk_w_7 = .6
         self.Ak_w_7 = .3
         self.Ik_w_7 = .1
-        self.speed_free = random.gauss(.134, .0342) # normal distribution of N(1.34, 0.342) m/s, but per (1/10s) timesteps
-        # isn't it plusmines 0.342, so it's supposed to be half of it?
+        self.speed_free = random.gauss(.134, .0342**2) # normal distribution of N(1.34, 0.342^2) m/s, but per (1/10s) timesteps
 
 
         # Set direction in degrees
