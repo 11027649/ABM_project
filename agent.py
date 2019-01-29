@@ -51,11 +51,11 @@ class Pedestrian(Agent):
         # TODO: assign target point with preference to right side?
         if self.dir == "up":
             self.direction = 270
-            self.target_point = (random.uniform(24*2,26*2), 0)
+            self.target_point = (random.uniform(self.target_x[0], self.target_x[1]), 0)
             self.own_light = 5
         elif self.dir == "down":
             self.direction = 90
-            self.target_point = (random.uniform(24*2,26*2), 50)
+            self.target_point = (random.uniform(self.target_x[0], self.target_x[1]), 50)
             self.own_light = 2
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
@@ -100,19 +100,6 @@ class Pedestrian(Agent):
                     (self.dir == "down" and self.direction%360 >180)):
                     # let it be removed by the step function in model.py
                     self.remove = True
-
-
-            # self test, this should never happen: if it does, something is wrong in our code
-            neighbors = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.radius)
-            # if len(neighbors) > 0:
-            #     for i in neighbors:
-            #         if type(i) != Light:
-            #             print('error pos', self.pos)
-            #             print('error dir', self.dir)
-            #             print('waar hij in loopt', i.pos)
-            #             print(i)
-            #             print('dist', math.sqrt((self.pos[0]-i.pos[0])**2+(self.pos[1]-i.pos[1])**2))
-            #             raise ValueError("COLLISION")
 
             # Finalize this step
             self.time += 1
@@ -173,11 +160,10 @@ class Pedestrian(Agent):
             can also be a bit heigher to check the most outer parts.).
         """
 
-        # get all surrounding neighbors
-
         rotatedNeighList = []
         i = -1
         # rotate all the neigbours facing either up or down
+        # TODO: Create one list
         for neigh in self.neighbours:
             i = i + 1
 
@@ -228,6 +214,7 @@ class Pedestrian(Agent):
 
         # sanity check
         if self.vision_angle == 170:
+            # TODO: do calculations again, maybe no hardcoding?
             dens = 0.0376
         else:
             raise ValueError('Code only works for 170 degrees vision range for now')
@@ -256,10 +243,11 @@ class Pedestrian(Agent):
         peds_in_180 = self.pedestrians_in_field(180)
 
         # Loop over the possible directions
-        max_util = [-10**6, None, None]
         pos_directions = self.possible_directions()
+        # TODO: Please check if using the first in pos_directions is going okay, I think it is, but im too tired to be 100% sure
+        max_util = list(self.calc_utility(pos_directions[0], peds_in_180))+[pos_directions[0]]
 
-        for direction in pos_directions: #TODO I think this is where something may be going wrong
+        for direction in pos_directions[1:]: #TODO I think this is where something may be going wrong
             # Calculate utility for every possible direction
             util, next_pos = self.calc_utility(direction, peds_in_180)
 
@@ -293,13 +281,8 @@ class Pedestrian(Agent):
         """
 
         # list of pedestrians in that direction
-        # DEBUG (put in all surrounding neighbours)
-        # peds_in_180 = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.R_vision_range)
         peds_in_dir = self.pedestrian_intersection(direction, self.radius*2 + 0.01)
 
-        # DEBUG
-        # print('True angle', direction)
-        # print()
         # get closest pedestrian in this directions
         if len(peds_in_dir) > 0:
             # get closest pedestrian: min_distance, min_pedestrian.pos
@@ -320,9 +303,8 @@ class Pedestrian(Agent):
         # determine possible new position
         chosen_velocity = min(self.des_speed, closest_ped, closest_wall)
         next_pos = self.new_pos(chosen_velocity, direction)
-        # print('velocities', chosen_velocity, self.des_speed, closest_ped, closest_wall)
 
-        # finds the pedestrians in the next step length
+        # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
         if len(peds_in_180)>0:
             cpil = self.closest_ped_on_line(peds_in_180, direction)[1:]
             theta_vj = self.theta_angle(direction, cpil[0],cpil[1])
@@ -342,11 +324,10 @@ class Pedestrian(Agent):
         Ek = 1 - (target_dist - self.R_vision_range + self.speed_free)/(2*self.speed_free) # Efficiency of approaching target point
         Ok =  closest_wall/self.R_vision_range # distance to closest obstacle/vision range
         Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range
-        # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
-        Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
+        Ak = 1 - math.radians(theta_vj)/math.pi  # avoiding collision with closest pedestrian to direction-line
         Ik = self.inertia(direction) # Difference in angle of current and possible directions
 
-        # Equation 1
+        # Equation 1 in Liu, 2014
         return self.Ek_w * Ek + self.Ok_w * Ok + \
                 self.Pk_w * Pk + self.Ak_w * Ak + \
                 self.Ik_w * Ik, next_pos
@@ -462,8 +443,7 @@ class Pedestrian(Agent):
             rotatedPed = self.rotate_intersection(self.pos, neighbour.pos, angle)
             if rotatedPed[0] >= self.pos[0] - self.radius and rotatedPed[1] >= self.pos[1] - offset and rotatedPed[1] <= self.pos[1] + offset:
                 intersecting.append(neighbour)
-        # print('aaa')
-        # print(intersecting)
+
         return intersecting
 
     def closest_ped_on_line(self, neighboursList, direction):
@@ -499,7 +479,7 @@ class Pedestrian(Agent):
                         side = 'left'
                     min_pedestrian = neighbour
                     min_distance = cur_distance
-        # print(side)
+
         # Returns the min distance and the corresponding pedestrian
         return min_distance, min_pedestrian, side
 
