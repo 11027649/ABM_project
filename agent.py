@@ -322,8 +322,8 @@ class Pedestrian(Agent):
 
         # finds the pedestrians in the next step length
         if len(peds_in_180)>0:
-            cpil = self.closest_ped_on_line(peds_in_180, direction)[1]
-            theta_vj = self.theta_calc(cpil,direction)
+            cpil = self.closest_ped_on_line(peds_in_180, direction)[1:]
+            theta_vj = self.theta_angle(direction, cpil[0], cpil[1])
         else:
             theta_vj = 0
 
@@ -341,7 +341,6 @@ class Pedestrian(Agent):
         Ok =  closest_wall/self.R_vision_range # distance to closest obstacle/vision range
         Pk =  closest_ped/self.R_vision_range # distance to closest person/vision range
         # Theta_vj is the angle between directions of this pedestrian and the pedestrian closest to the trajectory
-
         Ak = 1 - math.radians(theta_vj)/math.pi  # flocking, kinda if it was true flocking then it would have more agents being examined, we can look at this later.
         Ik = abs(self.direction-direction) / (self.vision_angle/2) # Difference in angle of current and possible directions
 
@@ -366,17 +365,49 @@ class Pedestrian(Agent):
             # Return the angle of the closest neighbours direction and the current pedestrians direction
             return abs(closest_neigh.direction - direction)
 
-    def theta_calc(self, ped, angle):
-        """returns the angle given the pedestrians location and the directions"""
-        m = math.tan(math.radians(angle))
-        b = self.pos[1] - (m * self.pos[0])
+    def theta_angle(self, direction, ped, side):
+        """Returns the angle between direction and the angle of the closest
+        pedestrian to that line. If the velocities do not cross, theta=0.
+        """
+        
+        # Errorcheck
+        if side != "left" and side != "right":
+            raise ValueError("side should be 'left' or 'right', not", side)
+        
+        # For pedestrian on left side with angle to the right (i.e. crossing direction)
+        elif side == "left":
+            # If area for angle is in two pieces (divided by radian=0 line)
+            if direction > 180:
+                # If angle and direction are on the same side of division
+                if ped.direction > direction:
+                    return ped.direction-direction
+                # If angle and direction are NOT on the same side of division
+                elif ped.direction < (direction+180)%360:
+                    return 360-direction + ped.direction
 
-        if ped.pos[1] - (m*ped.pos[0])+b < 0 and ped.direction>angle and ped.direction < angle+math.radians(180):
-            return abs(angle - ped.direction)
-        elif ped.pos[1] - (m*ped.pos[0])+b > 0 and (ped.direction<angle or ped.direction > angle+math.radians(180)):
-            return abs(angle - ped.direction)
-        else:
-            return 0
+            # If area for angle is in ONE piece
+            else:
+                if ped.direction > direction and ped.direction < (direction+180):
+                    return ped.direction-direction        
+            
+            
+        # For pedestrian on right side with angle to the left (i.e. crossing direction)
+        elif side == "right":
+            # If area for angle is in two pieces (divided by radian=0 line)
+            if direction < 180:
+                # If angle and direction are on the same side of division
+                if ped.direction < direction:
+                    return direction-ped.direction
+                # If angle and direction are NOT on the same side of division
+                elif ped.direction > direction+180:
+                    return direction + 360-ped.direction
+
+            # If area for angle is in ONE piece
+            else:
+                if ped.direction < direction and ped.direction > (direction+180)%360:
+                    return direction-ped.direction
+                
+        return 0
 
     def target_projection(self):
         """
