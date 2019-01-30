@@ -838,7 +838,7 @@ class Light(Agent):
                 self.color = "Red"
                 self.state = 0
                 self.car_light = False
-                self.ped_light = True
+                self.ped_light = True44
 
     def simultaneous_ped(self):
         """The light profile for the pedestrian lights"""
