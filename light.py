@@ -7,6 +7,7 @@ import random
 import math
 import numpy as np
 
+
 class Light(Agent):
     def __init__(self, unique_id, model, pos, state, light, color, lane):
         super().__init__(unique_id, model)
