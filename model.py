@@ -29,7 +29,8 @@ class Traffic(Model):
         self.x_max = x_max
 
         # self.strategy = "Free"
-        self.strategy = "Simultaneous"
+        # self.strategy = "Simultaneous"
+        self.strategy = "Reactive"
 
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
@@ -54,23 +55,23 @@ class Traffic(Model):
         '''
 
         # car lights
-        self.new_light((44.5, 22.4), 0, "Traf", "Red")
-        self.new_light((54.5, 10.6), 0, "Traf", "Red")
+        self.new_light((44.5, 22.4), 0, "Traf", "Red", "Bottom")
+        self.new_light((54.5, 10.6), 0, "Traf", "Red", "Top")
 
         # "Down" lights
-        self.new_light((53.5, 10.6), 250, "Ped", "Green")
-        self.new_light((53.5, 16.2), 250, "Ped", "Green") #Median
+        self.new_light((53.5, 10.6), 250, "Ped", "Green", "Top")
+        self.new_light((53.5, 16.2), 250, "Ped", "Green", "Top") #Median
 
         # "Up" Lights
-        self.new_light((45.5, 16.8), 250, "Ped", "Green") #Median
-        self.new_light((45.5, 22.4), 250, "Ped", "Green")
+        self.new_light((45.5, 16.8), 250, "Ped", "Green", "Bottom") #Median
+        self.new_light((45.5, 22.4), 250, "Ped", "Green", "Bottom")
 
 
-    def new_light(self, pos, state, type, color):
+    def new_light(self, pos, state, type, color, lane):
         '''
         Method that creates a new agent, and adds it to the correct scheduler.
         '''
-        light = Light(self.next_id(), self, pos, state, type, color)
+        light = Light(self.next_id(), self, pos, state, type, color, lane)
         self.lights.append(light)
         self.space.place_agent(light, pos)
         getattr(self, 'schedule_Light').add(light)
