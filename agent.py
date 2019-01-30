@@ -800,7 +800,7 @@ class Light(Agent):
         '''
         Update the state of the light.
         '''
-        self.state = (self.state + 1) % 500
+        #self.state = (self.state + 1) % 500
 
         if self.model.strategy == "Simultaneous":
             self.simultaneous_step()
@@ -825,12 +825,12 @@ class Light(Agent):
         # checks which type of light it is
         if self.type == "Traf":
             # checks to see if its red and needs to change
-            if self.color == "Red" and (self.car_light):
+            if self.color == "Red" and self.car_light:
                 self.color = "Green"
             self.simultaneous_car()
         elif self.type == "Ped":
             # checks if its red and needs to change
-            if self.color == "Red" and (self.ped_light):
+            if self.color == "Red" and self.ped_light:
                 self.color = "Green"
             self.simultaneous_ped()
 
@@ -839,13 +839,13 @@ class Light(Agent):
         # Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
-            if self.state >= 40:
+            if self.state >= 75:
                 self.color = "Orange"
                 self.state = 0
         elif self.color == "Orange":
             self.state += 1
             # Placehodler ToDo Figure out when it should tip over
-            if self.state >= 20:
+            if self.state >= 25:
                 self.color = "Red"
                 self.state = 0
                 for light in self.model.lights:
@@ -857,14 +857,14 @@ class Light(Agent):
         # Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
-            if self.state >= 20 and (
+            if self.state >= 100 and (
                     self.model.lights[0].closest_car() <= 7 or self.model.lights[1].closest_car() <= 7):
                 self.color = "Orange"
                 self.state = 0
         elif self.color == "Orange":
             self.state += 1
             # Placehodler ToDo Figure out when it should tip over
-            if self.state >= 10:
+            if self.state >= 25:
                 self.color = "Red"
                 self.state = 0
                 for light in self.model.lights:
@@ -947,6 +947,7 @@ class Light(Agent):
                         light.car_light = True
 
     def free(self):
+        self.step += 1
         self.color = "Green"
 
     def closest_car(self):
