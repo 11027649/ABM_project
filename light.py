@@ -26,10 +26,10 @@ class Light(Agent):
         self.state = (self.state + 1) % 500
 
         if self.model.strategy == "Simultaneous":
-            self.simultaneous()
+            self.simultaneous_step()
         elif self.model.strategy == "Free":
             self.free()
-
+    
         if self.unique_id == 1 or self.unique_id == 2:
             self.closest = self.closest_car()
 
@@ -42,47 +42,55 @@ class Light(Agent):
             self.color = "Orange"
 
     def simultaneous_step(self):
-        """Not sure if this will be needed"""
+        """Simultaneaous step function updated"""
+        #checks which type of light it is
         if self.type == "Traf":
-            if self.color == "Red" and self.type == "Traf" and self.car_light:
+            #checks to see if its red and needs to change
+            if self.color == "Red" and (self.car_light):
                 self.color = "Green"
             self.simultaneous_car()
         elif self.type == "Ped":
-            if self.color == "Red" and self.ped_light:
+            #checks if its red and needs to change
+            if self.color == "Red" and (self.ped_light):
                 self.color = "Green"
             self.simultaneous_ped()
 
 
     def simultaneous_car(self):
         """The light profile for the car lights"""
+        #Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
-            if self.state == 40:
+            if self.state >= 40:
                 self.color = "Orange"
+                self.state = 0
         elif self.color == "Orange":
             self.state += 1
             # Placehodler ToDo Figure out when it should tip over
-            if self.state == 60:
+            if self.state >= 20:
                 self.color = "Red"
                 self.state = 0
-                self.car_light = False
-                self.ped_light = True
+                for light in self.model.lights:
+                    light.car_light = False
+                    light.ped_light = True
 
     def simultaneous_ped(self):
         """The light profile for the pedestrian lights"""
+        # Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
-            if self.state >= 15 and self.closest_car()<30:
+            if self.state >= 20 and (self.model.lights[0].closest_car()<=7 or self.model.lights[1].closest_car()<=7):
                 self.color = "Orange"
+                self.state = 0
         elif self.color == "Orange":
             self.state += 1
             # Placehodler ToDo Figure out when it should tip over
-            if self.state == 20:
+            if self.state >= 10:
                 self.color = "Red"
                 self.state = 0
-                self.ped_light = False
-                self.cer_light = True
-
+                for light in self.model.lights:
+                    light.ped_light = False
+                    light.car_light = True
 
     def free(self):
         self.color = "Green"
