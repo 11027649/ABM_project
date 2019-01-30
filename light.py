@@ -53,6 +53,22 @@ class Light(Agent):
                 self.color = "Green"
             self.simultaneous_ped()
 
+    def staggered_step(self):
+        """Updates for staggered step functions"""
+        """Simultaneaous step function updated"""
+        #checks which type of light it is
+        if self.type == "Traf":
+            #checks to see if its red and needs to change
+            if self.color == "Red" and (self.car_light):
+                self.color = "Green"
+            self.simultaneous_car()
+        elif self.type == "Ped":
+            #checks if its red and needs to change
+            if self.color == "Red" and (self.ped_light):
+                self.color = "Green"
+            self.simultaneous_ped()
+
+
 
     def simultaneous_car(self):
         """The light profile for the car lights"""
