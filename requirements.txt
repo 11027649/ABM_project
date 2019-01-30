@@ -1,0 +1,6 @@
+mesa
+math
+numpy
+random
+matplotlib
+time
