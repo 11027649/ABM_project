@@ -46,6 +46,7 @@ class Pedestrian(Agent):
         # self.Ik_w_7 = .1
 
         self.speed_free = random.gauss(self.speed_mean, self.speed_sd**2) # normal distribution of N(1.34, 0.342^2) m/s, but per (1/10s) timesteps
+        self.crossing_chance = max(0, min(1, random.gauss(0.5, 0.15))) # generates a nice 'normal distribution', max 1, min 0
 
         # Set direction in degrees
         # TODO: assign target point with preference to right side?
@@ -78,7 +79,7 @@ class Pedestrian(Agent):
         """
 
         # check if traffic light is green or if on road side
-        if not self.on_road_side() or self.traffic_green():
+        if self.red_crossing() or not self.on_road_side() or self.traffic_green():
             # get list of pedestrians in the vision field
             # TODO: check if we can do it with only 180
             self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
@@ -104,6 +105,26 @@ class Pedestrian(Agent):
             # Finalize this step
             self.time += 1
 
+    def red_crossing(self):
+        if self.dir == "up":
+            if self.pos[1] > 21:
+                light_to_watch = 0
+            else:
+                light_to_watch = 1
+        else:
+            if self.pos[1] < 12.1:
+                light_to_watch = 1
+            else:
+                light_to_watch = 0
+        # print(self.model.lights[0].closest)
+
+        # print(self.model.lights[1].closest)
+
+        current_crossing_chance =  1 / (1 + np.exp(10 - 0.25 * self.model.lights[light_to_watch].closest))
+        if current_crossing_chance >= self.crossing_chance:
+            return True
+
+        return False
     def on_road_side(self):
         """
         This is a function that checks if the pedestrian is near the road. If
@@ -669,8 +690,11 @@ class Car(Agent):
                             min_dist = new_dist - 3
 
                     elif type(neigh) is Pedestrian and (new_dist < min_dist):
-                        if (neigh.pos[1] > 11 and neigh.pos[1] < 16) or (neigh.pos[1] > 17 and neigh.pos[1] < 22):
-                            if (self.dir == "right" and self.pos[0] + 1.8 < neigh.pos[0]) or (self.dir == "left" and self.pos[0] - 1.8 > neigh.pos[0]):
+                        if (neigh.pos[1] > 11.1 and neigh.pos[1] < 15.9) or (neigh.pos[1] > 17.1 and neigh.pos[1] < 21.9):
+                            if self.dir == "right" and self.pos[0] + 1.8 < neigh.pos[0] and neigh.pos[1] > 17.1 and neigh.pos[1] < 21.9:
+                                min_dist = new_dist - 3
+
+                            elif self.dir == "left" and self.pos[0] - 1.8 > neigh.pos[0] and neigh.pos[1] > 11.1 and neigh.pos[1] < 15.9:
                                 min_dist = new_dist - 3
 
                 if min_dist is not 99999:

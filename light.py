@@ -15,6 +15,7 @@ class Light(Agent):
         self.type = light # where light is either Ped or Traf#
         self.ped_light = True
         self.car_light = False
+        self.closest = math.inf
 
     def step(self):
         '''
@@ -28,7 +29,7 @@ class Light(Agent):
             self.free()
     
         if self.unique_id == 1 or self.unique_id == 2:
-            self.closest_car()
+            self.closest = self.closest_car()
 
     def simultaneous(self):
         if self.state <= 300:
@@ -87,22 +88,33 @@ class Light(Agent):
 
     def closest_car(self):
 
-        center = 2.5
+        center = 15
         if self.unique_id == 1:
-            direction = -1
-        elif self.unique_id == 2:
-            direction = 1
-        # checks for neighbors 10 times with a radius of 2.6 in steps of 5 (sees entire road)
-        for i in range(10):
-            neighbours = self.model.space.get_neighbors((self.pos[0] + (center + i * (2.5 * 2)) * direction, 16.5 - 3 * direction), include_center = True, radius = 2.6)
+            print('unique id 1')       
 
-            if len(neighbours) > 0:
-                min_distance = math.inf
-                for neigh in neighbours:
-                    cur_distance = abs(self.pos[0] - neigh.pos[0])
-                    if cur_distance < min_distance:
-                        min_distance = cur_distance
-                return min_distance
+            for i in range(16):
+                neighbours = self.model.space.get_neighbors((self.pos[0] + center - i * 2.5 * 2, 16.5 + 3), include_center = True, radius = 2.6)
+                if len(neighbours) > 0:
+                    break
+
+
+        elif self.unique_id == 2:
+            print('unique id 2')       
+
+            for i in range(16):
+                neighbours = self.model.space.get_neighbors((self.pos[0] - center + i * 2.5 * 2, 16.5 - 3), include_center = True, radius = 2.6) 
+                if len(neighbours) > 0:
+                    break
+                    
+        if len(neighbours) > 0:
+            min_distance = math.inf
+            for neigh in neighbours:
+                cur_distance = abs(self.pos[0] - neigh.pos[0])
+                if cur_distance < min_distance:
+                    min_distance = cur_distance
+            print(min_distance)
+            return min_distance
+        return math.inf
 
 
 # simultaneous strategy
