@@ -11,8 +11,10 @@ class Light(Agent):
 
         self.pos = pos
         self.state = state
-        self.color = color #Where color is Red or Green
-        self.type = light #where light is either Ped or Traf
+        self.color = color # where color is Red, Green or Orange
+        self.type = light # where light is either Ped or Traf#
+        self.ped_light = True
+        self.car_light = False
 
     def step(self):
         '''
@@ -21,7 +23,7 @@ class Light(Agent):
         self.state = (self.state + 1) % 500
 
         if self.model.strategy == "Simultaneous":
-            self.simultaneous_step()
+            self.simultaneous()
         elif self.model.strategy == "Free":
             self.free()
 
@@ -40,9 +42,9 @@ class Light(Agent):
         """Not sure if this will be needed"""
         if self.closest_car()<30:
             self.model.sense_car = True
-        if self.color == "Red" and self.type == "Ped" and self.model.ped_light:
+        if self.color == "Red" and self.type == "Ped" and self.ped_light:
             self.color = "Green"
-        elif self.color == "Red" and self.type == "Traf" and self.model.car_light:
+        elif self.color == "Red" and self.type == "Traf" and self.car_light:
             self.color = "Green"
         if self.type == "Car":
             self.simultaneous_car()
@@ -62,14 +64,14 @@ class Light(Agent):
             if self.state == 60:
                 self.color = "Red"
                 self.state = 0
-                self.model.car_light = False
-                self.model.ped_light = True
+                self.car_light = False
+                self.ped_light = True
 
     def simultaneous_ped(self):
         """The light profile for the pedestrian lights"""
         if self.color == "Green":
             self.state += 1
-            if self.state >= 15 and self.model.sense_car:
+            if self.state >= 15 and self.closest_car()<30:
                 self.color = "Orange"
         elif self.color == "Orange":
             self.state += 1
@@ -77,9 +79,8 @@ class Light(Agent):
             if self.state == 20:
                 self.color = "Red"
                 self.state = 0
-                self.model.ped_light = False
-                self.model.cer_light = True
-
+                self.ped_light = False
+                self.cer_light = True
 
 
     def free(self):
