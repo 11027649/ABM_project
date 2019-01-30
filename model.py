@@ -40,7 +40,7 @@ class Traffic(Model):
 
         self.lights = []
         self.place_lights()
-
+        self.spawn_rate = 0.01
         # we don't want to collect data when running the visualization
         self.data = False
 
@@ -146,7 +146,7 @@ class Traffic(Model):
                 if self.space.get_neighbors((pos[0] + 5 * i, pos[1]), include_center = True, radius = 2.5):
                     car_near = True
 
-            if random.random() < 0.05 and car_near == False:
+            if random.random() < self.spawn_rate and car_near == False:
                 self.new_car(pos, "right")
 
         else:
@@ -157,7 +157,7 @@ class Traffic(Model):
             for i in range(5):
                 if self.space.get_neighbors((pos[0] - 5 * i, pos[1]), include_center = True, radius = 2.5):
                     car_near = True
-            if random.random() < 0.05 and car_near == False:
+            if random.random() < self.spawn_rate and car_near == False:
                 self.new_car(pos, "left")
 
 
@@ -167,14 +167,14 @@ class Traffic(Model):
             pos = (self.x_max / 2 - 1 , self.y_max - 1)
         #     pos = (random.uniform(24*2,26*2),  self.y_max - 1)
 
-            if random.random() < 0.05 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
+            if random.random() < self.spawn_rate and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "up")
 
         # else:
             pos = (self.x_max / 2 + 1, 0)
         #     pos = (random.uniform(24*2,26*2),  0)
 
-            if random.random() < 0.05 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
+            if random.random() < self.spawn_rate and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "down")
 
         # save the statistics
