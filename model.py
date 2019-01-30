@@ -29,8 +29,8 @@ class Traffic(Model):
         self.x_max = x_max
 
         # self.strategy = "Free"
-        self.strategy = "Simultaneous"
-        # self.strategy = "Reactive"
+        # self.strategy = "Simultaneous"
+        self.strategy = "Reactive"
 
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
@@ -107,7 +107,6 @@ class Traffic(Model):
         self.space.remove_agent(agent)
         getattr(self, f'schedule_{type(agent).__name__}').remove(agent)
 
-
     def step(self):
         '''
         Method that calls the step method for each car.
@@ -138,7 +137,6 @@ class Traffic(Model):
                     self.remove_agent(current_agent)
                 elif (current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed_free >= self.y_max) or current_agent.remove == True:
                     self.remove_agent(current_agent)
-
 
         if random.random() < 0.5:
 
