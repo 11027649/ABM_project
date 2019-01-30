@@ -26,7 +26,7 @@ class Light(Agent):
             self.simultaneous()
         elif self.model.strategy == "Free":
             self.free()
-
+    
         if self.unique_id == 1 or self.unique_id == 2:
             self.closest_car()
 
@@ -41,9 +41,8 @@ class Light(Agent):
     def simultaneous_step(self):
         """Not sure if this will be needed"""
 
-
         if self.type == "Traf":
-            if self.color == "Red" and self.type == "Traf" and self.car_light:
+            if self.color == "Red" and self.car_light:
                 self.color = "Green"
             self.simultaneous_car()
         elif self.type == "Ped":
@@ -71,7 +70,7 @@ class Light(Agent):
         """The light profile for the pedestrian lights"""
         if self.color == "Green":
             self.state += 1
-            if self.state >= 15 and self.closest_car()<30:
+            if self.state >= 15 and self.closest_car()<7:
                 self.color = "Orange"
         elif self.color == "Orange":
             self.state += 1
