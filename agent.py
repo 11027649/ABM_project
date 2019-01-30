@@ -366,7 +366,7 @@ class Pedestrian(Agent):
         # Get smallest difference angle
         if diff > 180:
             diff = 360-diff
-            
+
         # Return inertia
         return 1- diff/(self.vision_angle/2)
 
@@ -476,7 +476,7 @@ class Pedestrian(Agent):
     #                 self.pos[1] + self.R_vision_range*np.sin(math.radians(direction))]
 
     #     # If self and see_pos are within x_boundaries
-    #     if ((self.pos[0]>x_walls[0] and self.pos[0]<x_walls[1]) and 
+    #     if ((self.pos[0]>x_walls[0] and self.pos[0]<x_walls[1]) and
     #         (see_pos[0]>x_walls[0] and see_pos[0]<x_walls[1])):
     #         return self.R_vision_range
 
@@ -493,7 +493,7 @@ class Pedestrian(Agent):
     #                 return x_walls[1] - self.pos[0]
 
 
-    #         # if see_pos is upwards of area 2 
+    #         # if see_pos is upwards of area 2
     #         elif:
 
     #         # if see_pos is downwards of area 2
@@ -686,7 +686,7 @@ class Car(Agent):
         # if there is a car in front and within speed, stop right behind it
         if self.check_front() > 0 and self.check_front() < self.braking_distance() and self.speed > 0:
             self.speed_change(-0.8/40)
-        
+
         elif self.check_front() > 0 and self.check_front() * 1.5 < self.braking_distance() and self.speed > 0:
             self.speed_change(-0.8/20)
 
@@ -1000,7 +1000,6 @@ class Light(Agent):
 
         center = 8
         if self.unique_id == 1:
-            #print('unique id 1')
             for i in range(16):
                 neighbourList = []
                 neighbours = self.model.space.get_neighbors((self.pos[0] + center - i * 2.5 * 2, 16.5 + 3),
@@ -1012,7 +1011,6 @@ class Light(Agent):
                     break
 
         elif self.unique_id == 2:
-            #print('unique id 2')
             for i in range(16):
                 neighbourList = []
                 neighbours = self.model.space.get_neighbors((self.pos[0] - center + i * 2.5 * 2, 16.5 - 3),
@@ -1029,6 +1027,6 @@ class Light(Agent):
                 cur_distance = abs(self.pos[0] - neigh.pos[0])
                 if cur_distance < min_distance:
                     min_distance = cur_distance
-            print(min_distance)
+            # print(min_distance)
             return min_distance
         return math.inf
