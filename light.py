@@ -81,10 +81,6 @@ class Light(Agent):
                 self.model.cer_light = True
 
 
-    def check_lights(self):
-        """Update the bolleans for the lights"""
-
-
 
     def free(self):
         self.color = "Green"
