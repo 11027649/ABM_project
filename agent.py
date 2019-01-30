@@ -25,7 +25,7 @@ class Pedestrian(Agent):
         self.vision_angle = 170  # Degrees
         self.radius = .2 # radius
         self.N = 16 #  number of possible directions Should be >= 2!
-        self.R_vision_range = 4 # Meters
+        self.R_vision_range = 3 # Meters
         # Weights (for equation 1)
         self.Ek_w = 1
         self.Ok_w = .4
@@ -947,7 +947,7 @@ class Light(Agent):
                         light.car_light = True
 
     def free(self):
-        self.step += 1
+        self.step += 1 # TO DO, why +1 a function? 
         self.color = "Green"
 
     def closest_car(self):
