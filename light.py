@@ -6,12 +6,13 @@ import math
 import numpy as np
 
 class Light(Agent):
-    def __init__(self, unique_id, model, pos, state):
+    def __init__(self, unique_id, model, pos, state, light, color):
         super().__init__(unique_id, model)
 
         self.pos = pos
         self.state = state
-        self.color = "Red"
+        self.color = color #Where color is Red or Green
+        self.type = light #where light is either Ped or Traf
 
     def step(self):
         '''
@@ -20,7 +21,7 @@ class Light(Agent):
         self.state = (self.state + 1) % 500
 
         if self.model.strategy == "Simultaneous":
-            self.simultaneous()
+            self.simultaneous_step()
         elif self.model.strategy == "Free":
             self.free()
 
@@ -37,12 +38,22 @@ class Light(Agent):
 
     def simultaneous_step(self):
         """Not sure if this will be needed"""
-        # First check for car
+        if self.closest_car()<30:
+            self.model.sense_car = True
+        if self.color == "Red" and self.type == "Ped" and self.model.ped_light:
+            self.color = "Green"
+        elif self.color == "Red" and self.type == "Traf" and self.model.car_light:
+            self.color = "Green"
+        if self.type == "Car":
+            self.simultaneous_car()
+        elif self.type == "Ped":
+            self.simultaneous_ped()
+
 
     def simultaneous_car(self):
         """The light profile for the car lights"""
         if self.color == "Green":
-            self.state _+= 1
+            self.state += 1
             if self.state == 40:
                 self.color = "Orange"
         elif self.color == "Orange":
@@ -51,15 +62,14 @@ class Light(Agent):
             if self.state == 60:
                 self.color = "Red"
                 self.state = 0
-        elif self.car_light == False:
-            closest_car = self.closest_car()
-            if self.closest_car() < 40:
+                self.model.car_light = False
+                self.model.ped_light = True
 
     def simultaneous_ped(self):
         """The light profile for the pedestrian lights"""
         if self.color == "Green":
-            self.state _+= 1
-            if self.state == 15:
+            self.state += 1
+            if self.state >= 15 and self.model.sense_car:
                 self.color = "Orange"
         elif self.color == "Orange":
             self.state += 1
@@ -67,8 +77,14 @@ class Light(Agent):
             if self.state == 20:
                 self.color = "Red"
                 self.state = 0
-        elif self.ped_light == False:
-            # This should probably do something
+                self.model.ped_light = False
+                self.model.cer_light = True
+
+
+    def check_lights(self):
+        """Update the bolleans for the lights"""
+
+
 
     def free(self):
         self.color = "Green"
