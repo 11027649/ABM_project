@@ -40,15 +40,15 @@ class Light(Agent):
 
     def simultaneous_step(self):
         """Not sure if this will be needed"""
-        if self.closest_car()<30:
-            self.model.sense_car = True
-        if self.color == "Red" and self.type == "Ped" and self.ped_light:
-            self.color = "Green"
-        elif self.color == "Red" and self.type == "Traf" and self.car_light:
-            self.color = "Green"
-        if self.type == "Car":
+
+
+        if self.type == "Traf":
+            if self.color == "Red" and self.type == "Traf" and self.car_light:
+                self.color = "Green"
             self.simultaneous_car()
         elif self.type == "Ped":
+            if self.color == "Red" and self.ped_light:
+                self.color = "Green"
             self.simultaneous_ped()
 
 
