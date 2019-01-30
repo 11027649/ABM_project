@@ -1,6 +1,8 @@
 from mesa import Agent
 from mesa import space
 from mesa.space import ContinuousSpace
+from agent import Pedestrian, Car, Light
+
 import random
 import math
 import numpy as np
@@ -41,8 +43,6 @@ class Light(Agent):
 
     def simultaneous_step(self):
         """Not sure if this will be needed"""
-
-
         if self.type == "Traf":
             if self.color == "Red" and self.type == "Traf" and self.car_light:
                 self.color = "Green"
@@ -89,27 +89,32 @@ class Light(Agent):
 
     def closest_car(self):
 
-        center = 15
+        center = 8
         if self.unique_id == 1:
             print('unique id 1')       
-
             for i in range(16):
+                neighbourList = []
                 neighbours = self.model.space.get_neighbors((self.pos[0] + center - i * 2.5 * 2, 16.5 + 3), include_center = True, radius = 2.6)
-                if len(neighbours) > 0:
+                for neigh in neighbours:
+                    if type(neigh) == Car:
+                        neighbourList.append(neigh)
+                if len(neighbourList) > 0:
                     break
-
 
         elif self.unique_id == 2:
             print('unique id 2')       
-
             for i in range(16):
-                neighbours = self.model.space.get_neighbors((self.pos[0] - center + i * 2.5 * 2, 16.5 - 3), include_center = True, radius = 2.6) 
-                if len(neighbours) > 0:
+                neighbourList = []
+                neighbours = self.model.space.get_neighbors((self.pos[0] - center + i * 2.5 * 2, 16.5 - 3), include_center = True, radius = 2.6)
+                for neigh in neighbours:
+                    if type(neigh) == Car:
+                        neighbourList.append(neigh) 
+                if len(neighbourList) > 0:
                     break
                     
-        if len(neighbours) > 0:
+        if len(neighbourList) > 0:
             min_distance = math.inf
-            for neigh in neighbours:
+            for neigh in neighbourList:
                 cur_distance = abs(self.pos[0] - neigh.pos[0])
                 if cur_distance < min_distance:
                     min_distance = cur_distance

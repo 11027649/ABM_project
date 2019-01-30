@@ -8,7 +8,9 @@ from mesa.time import RandomActivation, RandomActivation
 from progressBar import printProgressBar
 
 from data import Data
-from agent import Pedestrian, Car, Light
+from agent import Pedestrian
+from agent import Car
+from agent import Light
 
 import math
 
