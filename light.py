@@ -35,7 +35,7 @@ class Light(Agent):
             self.free()
         elif self.model.strategy == "Reactive":
             self.reactive_step()
-    
+
         if self.unique_id == 1 or self.unique_id == 2:
             self.closest = self.closest_car()
 
@@ -174,7 +174,6 @@ class Light(Agent):
 
         center = 8
         if self.unique_id == 1:
-            print('unique id 1')       
             for i in range(16):
                 neighbourList = []
                 neighbours = self.model.space.get_neighbors((self.pos[0] + center - i * 2.5 * 2, 16.5 + 3), include_center = True, radius = 2.6)
@@ -184,17 +183,16 @@ class Light(Agent):
                 if len(neighbourList) > 0:
                     break
 
-        elif self.unique_id == 2:
-            print('unique id 2')       
+        elif self.unique_id == 2:      
             for i in range(16):
                 neighbourList = []
                 neighbours = self.model.space.get_neighbors((self.pos[0] - center + i * 2.5 * 2, 16.5 - 3), include_center = True, radius = 2.6)
                 for neigh in neighbours:
                     if type(neigh) == Car:
-                        neighbourList.append(neigh) 
+                        neighbourList.append(neigh)
                 if len(neighbourList) > 0:
                     break
-                    
+
         if len(neighbourList) > 0:
             min_distance = math.inf
             for neigh in neighbourList:
