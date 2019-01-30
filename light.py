@@ -108,7 +108,7 @@ class Light(Agent):
                         min_distance = cur_distance
                 return min_distance
 
-            
+
 # simultaneous strategy
 # 3 & 4 are the same
 # 5 & 6 are the same

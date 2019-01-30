@@ -3,12 +3,13 @@ from mesa import Model
 from model import Traffic
 import time
 from data import Data
+from progressBar import printProgressBar
 
 import matplotlib.pyplot as plt
 
 print("Do you want to launch the server for visualization? (Type yes/no)")
-# choiche = input()
-choiche = "yes"
+choiche = input()
+# choiche = "yes"
 
 if choiche == "yes":
     # launch at default port
@@ -22,15 +23,18 @@ else:
     print("Okay then, running your model now...")
 
     results = Data()
-    t0 = time.time()
+
+    total_time = 0
 
     for i in range(iterations):
-        # printProgressBar(i, iterations)
+        t0 = time.time()
+        print("Run number:", i)
+
         model = Traffic()
         model.run_model(steps, results)
-        simulation_info = model.datacollector.get_model_vars_dataframe()
 
-        results.write_info(simulation_info)
+        print("\nEnd time of this run: ", time.time() - t0)
+        total_time += t0
 
-    print(time.time() - t0)
-    print("Terminated normally! Have fun with your data ;-)")
+    print("It took me", total_time, "s to run your model", iterations, "times with", steps, "steps")
+    print("Terminated normally! Find your data in the data folder. Have fun with it! ;-)")
