@@ -6,14 +6,17 @@ import math
 import numpy as np
 
 class Light(Agent):
-    def __init__(self, unique_id, model, pos, state):
+    def __init__(self, unique_id, model, pos, state, light, color):
         super().__init__(unique_id, model)
 
         self.pos = pos
         self.state = state
-        self.color = "Red"
+        self.color = color # where color is Red, Green or Orange
+        self.type = light # where light is either Ped or Traf#
+        self.ped_light = True
+        self.car_light = False
         self.closest = math.inf
-        
+
     def step(self):
         '''
         Update the state of the light.
@@ -35,6 +38,51 @@ class Light(Agent):
             self.color = "Green"
         else:
             self.color = "Orange"
+
+    def simultaneous_step(self):
+        """Not sure if this will be needed"""
+
+
+        if self.type == "Traf":
+            if self.color == "Red" and self.type == "Traf" and self.car_light:
+                self.color = "Green"
+            self.simultaneous_car()
+        elif self.type == "Ped":
+            if self.color == "Red" and self.ped_light:
+                self.color = "Green"
+            self.simultaneous_ped()
+
+
+    def simultaneous_car(self):
+        """The light profile for the car lights"""
+        if self.color == "Green":
+            self.state += 1
+            if self.state == 40:
+                self.color = "Orange"
+        elif self.color == "Orange":
+            self.state += 1
+            # Placehodler ToDo Figure out when it should tip over
+            if self.state == 60:
+                self.color = "Red"
+                self.state = 0
+                self.car_light = False
+                self.ped_light = True
+
+    def simultaneous_ped(self):
+        """The light profile for the pedestrian lights"""
+        if self.color == "Green":
+            self.state += 1
+            if self.state >= 15 and self.closest_car()<30:
+                self.color = "Orange"
+        elif self.color == "Orange":
+            self.state += 1
+            # Placehodler ToDo Figure out when it should tip over
+            if self.state == 20:
+                self.color = "Red"
+                self.state = 0
+                self.ped_light = False
+                self.cer_light = True
+
 
     def free(self):
         self.color = "Green"
@@ -69,7 +117,7 @@ class Light(Agent):
             return min_distance
         return math.inf
 
-            
+
 # simultaneous strategy
 # 3 & 4 are the same
 # 5 & 6 are the same
