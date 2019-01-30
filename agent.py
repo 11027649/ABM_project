@@ -894,15 +894,15 @@ class Light(Agent):
     def update_bottom_lane(self):
         """Update the bottom lane"""
         if self.type == "Traf":
-            # checks to see if its red and needs to change
+            # checks to see if its red and needs to changegit
             if self.color == "Red" and (self.car_light):
                 self.color = "Green"
-            self.reactive_car("Top")
+            self.reactive_car("Bottom")
         elif self.type == "Ped":
             # checks if its red and needs to change
             if self.color == "Red" and (self.ped_light):
                 self.color = "Green"
-            self.reactive_ped("Top")
+            self.reactive_ped("Bottom")
 
     def reactive_car(self, lane):
         """The light profile for the car lights"""
@@ -960,7 +960,6 @@ class Light(Agent):
                 neighbours = self.model.space.get_neighbors((self.pos[0] + center - i * 2.5 * 2, 16.5 + 3),
                                                             include_center=True, radius=2.6)
                 for neigh in neighbours:
-                    print("This needs to be under 16.5", neigh.pos[1])
                     if type(neigh) == Car:
                         neighbourList.append(neigh)
                 if len(neighbourList) > 0:
@@ -973,7 +972,6 @@ class Light(Agent):
                 neighbours = self.model.space.get_neighbors((self.pos[0] - center + i * 2.5 * 2, 16.5 - 3),
                                                             include_center=True, radius=2.6)
                 for neigh in neighbours:
-                    print("This needs to be over 16.5", neigh.pos[1])
                     if type(neigh) == Car:
                         neighbourList.append(neigh)
                 if len(neighbourList) > 0:
