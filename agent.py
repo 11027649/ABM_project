@@ -79,7 +79,7 @@ class Pedestrian(Agent):
         """
 
         # check if traffic light is green or if on road side
-        if self.red_crossing() or not self.on_road_side() or self.traffic_green():
+        if self.red_crossing() or not self.on_road_side():# or self.traffic_green():
             # get list of pedestrians in the vision field
             # TODO: check if we can do it with only 180
             self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
@@ -686,6 +686,9 @@ class Car(Agent):
         # if there is a car in front and within speed, stop right behind it
         if self.check_front() > 0 and self.check_front() < self.braking_distance() and self.speed > 0:
             self.speed_change(-0.8/40)
+        
+        elif self.check_front() > 0 and self.check_front() * 1.5 < self.braking_distance() and self.speed > 0:
+            self.speed_change(-0.8/20)
 
         elif self.check_front() > 0 and self.check_front() > self.braking_distance():
             self.speed_change(0.8/40)
@@ -947,7 +950,7 @@ class Light(Agent):
                         light.car_light = True
 
     def free(self):
-        self.step += 1 # TO DO, why +1 a function? 
+        # self.step += 1 # TO DO, why +1 a function? 
         self.color = "Green"
 
     def closest_car(self):
