@@ -25,7 +25,7 @@ class Pedestrian(Agent):
         self.vision_angle = 170  # Degrees
         self.radius = .2 # radius
         self.N = 16 #  number of possible directions Should be >= 2!
-        self.R_vision_range = 3 # Meters
+        self.R_vision_range = 4 # Meters
         # Weights (for equation 1)
         self.Ek_w = 1
         self.Ok_w = .4
@@ -35,7 +35,7 @@ class Pedestrian(Agent):
         # Other variables
         self.speed_mean = .134 # for max speed
         self.speed_sd = .0342
-        self.target_x = (24*2,26*2) # boundaries of walls
+        self.target_x = self.walls_x # boundaries of walls
         self.gamma = 1.913 # gamma for desired speed
         self.max_density = 5.4 # maximum density in the cone # TODO: Check what this means exactly
 
@@ -63,9 +63,9 @@ class Pedestrian(Agent):
         # For out of bound check
         self.remove = False
 
-        # Check if walls are far enough for dist_walls function
-        if abs(self.walls_x[0]-self.walls_x[1])<2*self.R_vision_range:
-            raise ValueError("Walls are too close together for the dist_walls function to work correctly")
+        # # Check if walls are far enough for dist_walls function
+        # if abs(self.walls_x[0]-self.walls_x[1])<2*self.R_vision_range:
+        #     raise ValueError("Walls are too close together for the dist_walls function to work correctly")
 
 
     def step(self):
@@ -346,7 +346,7 @@ class Pedestrian(Agent):
             diff = 360-diff
             
         # Return inertia
-        return diff/(self.vision_angle/2)
+        return 1- diff/(self.vision_angle/2)
 
 
     def theta_angle(self, direction, ped, side):
@@ -411,6 +411,9 @@ class Pedestrian(Agent):
         """
         Returns True if
         """
+        # print(self.model.lights[5].pos[0], self.model.lights[2].pos[0])
+        # print(self.model.lights[2].pos[1], self.model.lights[5].pos[1])
+        # print()
         # Calculate furthest point the pedestrian can see
         max_x_pos = self.pos[0] + self.R_vision_range*np.cos(math.radians(direction))
         # If the maximum x position is outside of the walls, return distance
@@ -421,6 +424,64 @@ class Pedestrian(Agent):
         # Else, return the vision range
         else:
             return self.R_vision_range
+
+
+    # def dist_wall(self, direction):
+    #     """
+    #     Returns True if
+    #     """
+    #     x_walls = self.model.lights[5].pos[0], self.model.lights[2].pos[0])
+    #     y_walls = self.model.lights[2].pos[1], self.model.lights[5].pos[1])
+    #     print()
+    #     # Calculate furthest point the pedestrian can see in this direction
+    #     see_pos = [self.pos[0] + self.R_vision_range*np.cos(math.radians(direction)),
+    #                 self.pos[1] + self.R_vision_range*np.sin(math.radians(direction))]
+
+
+    #     # # Check if in the y direction the walls are closer than the maximum y distance self can see
+    #     # if (abs(see_pos[1] - self.pos[1]) > abs(y_walls[0] - self.pos[1]) or
+    #     #     abs(see_pos[1] - self.pos[1]) > abs(y_walls[1] - self.pos[1])):
+
+    # def dist_wall(self, direction):
+    #     """
+    #     Returns True if
+    #     """
+    #     x_walls = self.model.lights[5].pos[0], self.model.lights[2].pos[0])
+    #     y_walls = self.model.lights[2].pos[1], self.model.lights[5].pos[1])
+    #     print()
+    #     # Calculate furthest point the pedestrian can see in this direction
+    #     see_pos = [self.pos[0] + self.R_vision_range*np.cos(math.radians(direction)),
+    #                 self.pos[1] + self.R_vision_range*np.sin(math.radians(direction))]
+
+    #     # If self and see_pos are within x_boundaries
+    #     if ((self.pos[0]>x_walls[0] and self.pos[0]<x_walls[1]) and 
+    #         (see_pos[0]>x_walls[0] and see_pos[0]<x_walls[1])):
+    #         return self.R_vision_range
+
+    #     # If position in area 2
+    #     elif (self.pos[1]>y_walls[0] and self.pos[1]<y_walls[1]):
+    #         # if see_pos also within area 2:
+    #         if ((see_pos[1]>y_walls[0] and see_pos[1]<y_walls[1])
+    #             and (see_pos[0]>x_walls[0] and see_pos[0]<x_walls[1])):
+    #             # Just check normal walls
+    #             # Return distance to the walls if walls are in sight
+    #             if  see_pos[0]<x_walls[0]:
+    #                 return self.pos[0]-x_walls[0]
+    #             elif see_pos[0]>x_walls[1]:
+    #                 return x_walls[1] - self.pos[0]
+
+
+    #         # if see_pos is upwards of area 2 
+    #         elif:
+
+    #         # if see_pos is downwards of area 2
+
+
+
+
+
+
+
 
     def new_pos(self, chosen_velocity, theta_chosen):
         """
