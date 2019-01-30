@@ -29,7 +29,7 @@ class Pedestrian(Agent):
         # Weights (for equation 1)
         self.Ek_w = 1
         self.Ok_w = .4
-        self.Pk_w = .6
+        self.Pk_w = 0.6
         self.Ak_w = .3
         self.Ik_w = .1
         # Other variables
