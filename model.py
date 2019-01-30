@@ -37,11 +37,6 @@ class Traffic(Model):
         self.schedule_Pedestrian = RandomActivation(self)
         self.schedule_Light = RandomActivation(self)
 
-        self.datacollector = DataCollector(
-             {"Pedestrians": lambda m: self.schedule_Pedestrian.get_agent_count(),
-              "Cars": lambda m: self.schedule_Car.get_agent_count(),
-              "Midsection": lambda m: self.check_median()})
-
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
 
         self.lights = []
@@ -49,10 +44,6 @@ class Traffic(Model):
 
         # we don't want to collect data when running the visualization
         self.data = False
-
-        # this is required for the datacollector to work
-        self.running = True
-        self.datacollector.collect(self)
 
     def place_lights(self):
         '''
@@ -189,9 +180,9 @@ class Traffic(Model):
             if random.random() < 0.1 and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
                 self.new_pedestrian(pos, "down")
 
+        # save the statistics
+        self.data.write_row_info(self.schedule_Pedestrian.get_agent_count(), self.schedule_Car.get_agent_count(), self.check_median())
 
-        # Save the statistics
-        self.datacollector.collect(self)
 
     def check_median(self, middle_pos = (50,16.5), median_width = 3, median_height = 1):
         """Used for getting the number of pedestrians in the median, though it could be used for any height band."""
@@ -201,7 +192,7 @@ class Traffic(Model):
 
         median_neighbours = []
 
-        # Cycle through the neighbours checking for pedestrians and for their positions to be within the desired area.
+        # cycle through the neighbours checking for pedestrians and for their positions to be within the desired area.
 
         for neigh in neighbours:
             if type(neigh) == Pedestrian and neigh.pos[1]>=middle_pos[1]-(.5*median_height) and neigh.pos[1]<=middle_pos[1]+(.5*median_height):
@@ -216,11 +207,12 @@ class Traffic(Model):
         Method that runs the model for a specific amount of steps.
         '''
         self.data = data
-        data.generate_headers(self.strategy)
+        if data.iteration is 0:
+            data.generate_headers(self.strategy)
 
         for i in range(step_count):
             printProgressBar(i, step_count)
             self.step()
 
         # return the data object so we can write all info from the datacollector too
-        self.data.write_end_line()
+        self.data.next_iteration()

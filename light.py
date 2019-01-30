@@ -35,40 +35,40 @@ class Light(Agent):
         else:
             self.color = "Orange"
 
-    def simultaneous_step(self):
-        """Not sure if this will be needed"""
-        # First check for car
-
-    def simultaneous_car(self):
-        """The light profile for the car lights"""
-        if self.color == "Green":
-            self.state _+= 1
-            if self.state == 40:
-                self.color = "Orange"
-        elif self.color == "Orange":
-            self.state += 1
-            # Placehodler ToDo Figure out when it should tip over
-            if self.state == 60:
-                self.color = "Red"
-                self.state = 0
-        elif self.car_light == False:
-            closest_car = self.closest_car()
-            if self.closest_car() < 40:
-
-    def simultaneous_ped(self):
-        """The light profile for the pedestrian lights"""
-        if self.color == "Green":
-            self.state _+= 1
-            if self.state == 15:
-                self.color = "Orange"
-        elif self.color == "Orange":
-            self.state += 1
-            # Placehodler ToDo Figure out when it should tip over
-            if self.state == 20:
-                self.color = "Red"
-                self.state = 0
-        elif self.ped_light == False:
-            # This should probably do something
+    # def simultaneous_step(self):
+    #     """Not sure if this will be needed"""
+    #     # First check for car
+    #
+    # def simultaneous_car(self):
+    #     """The light profile for the car lights"""
+    #     if self.color == "Green":
+    #         self.state += 1
+    #         if self.state == 40:
+    #             self.color = "Orange"
+    #     elif self.color == "Orange":
+    #         self.state += 1
+    #         # Placehodler ToDo Figure out when it should tip over
+    #         if self.state == 60:
+    #             self.color = "Red"
+    #             self.state = 0
+    #     elif self.car_light == False:
+    #         closest_car = self.closest_car()
+    #         if self.closest_car() < 40:
+    #
+    # def simultaneous_ped(self):
+    #     """The light profile for the pedestrian lights"""
+    #     if self.color == "Green":
+    #         self.state _+= 1
+    #         if self.state == 15:
+    #             self.color = "Orange"
+    #     elif self.color == "Orange":
+    #         self.state += 1
+    #         # Placehodler ToDo Figure out when it should tip over
+    #         if self.state == 20:
+    #             self.color = "Red"
+    #             self.state = 0
+    #     elif self.ped_light == False:
+    #         # This should probably do something
 
     def free(self):
         self.color = "Green"
@@ -92,7 +92,7 @@ class Light(Agent):
                         min_distance = cur_distance
                 return min_distance
 
-            
+
 # simultaneous strategy
 # 3 & 4 are the same
 # 5 & 6 are the same
