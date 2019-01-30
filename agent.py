@@ -974,7 +974,7 @@ class Light(Agent):
                                                             include_center=True, radius=2.6)
                 for neigh in neighbours:
                     print("This needs to be over 16.5", neigh.pos[1])
-                    if type(neigh) == neigh:
+                    if type(neigh) == Car:
                         neighbourList.append(neigh)
                 if len(neighbourList) > 0:
                     break
