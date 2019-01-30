@@ -50,7 +50,7 @@ class Light(Agent):
     def simultaneous_step(self):
         """Simultaneaous step function updated"""
         #checks which type of light it is
-        if self.type == "Traf":
+        if self.type == "Car":
             #checks to see if its red and needs to change
             if self.color == "Red" and (self.car_light):
                 self.color = "Green"
@@ -105,7 +105,7 @@ class Light(Agent):
 
     def update_top_lane(self):
         """Update the top lane"""
-        if self.type == "Traf":
+        if self.type == "Car":
             # checks to see if its red and needs to change
             if self.color == "Red" and (self.car_light_top):
                 self.color = "Green"
@@ -118,7 +118,7 @@ class Light(Agent):
 
     def update_bottom_lane(self):
         """Update the bottom lane"""
-        if self.type == "Traf":
+        if self.type == "Car":
             # checks to see if its red and needs to change
             if self.color == "Red" and (self.car_light_bottom):
                 self.color = "Green"
