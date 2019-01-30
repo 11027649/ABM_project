@@ -5,7 +5,7 @@ import random
 import math
 import numpy as np
 
-from light import Light
+# from light import Light
 
 class Pedestrian(Agent):
     def __init__(self, unique_id, model, pos, dir, speed = 1, time=0):
@@ -46,6 +46,7 @@ class Pedestrian(Agent):
         # self.Ik_w_7 = .1
 
         self.speed_free = random.gauss(self.speed_mean, self.speed_sd**2) # normal distribution of N(1.34, 0.342^2) m/s, but per (1/10s) timesteps
+        self.crossing_chance = max(0, min(1, random.gauss(0.5, 0.15))) # generates a nice 'normal distribution', max 1, min 0
 
         # Set direction in degrees
         # TODO: assign target point with preference to right side?
@@ -78,7 +79,7 @@ class Pedestrian(Agent):
         """
 
         # check if traffic light is green or if on road side
-        if not self.on_road_side() or self.traffic_green():
+        if self.red_crossing() or not self.on_road_side() or self.traffic_green():
             # get list of pedestrians in the vision field
             # TODO: check if we can do it with only 180
             self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
@@ -104,6 +105,27 @@ class Pedestrian(Agent):
             # Finalize this step
             self.time += 1
 
+    def red_crossing(self):
+        if self.dir == "up":
+            if self.pos[1] > 19:
+                light_to_watch = 0
+            else:
+                light_to_watch = 1
+        else:
+            if self.pos[1] < 12:
+                light_to_watch = 1
+            else:
+                light_to_watch = 0
+
+        # print(self.model.lights[0].closest)
+        # print(self.model.lights[1].closest)
+
+        current_crossing_chance =  1 / (1 + np.exp(8 - 0.25 * self.model.lights[light_to_watch].closest))
+
+        if current_crossing_chance >= self.crossing_chance:
+            return True
+
+        return False
     def on_road_side(self):
         """
         This is a function that checks if the pedestrian is near the road. If
@@ -730,8 +752,11 @@ class Car(Agent):
                             min_dist = new_dist - 3
 
                     elif type(neigh) is Pedestrian and (new_dist < min_dist):
-                        if (neigh.pos[1] > 11 and neigh.pos[1] < 16) or (neigh.pos[1] > 17 and neigh.pos[1] < 22):
-                            if (self.dir == "right" and self.pos[0] + 1.8 < neigh.pos[0]) or (self.dir == "left" and self.pos[0] - 1.8 > neigh.pos[0]):
+                        if (neigh.pos[1] > 11.1 and neigh.pos[1] < 15.9) or (neigh.pos[1] > 17.1 and neigh.pos[1] < 21.9):
+                            if self.dir == "right" and self.pos[0] + 1.8 < neigh.pos[0] and neigh.pos[1] > 17.1 and neigh.pos[1] < 21.9:
+                                min_dist = new_dist - 3
+
+                            elif self.dir == "left" and self.pos[0] - 1.8 > neigh.pos[0] and neigh.pos[1] > 11.1 and neigh.pos[1] < 15.9:
                                 min_dist = new_dist - 3
 
                 if min_dist is not 99999:
@@ -752,3 +777,122 @@ class Car(Agent):
             distance = distance + current_speed
             current_speed = current_speed - 0.02
         return distance + 3.5
+
+
+class Light(Agent):
+    def __init__(self, unique_id, model, pos, state, light, color):
+        super().__init__(unique_id, model)
+
+        self.pos = pos
+        self.state = state
+        self.color = color # where color is Red, Green or Orange
+        self.type = light # where light is either Ped or Traf#
+        self.ped_light = True
+        self.car_light = False
+        self.closest = math.inf
+
+    def step(self):
+        '''
+        Update the state of the light.
+        '''
+        self.state = (self.state + 1) % 500
+
+        if self.model.strategy == "Simultaneous":
+            self.simultaneous()
+        elif self.model.strategy == "Free":
+            self.free()
+
+        if self.unique_id == 1 or self.unique_id == 2:
+            self.closest = self.closest_car()
+
+    def simultaneous(self):
+        if self.state <= 300:
+            self.color = "Red"
+        elif self.state <= 450:
+            self.color = "Green"
+        else:
+            self.color = "Orange"
+
+    def simultaneous_step(self):
+        """Not sure if this will be needed"""
+        if self.type == "Traf":
+            if self.color == "Red" and self.type == "Traf" and self.car_light:
+                self.color = "Green"
+            self.simultaneous_car()
+        elif self.type == "Ped":
+            if self.color == "Red" and self.ped_light:
+                self.color = "Green"
+            self.simultaneous_ped()
+
+
+    def simultaneous_car(self):
+        """The light profile for the car lights"""
+        if self.color == "Green":
+            self.state += 1
+            if self.state == 40:
+                self.color = "Orange"
+        elif self.color == "Orange":
+            self.state += 1
+            # Placehodler ToDo Figure out when it should tip over
+            if self.state == 60:
+                self.color = "Red"
+                self.state = 0
+                self.car_light = False
+                self.ped_light = True
+
+    def simultaneous_ped(self):
+        """The light profile for the pedestrian lights"""
+        if self.color == "Green":
+            self.state += 1
+            if self.state >= 15 and self.closest_car()<30:
+                self.color = "Orange"
+        elif self.color == "Orange":
+            self.state += 1
+            # Placehodler ToDo Figure out when it should tip over
+            if self.state == 20:
+                self.color = "Red"
+                self.state = 0
+                self.ped_light = False
+                self.cer_light = True
+
+
+    def free(self):
+        self.color = "Green"
+
+    def closest_car(self):
+
+        center = 8
+        if self.unique_id == 1:
+            for i in range(16):
+                neighbourList = []
+                neighbours = self.model.space.get_neighbors((self.pos[0] + center - i * 2.5 * 2, 16.5 + 3), include_center = True, radius = 2.6)
+                for neigh in neighbours:
+                    if type(neigh) == Car:
+                        neighbourList.append(neigh)
+                if len(neighbourList) > 0:
+                    break
+
+        elif self.unique_id == 2:
+            for i in range(16):
+                neighbourList = []
+                neighbours = self.model.space.get_neighbors((self.pos[0] - center + i * 2.5 * 2, 16.5 - 3), include_center = True, radius = 2.6)
+                for neigh in neighbours:
+                    if type(neigh) == Car:
+                        neighbourList.append(neigh) 
+                if len(neighbourList) > 0:
+                    break
+                    
+        if len(neighbourList) > 0:
+            min_distance = math.inf
+            for neigh in neighbourList:
+                cur_distance = abs(self.pos[0] - neigh.pos[0])
+                if cur_distance < min_distance:
+                    min_distance = cur_distance
+            return min_distance
+        return math.inf
+
+
+# simultaneous strategy
+# 3 & 4 are the same
+# 5 & 6 are the same
+

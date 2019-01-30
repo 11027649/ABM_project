@@ -24,17 +24,15 @@ else:
 
     results = Data()
 
-    t0 = time.time()
     total_time = 0
 
     for i in range(iterations):
+        t0 = time.time()
         print("Run number:", i)
 
         model = Traffic()
         model.run_model(steps, results)
-        simulation_info = model.datacollector.get_model_vars_dataframe()
 
-        results.write_info(simulation_info)
         print("\nEnd time of this run: ", time.time() - t0)
         total_time += t0
 
