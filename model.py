@@ -179,7 +179,8 @@ class Traffic(Model):
                 self.new_pedestrian(pos, "down")
 
         # save the statistics
-        self.data.write_row_info(self.schedule_Pedestrian.get_agent_count(), self.schedule_Car.get_agent_count(), self.check_median())
+        if self.data:
+            self.data.write_row_info(self.schedule_Pedestrian.get_agent_count(), self.schedule_Car.get_agent_count(), self.check_median())
 
 
     def check_median(self, middle_pos = (50,16.5), median_width = 3, median_height = 1):
