@@ -41,6 +41,7 @@ class Traffic(Model):
         self.lights = []
         self.place_lights()
         self.spawn_rate = 0.01
+
         # we don't want to collect data when running the visualization
         self.data = False
 
