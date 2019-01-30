@@ -30,6 +30,8 @@ class Traffic(Model):
         # self.strategy = "Simultaneous"
         # self.strategy = "Reactive"
 
+        self.crowdedness = "Unkown?"
+
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
         self.schedule_Car = RandomActivation(self)
@@ -207,7 +209,7 @@ class Traffic(Model):
         '''
         self.data = data
         if data.iteration is 0:
-            data.generate_headers(self.strategy)
+            data.generate_headers(self.strategy, step_count, self.crowdedness)
 
         for i in range(step_count):
             printProgressBar(i, step_count)
