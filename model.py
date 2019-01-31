@@ -46,7 +46,7 @@ class Traffic(Model):
         # Agents parameters
         self.vision_angle = 170  # Degrees
         self.N = 16 #  number of possible directions Should be >= 2!
-        self.R_vision_range = 4 # Meters
+        self.R_vision_range = 3 # Meters
         # Weights (for equation 1)
         self.Ek_w = 1
         self.Ok_w = .4
