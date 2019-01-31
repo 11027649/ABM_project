@@ -73,6 +73,7 @@ class Traffic(Model):
         # we don't want to collect data when running the visualization
         self.data = False
 
+
     def set_parameters(self, vision_angle=170, N=16, vision_range=3,
         Ek_w=1, Ok_w=.4, Pk_w=1, Ak_w=.6, Ik_w=.1,
         speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
@@ -105,6 +106,9 @@ class Traffic(Model):
         # spawn rates
         self.spawn_rate_car = spawn_rate_car
         self.spawn_rate_pedes = spawn_rate_pedes
+
+        self.pedestrian_removed = 0
+        self.cars_removed = 0
 
 
     def place_lights(self):
@@ -166,8 +170,10 @@ class Traffic(Model):
 
         if type(agent) is Car:
             self.cars_removed += 1
+
         elif type(agent) is Pedestrian:
             self.pedestrian_removed += 1
+
 
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
