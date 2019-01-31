@@ -19,7 +19,7 @@ class Pedestrian(Agent):
         self.neighbours = []
 
         self.walls_x = [self.model.lights[4].pos[0], self.model.lights[3].pos[0]]
-        self.target_x = self.walls_x # boundaries of walls
+        # self.walls_x = self.walls_x # boundaries of walls
 
         # Set individual parameters
         self.speed_free = random.gauss(self.model.speed_mean, self.model.speed_sd**2) # normal distribution of N(1.34, 0.342^2) m/s, but per (1/10s) timesteps
@@ -29,21 +29,17 @@ class Pedestrian(Agent):
         # TODO: assign target point with preference to right side?
         if self.dir == "up":
             self.direction = 270
-            self.target_point = (random.uniform(self.target_x[0] + ((self.target_x[1] - self.target_x[0]) * 2 / 6), self.target_x[1]), 0)
+            self.target_point = (random.uniform(self.walls_x[0] + ((self.walls_x[1] - self.walls_x[0]) * 2 / 6), self.walls_x[1]), 0)
             self.own_light = 5
         elif self.dir == "down":
             self.direction = 90
-            self.target_point = (random.uniform(self.target_x[0],  self.target_x[0] + ((self.target_x[1] - self.target_x[0]) * 4 / 6)), 33)
+            self.target_point = (random.uniform(self.walls_x[0],  self.walls_x[0] + ((self.walls_x[1] - self.walls_x[0]) * 4 / 6)), 33)
             self.own_light = 2
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
 
         # For out of bound check
         self.remove = False
-
-        # # Check if walls are far enough for dist_walls function
-        # if abs(self.walls_x[0]-self.walls_x[1])<2*self.model.R_vision_range:
-        #     raise ValueError("Walls are too close together for the dist_walls function to work correctly")
 
 
     def step(self):
