@@ -19,21 +19,6 @@ class Traffic(Model):
     The actual model class!
     '''
 
-    # # Weights (for equation 1)
-    # Ek_w = 1
-    # Ok_w = .4
-    # Pk_w = 0.6
-    # Ak_w = .3
-    # Ik_w = .1
-    # # Speed parameters
-    # speed_mean = .134 # for max speed
-    # speed_sd = .0342
-    # gamma = 1.913 # gamma for desired speed
-    # max_density = 5.4 # maximum density in the cone # TODO: Check what this means exactly
-    # # Crossing through red
-    # crossing_mean = .5
-    # crossing_sd = .15
-
     def __init__(self, y_max=33, x_max=99):
 
         super().__init__()
@@ -80,7 +65,6 @@ class Traffic(Model):
         self.max_peds = 50 # 10 - 20 - 40
         self.max_cars = 8 # 2 - 4 - 8
 
-
         self.spawn_rate_car = 1.2
         self.spawn_rate_pedes = 0.1
         # we don't want to collect data when running the visualization
@@ -89,7 +73,8 @@ class Traffic(Model):
     def set_parameters(self, vision_angle=170, N=4, vision_range=3,
         Ek_w=1, Ok_w=.4, Pk_w=.6, Ak_w=.3, Ik_w=.1,
         speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
-        crossing_mean=.5, crossing_sd=.15, spawn_rate_car=.01, spawn_rate_pedes=.02):
+        crossing_mean=.5, crossing_sd=.15, max_peds=50, max_cars=8,
+        spawn_rate_car=.01, spawn_rate_pedes=.02):
 
 
         self.N = N
@@ -110,6 +95,9 @@ class Traffic(Model):
         # Crossing through red
         self.crossing_mean = crossing_mean
         self.crossing_sd = crossing_sd
+
+        self.max_peds = max_peds
+        self.max_cars = max_cars
 
         # spawn rates
         self.spawn_rate_car = spawn_rate_car
