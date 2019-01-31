@@ -50,8 +50,8 @@ class Traffic(Model):
         # Weights (for equation 1)
         self.Ek_w = 1
         self.Ok_w = .4
-        self.Pk_w = 2
-        self.Ak_w = 2
+        self.Pk_w = 1
+        self.Ak_w = .6
         self.Ik_w = .1
         # Speed parameters
         self.speed_mean = .134 # for max speed
@@ -62,7 +62,7 @@ class Traffic(Model):
         self.crossing_mean = .5
         self.crossing_sd = .15
 
-        self.max_peds = 30 # 10 - 20 - 30
+        self.max_peds = 50 # 10 - 20 - 40
         self.max_cars = 8 # 2 - 4 - 8
 
 
