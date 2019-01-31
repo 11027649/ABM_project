@@ -43,6 +43,27 @@ class Traffic(Model):
         self.lights = []
         self.place_lights()
 
+        # Agents parameters
+        self.vision_angle = 170  # Degrees
+        self.N = 16 #  number of possible directions Should be >= 2!
+        self.R_vision_range = 4 # Meters
+        # Weights (for equation 1)
+        self.Ek_w = 1
+        self.Ok_w = .4
+        self.Pk_w = 0.6
+        self.Ak_w = .3
+        self.Ik_w = .1
+        # Speed parameters
+        self.speed_mean = .134 # for max speed
+        self.speed_sd = .0342
+        self.gamma = 1.913 # gamma for desired speed
+        self.max_density = 5.4 # maximum density in the cone # TODO: Check what this means exactly
+        # Crossing through red
+        self.crossing_mean = .5
+        self.crossing_sd = .15
+
+
+
         # we don't want to collect data when running the visualization
         self.data = False
 
