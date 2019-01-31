@@ -15,7 +15,7 @@ class Pedestrian(Agent):
         self.speed = speed
         self.time = time
         self.des_speed = None # Meters per time step
-        self.radius = .2 # radius
+        self.radius = .25 # radius
         self.neighbours = []
 
         # Liu, 2014 parameters
@@ -83,7 +83,7 @@ class Pedestrian(Agent):
         The pedestrians always go on green, and never go on red or orange. They will
         walk through orange if they're already on the road.
         """
-        print(self.speed_mean)
+        # print(self.speed_mean)
         # check if traffic light is green or if on road side
         if self.red_crossing() or not self.on_road_side() or self.traffic_green():
             # get list of pedestrians in the vision field

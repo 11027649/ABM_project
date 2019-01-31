@@ -46,12 +46,12 @@ class Traffic(Model):
         # Agents parameters
         self.vision_angle = 170  # Degrees
         self.N = 16 #  number of possible directions Should be >= 2!
-        self.R_vision_range = 4 # Meters
+        self.R_vision_range = 3 # Meters
         # Weights (for equation 1)
         self.Ek_w = 1
         self.Ok_w = .4
-        self.Pk_w = 0.6
-        self.Ak_w = .3
+        self.Pk_w = 2
+        self.Ak_w = 2
         self.Ik_w = .1
         # Speed parameters
         self.speed_mean = .134 # for max speed
@@ -62,10 +62,12 @@ class Traffic(Model):
         self.crossing_mean = .5
         self.crossing_sd = .15
 
+        self.max_peds = 30 # 10 - 20 - 30
+        self.max_cars = 8 # 2 - 4 - 8
 
 
-        self.spawn_rate_car = 0.01
-        self.spawn_rate_pedes = 0.02
+        self.spawn_rate_car = 1.2
+        self.spawn_rate_pedes = 0.1
         # we don't want to collect data when running the visualization
         self.data = False
 
@@ -161,7 +163,9 @@ class Traffic(Model):
                 elif (current_agent.dir == "down" and current_agent.pos[1] + current_agent.speed_free >= self.y_max) or current_agent.remove == True:
                     self.remove_agent(current_agent)
 
-        if random.random() < 0.5:
+
+        if self.schedule_Car.get_agent_count() < self.max_cars:
+
 
             # if there's place place a new car with probability 0.7
             pos = (0, 19.5)
@@ -174,7 +178,6 @@ class Traffic(Model):
             if random.random() < self.spawn_rate_car and car_near == False:
                 self.new_car(pos, "right")
 
-        else:
             # if there's place place a new car with probability 0.7
             pos = (self.x_max - 1, 13.5)
 
@@ -185,21 +188,19 @@ class Traffic(Model):
             if random.random() < self.spawn_rate_car and car_near == False:
                 self.new_car(pos, "left")
 
+        if self.schedule_Pedestrian.get_agent_count() < self.max_peds:
+            # # either up or down
+            #     # if there's place, place a new pedestrian with a certain probability
+                # pos = (self.x_max / 2 - 1 , self.y_max - 1)
+            pos = (random.uniform(24*2,26*2),  self.y_max - 1)
 
-        # # either up or down
-        if random.random() < 0.5:
-        #     # if there's place, place a new pedestrian with a certain probability
-            pos = (self.x_max / 2 - 1 , self.y_max - 1)
-        #     pos = (random.uniform(24*2,26*2),  self.y_max - 1)
-
-            if random.random() < self.spawn_rate_pedes and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
+            if random.random() < self.spawn_rate_pedes and not self.space.get_neighbors(pos, include_center = True, radius = 0.4):
                 self.new_pedestrian(pos, "up")
 
-        # else:
-            pos = (self.x_max / 2 + 1, 0)
-        #     pos = (random.uniform(24*2,26*2),  0)
+            # pos = (self.x_max / 2 + 1, 0)
+            pos = (random.uniform(24*2,26*2),  0)
 
-            if random.random() < self.spawn_rate_pedes and not self.space.get_neighbors(pos, include_center = True, radius = 0.8):
+            if random.random() < self.spawn_rate_pedes and not self.space.get_neighbors(pos, include_center = True, radius = 0.4):
                 self.new_pedestrian(pos, "down")
 
         # save the statistics
