@@ -50,7 +50,7 @@ class Pedestrian(Agent):
         The pedestrians always go on green, and never go on red or orange. They will
         walk through orange if they're already on the road.
         """
-        print(self.model.N)
+        # print(self.model.speed_mean)
         # check if traffic light is green or if on road side
         if self.red_crossing() or not self.on_road_side() or self.traffic_green():
             # get list of pedestrians in the vision field
@@ -240,11 +240,13 @@ class Pedestrian(Agent):
         pos_directions = self.possible_directions()
         # TODO: Please check if using the first in pos_directions is going okay, I think it is, but im too tired to be 100% sure
         max_util = list(self.calc_utility(pos_directions[0], peds_in_180))+[pos_directions[0]]
+        max_util[0]+=random.gauss(0, .2)
 
         for direction in pos_directions[1:]: #TODO I think this is where something may be going wrong
             # Calculate utility for every possible direction
             util, next_pos = self.calc_utility(direction, peds_in_180)
-
+            util+= random.gauss(0, .2)
+            # print(util)
             # Check if this utility is higher than the previous
             if util > max_util[0]:
                 max_util = [util, next_pos, direction]
@@ -288,7 +290,7 @@ class Pedestrian(Agent):
             closest_ped = self.model.R_vision_range-2*self.radius
 
         # distance to road 'wall', if no pedestrians in view, closest_wall is set at vision range
-        closest_wall = self.dist_wall(direction) - self.radius
+        closest_wall = self.dist_wall(direction) - 2*self.radius
         # set negative distance to 0
         if closest_wall < 0:
             closest_wall = 0
@@ -758,13 +760,13 @@ class Light(Agent):
         # Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
-            if self.state >= 75:
+            if self.state >= 125:
                 self.color = "Orange"
                 self.state = 0
         elif self.color == "Orange":
             self.state += 1
             # Placehodler ToDo Figure out when it should tip over
-            if self.state >= 25:
+            if self.state >= 50:
                 self.color = "Red"
                 self.state = 0
                 # for light in self.model.lights:
@@ -773,7 +775,7 @@ class Light(Agent):
         elif self.color == "Red" and self.car_light:
             # print("Cars red steps", self.state)
             self.state += 1
-            if self.state>=50:
+            if self.state>=75:
                 # print("Made it to switch red for car")
                 self.state = 0
                 # print(self.car_light)
@@ -792,14 +794,14 @@ class Light(Agent):
         # Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
-            if self.state >= 100 and (
+            if self.state >= 125 and (
                     self.model.lights[0].closest_car() <= 5 or self.model.lights[1].closest_car() <= 5):
                 self.color = "Orange"
                 self.state = 0
         elif self.color == "Orange":
             self.state += 1
             # Placehodler ToDo Figure out when it should tip over
-            if self.state >= 25:
+            if self.state >= 50:
                 self.color = "Red"
                 self.state = 0
                 # for light in self.model.lights:
@@ -808,7 +810,7 @@ class Light(Agent):
         elif self.color == "Red" and self.ped_light:
             self.state += 1
             # print("Peds red steps",self.state)
-            if self.state>=50:
+            if self.state>=75:
                 # print("Made it to switch red for ped")
                 self.state = 0
                 # print(self.ped_light)
