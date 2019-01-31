@@ -19,6 +19,21 @@ class Traffic(Model):
     The actual model class!
     '''
 
+    # # Weights (for equation 1)
+    # Ek_w = 1
+    # Ok_w = .4
+    # Pk_w = 0.6
+    # Ak_w = .3
+    # Ik_w = .1
+    # # Speed parameters
+    # speed_mean = .134 # for max speed
+    # speed_sd = .0342
+    # gamma = 1.913 # gamma for desired speed
+    # max_density = 5.4 # maximum density in the cone # TODO: Check what this means exactly
+    # # Crossing through red
+    # crossing_mean = .5
+    # crossing_sd = .15
+
     def __init__(self, y_max=33, x_max=99):
 
         super().__init__()
@@ -62,12 +77,40 @@ class Traffic(Model):
         self.crossing_mean = .5
         self.crossing_sd = .15
 
-
-
         self.spawn_rate_car = 0.01
         self.spawn_rate_pedes = 0.02
         # we don't want to collect data when running the visualization
         self.data = False
+    
+    def set_parameters(self, vision_angle=170, N=4, vision_range=3,
+        Ek_w=1, Ok_w=.4, Pk_w=.6, Ak_w=.3, Ik_w=.1,
+        speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
+        crossing_mean=.5, crossing_sd=.15, spawn_rate_car=.01, spawn_rate_pedes=.02):
+
+
+        self.N = N
+        self.vision_angle = vision_angle
+        self.R_vision_range
+
+        # Weights (for equation 1)
+        self.Ok_w = Ok_w
+        self.Pk_w = Pk_w
+        self.Ak_w = Ak_w
+        self.Ik_w = Ik_w
+
+        # Speed parameters
+        self.speed_mean = speed_mean # for max speed
+        self.speed_sd = speed_sd
+        self.gamma = gamma # gamma for desired speed
+        self.max_density = max_density # maximum density in the cone # TODO: Check what this means exactly
+        # Crossing through red
+        self.crossing_mean = crossing_mean
+        self.crossing_sd = crossing_sd
+
+        # spawn rates
+        self.spawn_rate_car = spawn_rate_car
+        self.spawn_rate_pedes = spawn_rate_pedes
+
 
     def place_lights(self):
         '''
@@ -234,7 +277,7 @@ class Traffic(Model):
             data.generate_headers(self.strategy, step_count, self.crowdedness)
 
         for i in range(step_count):
-            printProgressBar(i, step_count)
+            # printProgressBar(i, step_count)
             self.step()
 
         # return the data object so we can write all info from the datacollector too

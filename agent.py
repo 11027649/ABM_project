@@ -50,7 +50,7 @@ class Pedestrian(Agent):
         The pedestrians always go on green, and never go on red or orange. They will
         walk through orange if they're already on the road.
         """
-        print(self.model.speed_mean)
+        print(self.model.N)
         # check if traffic light is green or if on road side
         if self.red_crossing() or not self.on_road_side() or self.traffic_green():
             # get list of pedestrians in the vision field
@@ -266,7 +266,6 @@ class Pedestrian(Agent):
         pos_directions = []
         for i in range(self.model.N):
             pos_directions.append((lower_angle+i*theta_N)%360)
-
         return pos_directions
 
     def calc_utility(self, direction, peds_in_180):
