@@ -23,14 +23,14 @@ class Traffic(Model):
 
         super().__init__()
 
-        # Do I need this?
-
         self.y_max = y_max
         self.x_max = x_max
 
-        self.strategy = "Free"
-        # self.strategy = "Simultaneous"
+        # self.strategy = "Free"
+        self.strategy = "Simultaneous"
         # self.strategy = "Reactive"
+
+        self.crowdedness = "Unkown?"
 
 
         # Add a schedule for cars and pedestrians seperately to prevent race-conditions
@@ -56,8 +56,8 @@ class Traffic(Model):
         '''
 
         # car lights
-        self.new_light((44.5, 22.4), 0, "Traf", "Red", "Bottom")
-        self.new_light((54.5, 10.6), 0, "Traf", "Red", "Top")
+        self.new_light((44.5, 22.4), 0, "Car", "Red", "Bottom")
+        self.new_light((54.5, 10.6), 0, "Car", "Red", "Top")
 
         # "Down" lights
         self.new_light((53.5, 10.6), 250, "Ped", "Green", "Top")
@@ -209,7 +209,7 @@ class Traffic(Model):
         '''
         self.data = data
         if data.iteration is 0:
-            data.generate_headers(self.strategy)
+            data.generate_headers(self.strategy, step_count, self.crowdedness)
 
         for i in range(step_count):
             printProgressBar(i, step_count)

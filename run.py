@@ -34,7 +34,7 @@ else:
         model.run_model(steps, results)
 
         print("\nEnd time of this run: ", time.time() - t0)
-        total_time += t0
+        total_time += time.time() - t0
 
     print("It took me", total_time, "s to run your model", iterations, "times with", steps, "steps")
     print("Terminated normally! Find your data in the data folder. Have fun with it! ;-)")
