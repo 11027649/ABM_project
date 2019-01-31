@@ -1,0 +1,8 @@
+mesa
+math
+numpy
+random
+matplotlib
+time
+seaborn
+pandas

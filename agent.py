@@ -25,7 +25,7 @@ class Pedestrian(Agent):
 
         # parameters
         self.N = 16 #  number of possible directions Should be >= 2!
-        self.R_vision_range = 4 # Meters
+        self.R_vision_range = 3 # Meters
         # Weights (for equation 1)
         self.Ek_w = 1
         self.Ok_w = .4
@@ -58,11 +58,11 @@ class Pedestrian(Agent):
         # TODO: assign target point with preference to right side?
         if self.dir == "up":
             self.direction = 270
-            self.target_point = (random.uniform(self.target_x[0], self.target_x[1]), 0)
+            self.target_point = (random.uniform(self.target_x[0] + self.target_x[1] / 2, self.target_x[1]), 0)
             self.own_light = 5
         elif self.dir == "down":
             self.direction = 90
-            self.target_point = (random.uniform(self.target_x[0], self.target_x[1]), 50)
+            self.target_point = (random.uniform(self.target_x[0], self.target_x[1] / 2), 50)
             self.own_light = 2
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
@@ -372,7 +372,7 @@ class Pedestrian(Agent):
         # Get smallest difference angle
         if diff > 180:
             diff = 360-diff
-            
+
         # Return inertia
         return 1- diff/(self.model.vision_angle/2)
 
@@ -633,6 +633,9 @@ class Car(Agent):
         if self.check_front() > 0 and self.check_front() < self.braking_distance() and self.speed > 0:
             self.speed_change(-0.8/40)
 
+        elif self.check_front() > 0 and self.check_front() * 1.5 < self.braking_distance() and self.speed > 0:
+            self.speed_change(-0.8/20)
+
         elif self.check_front() > 0 and self.check_front() > self.braking_distance():
             self.speed_change(0.8/40)
 
@@ -769,15 +772,13 @@ class Light(Agent):
     def simultaneous_step(self):
         """Simultaneaous step function updated"""
         # checks which type of light it is
-        if self.type == "Traf":
+        if self.type == "Car":
             # checks to see if its red and needs to change
-            if self.color == "Red" and self.car_light:
-                self.color = "Green"
+
             self.simultaneous_car()
         elif self.type == "Ped":
             # checks if its red and needs to change
-            if self.color == "Red" and self.ped_light:
-                self.color = "Green"
+
             self.simultaneous_ped()
 
     def simultaneous_car(self):
@@ -794,9 +795,25 @@ class Light(Agent):
             if self.state >= 25:
                 self.color = "Red"
                 self.state = 0
-                for light in self.model.lights:
-                    light.car_light = False
-                    light.ped_light = True
+                # for light in self.model.lights:
+                #     light.car_light = False
+                #     light.ped_light = True
+        elif self.color == "Red" and self.car_light:
+            # print("Cars red steps", self.state)
+            self.state += 1
+            if self.state>=50:
+                # print("Made it to switch red for car")
+                self.state = 0
+                # print(self.car_light)
+                #if self.color == "Red" and self.model.lights[2] == "Red":
+                if self.color == "Red":
+                    for light in self.model.lights:
+                        light.car_light = False
+                        light.ped_light = True
+                        if light.type == "Ped":
+                            light.color = "Green"
+                            light.state = 0
+
 
     def simultaneous_ped(self):
         """The light profile for the pedestrian lights"""
@@ -804,7 +821,7 @@ class Light(Agent):
         if self.color == "Green":
             self.state += 1
             if self.state >= 100 and (
-                    self.model.lights[0].closest_car() <= 7 or self.model.lights[1].closest_car() <= 7):
+                    self.model.lights[0].closest_car() <= 5 or self.model.lights[1].closest_car() <= 5):
                 self.color = "Orange"
                 self.state = 0
         elif self.color == "Orange":
@@ -813,9 +830,24 @@ class Light(Agent):
             if self.state >= 25:
                 self.color = "Red"
                 self.state = 0
-                for light in self.model.lights:
-                    light.ped_light = False
-                    light.car_light = True
+                # for light in self.model.lights:
+                #     light.ped_light = False
+                #     light.car_light = True
+        elif self.color == "Red" and self.ped_light:
+            self.state += 1
+            # print("Peds red steps",self.state)
+            if self.state>=50:
+                # print("Made it to switch red for ped")
+                self.state = 0
+                # print(self.ped_light)
+                #if self.color == "Red" and self.model.lights[0].color == "Red":
+                if self.color == "Red":
+                    for light in self.model.lights:
+                        light.car_light = True
+                        light.ped_light = False
+                        if light.type == "Car":
+                            light.color = "Green"
+                            light.state = 0
 
     def reactive_step(self):
         """Updates for staggered step functions"""
@@ -826,28 +858,20 @@ class Light(Agent):
 
     def update_top_lane(self):
         """Update the top lane"""
-        if self.type == "Traf":
+        if self.type == "Car":
             # checks to see if its red and needs to change
-            if self.color == "Red" and (self.car_light):
-                self.color = "Green"
             self.reactive_car("Top")
         elif self.type == "Ped":
             # checks if its red and needs to change
-            if self.color == "Red" and (self.ped_light):
-                self.color = "Green"
             self.reactive_ped("Top")
 
     def update_bottom_lane(self):
         """Update the bottom lane"""
-        if self.type == "Traf":
+        if self.type == "Car":
             # checks to see if its red and needs to changegit
-            if self.color == "Red" and (self.car_light):
-                self.color = "Green"
             self.reactive_car("Bottom")
         elif self.type == "Ped":
             # checks if its red and needs to change
-            if self.color == "Red" and (self.ped_light):
-                self.color = "Green"
             self.reactive_ped("Bottom")
 
     def reactive_car(self, lane):
@@ -864,10 +888,20 @@ class Light(Agent):
             if self.state >= 40:
                 self.color = "Red"
                 self.state = 0
-                for light in self.model.lights:
-                    if light.lane == lane:
-                        light.car_light = False
-                        light.ped_light = True
+        elif self.color == "Red" and self.car_light:
+                # print("Cars red steps", self.state)
+                self.state += 1
+                if self.state >= 50:
+                    # print("Made it to switch red for car")
+                    self.state = 0
+                    if self.color == "Red":
+                        for light in self.model.lights:
+                            if light.lane == lane:
+                                light.car_light = False
+                                light.ped_light = True
+                                if light.type == "Ped":
+                                    light.color = "Green"
+                                    light.state = 0
 
     def reactive_ped(self, lane):
         """The light profile for the pedestrian lights"""
@@ -887,20 +921,31 @@ class Light(Agent):
             if self.state >= 25:
                 self.color = "Red"
                 self.state = 0
-                for light in self.model.lights:
-                    if light.lane == lane:
-                        light.ped_light = False
-                        light.car_light = True
+        elif self.color == "Red" and self.ped_light:
+                self.state += 1
+                # print("Peds red steps", self.state)
+                if self.state >= 50:
+                    # print("Made it to switch red for ped")
+                    self.state = 0
+                    # print(self.ped_light)
+                    # if self.color == "Red" and self.model.lights[0].color == "Red":
+                    if self.color == "Red":
+                        for light in self.model.lights:
+                            if light.lane == lane:
+                                light.car_light = True
+                                light.ped_light = False
+                                if light.type == "Car":
+                                    light.color = "Green"
+                                    light.state = 0
 
     def free(self):
-        self.step += 1
+        self.state += 1
         self.color = "Green"
 
     def closest_car(self):
 
         center = 8
         if self.unique_id == 1:
-            # print('unique id 1')
             for i in range(16):
                 neighbourList = []
                 neighbours = self.model.space.get_neighbors((self.pos[0] + center - i * 2.5 * 2, 16.5 + 3),
@@ -912,7 +957,6 @@ class Light(Agent):
                     break
 
         elif self.unique_id == 2:
-            # print('unique id 2')
             for i in range(16):
                 neighbourList = []
                 neighbours = self.model.space.get_neighbors((self.pos[0] - center + i * 2.5 * 2, 16.5 - 3),
