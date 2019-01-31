@@ -44,17 +44,17 @@ class Data():
             datawriter.writerow(['# Light strategy: ' + strategy])
             datawriter.writerow(['# Timesteps of each simulation: ' + str(iterations)])
             datawriter.writerow(['# Crowdedness: ' + crowdedness])
-            datawriter.writerow(['iteration', 'pedestrian_count', 'car_count', 'mid_section_count'])
+            datawriter.writerow(['iteration', 'pedestrian_count', 'car_count', 'mid_section_count', 'pedestrians_left', 'cars_left'])
 
     def write_row_hist(self, agent_type, agent_id, time_spent):
         with open(self.filepath_spent_time, 'a', newline='') as csvfile:
             datawriter = csv.writer(csvfile)
             datawriter.writerow([self.iteration, agent_type, agent_id, time_spent])
 
-    def write_row_info(self, pedestrian_count, car_count, mid_section_count):
+    def write_row_info(self, pedestrian_count, car_count, mid_section_count, pedestrians_left, cars_left):
         with open(self.filepath_info, 'a', newline='') as datafile:
             datawriter = csv.writer(datafile)
-            datawriter.writerow([self.iteration, pedestrian_count, car_count, mid_section_count])
+            datawriter.writerow([self.iteration, pedestrian_count, car_count, mid_section_count, pedestrians_left, cars_left])
 
     def next_iteration(self):
         self.iteration += 1
