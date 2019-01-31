@@ -38,6 +38,9 @@ class Traffic(Model):
         self.schedule_Pedestrian = RandomActivation(self)
         self.schedule_Light = RandomActivation(self)
 
+        self.pedestrian_removed = 0
+        self.cars_removed = 0
+
         self.space = ContinuousSpace(self.x_max, self.y_max, torus=False, x_min=0, y_min=0)
 
         self.lights = []
@@ -69,12 +72,12 @@ class Traffic(Model):
         self.spawn_rate_pedes = 0.1
         # we don't want to collect data when running the visualization
         self.data = False
-    
-    def set_parameters(self, vision_angle=170, N=4, vision_range=3,
-        Ek_w=1, Ok_w=.4, Pk_w=.6, Ak_w=.3, Ik_w=.1,
+
+    def set_parameters(self, vision_angle=170, N=16, vision_range=3,
+        Ek_w=1, Ok_w=.4, Pk_w=1, Ak_w=.6, Ik_w=.1,
         speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
         crossing_mean=.5, crossing_sd=.15, max_peds=50, max_cars=8,
-        spawn_rate_car=.01, spawn_rate_pedes=.02):
+        spawn_rate_car=1.2, spawn_rate_pedes=.1):
 
 
         self.N = N
@@ -161,6 +164,11 @@ class Traffic(Model):
             # save level of service by saving spended time in list
             self.data.write_row_hist(type(agent).__name__, agent.unique_id, agent.time)
 
+        if type(agent) is Car:
+            self.cars_removed += 1
+        elif type(agent) is Pedestrian:
+            self.pedestrian_removed += 1
+
         # if we remove the agents, save the time they spended in the grid
         self.space.remove_agent(agent)
         getattr(self, f'schedule_{type(agent).__name__}').remove(agent)
@@ -174,6 +182,9 @@ class Traffic(Model):
         self.schedule_Light.step()
         self.schedule_Pedestrian.step()
         self.schedule_Car.step()
+
+        self.pedestrian_removed = 0
+        self.cars_removed = 0
 
         # out of bounds checks for cars and pedestrians
         # TODO: remove the pedestrian schedule from here if we use the new pedestrian step
@@ -236,9 +247,10 @@ class Traffic(Model):
             if random.random() < self.spawn_rate_pedes and not self.space.get_neighbors(pos, include_center = True, radius = 0.4):
                 self.new_pedestrian(pos, "down")
 
+
         # save the statistics
         if self.data:
-            self.data.write_row_info(self.schedule_Pedestrian.get_agent_count(), self.schedule_Car.get_agent_count(), self.check_median())
+            self.data.write_row_info(self.schedule_Pedestrian.get_agent_count(), self.schedule_Car.get_agent_count(), self.check_median(), self.pedestrian_removed, self.cars_removed)
 
 
     def check_median(self, middle_pos = (50,16.5), median_width = 3, median_height = 1):
@@ -268,7 +280,7 @@ class Traffic(Model):
             data.generate_headers(self.strategy, step_count, self.crowdedness)
 
         for i in range(step_count):
-            # printProgressBar(i, step_count)
+            printProgressBar(i, step_count)
             self.step()
 
         # return the data object so we can write all info from the datacollector too
