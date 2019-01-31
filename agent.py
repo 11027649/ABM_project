@@ -15,15 +15,15 @@ class Pedestrian(Agent):
         self.speed = speed
         self.time = time
         self.des_speed = None # Meters per time step
-
-        # Liu, 2014 parameters
-        self.walls_x = [45.54, 53.46] # TODO: correct walls?
-        self.walls_y = [10, 23] # TODO: correct walls?
+        self.radius = .2 # radius
         self.neighbours = []
 
+        # Liu, 2014 parameters
+        # print(self.model.lights[5].pos[0], self.model.lights[2].pos[0])
+        # print(self.model.lights[2].pos[1], self.model.lights[5].pos[1])
+        # print()
+
         # parameters
-        self.vision_angle = 170  # Degrees
-        self.radius = .2 # radius
         self.N = 16 #  number of possible directions Should be >= 2!
         self.R_vision_range = 3 # Meters
         # Weights (for equation 1)
@@ -35,9 +35,15 @@ class Pedestrian(Agent):
         # Other variables
         self.speed_mean = .134 # for max speed
         self.speed_sd = .0342
-        self.target_x = self.walls_x # boundaries of walls
         self.gamma = 1.913 # gamma for desired speed
         self.max_density = 5.4 # maximum density in the cone # TODO: Check what this means exactly
+        # Crossing
+        self.crossing_mean = .5
+        self.crossing_sd = .15
+
+
+        self.walls_x = [self.model.lights[4].pos[0], self.model.lights[3].pos[0]]
+        self.target_x = self.walls_x # boundaries of walls
 
 
         # self.Ok_w_7 = .4
@@ -45,8 +51,8 @@ class Pedestrian(Agent):
         # self.Ak_w_7 = .3
         # self.Ik_w_7 = .1
 
-        self.speed_free = random.gauss(self.speed_mean, self.speed_sd**2) # normal distribution of N(1.34, 0.342^2) m/s, but per (1/10s) timesteps
-        self.crossing_chance = max(0, min(1, random.gauss(0.5, 0.15))) # generates a nice 'normal distribution', max 1, min 0
+        self.speed_free = random.gauss(self.model.speed_mean, self.model.speed_sd**2) # normal distribution of N(1.34, 0.342^2) m/s, but per (1/10s) timesteps
+        self.crossing_chance = max(0, min(1, random.gauss(self.model.crossing_mean, self.model.crossing_sd))) # generates a nice 'normal distribution', max 1, min 0
 
         # Set direction in degrees
         # TODO: assign target point with preference to right side?
@@ -77,14 +83,14 @@ class Pedestrian(Agent):
         The pedestrians always go on green, and never go on red or orange. They will
         walk through orange if they're already on the road.
         """
-
+        print(self.speed_mean)
         # check if traffic light is green or if on road side
         if self.red_crossing() or not self.on_road_side() or self.traffic_green():
             # get list of pedestrians in the vision field
             # TODO: check if we can do it with only 180
             self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.R_vision_range)
 
-            peds_in_vision = self.pedestrians_in_field(self.vision_angle)
+            peds_in_vision = self.pedestrians_in_field(self.model.vision_angle)
 
             # get desired_speed
             self.des_speed = self.desired_speed(len(peds_in_vision))
@@ -235,7 +241,7 @@ class Pedestrian(Agent):
         """
 
         # sanity check
-        if self.vision_angle == 170:
+        if self.model.vision_angle == 170:
             # TODO: do calculations again, maybe no hardcoding?
             dens = 0.0376
         else:
@@ -287,10 +293,10 @@ class Pedestrian(Agent):
         """
 
         # calculate the lower angle and the upper angle
-        lower_angle = self.direction - (self.vision_angle / 2)
+        lower_angle = self.direction - (self.model.vision_angle / 2)
 
         # get list of possible directions
-        theta_N = self.vision_angle/(self.N-1)
+        theta_N = self.model.vision_angle/(self.N-1)
         pos_directions = []
         for i in range(self.N):
             pos_directions.append((lower_angle+i*theta_N)%360)
@@ -368,7 +374,7 @@ class Pedestrian(Agent):
             diff = 360-diff
 
         # Return inertia
-        return 1- diff/(self.vision_angle/2)
+        return 1- diff/(self.model.vision_angle/2)
 
 
     def theta_angle(self, direction, ped, side):
@@ -433,9 +439,6 @@ class Pedestrian(Agent):
         """
         Returns True if
         """
-        # print(self.model.lights[5].pos[0], self.model.lights[2].pos[0])
-        # print(self.model.lights[2].pos[1], self.model.lights[5].pos[1])
-        # print()
         # Calculate furthest point the pedestrian can see
         max_x_pos = self.pos[0] + self.R_vision_range*np.cos(math.radians(direction))
         # If the maximum x position is outside of the walls, return distance
@@ -446,63 +449,6 @@ class Pedestrian(Agent):
         # Else, return the vision range
         else:
             return self.R_vision_range
-
-
-    # def dist_wall(self, direction):
-    #     """
-    #     Returns True if
-    #     """
-    #     x_walls = self.model.lights[5].pos[0], self.model.lights[2].pos[0])
-    #     y_walls = self.model.lights[2].pos[1], self.model.lights[5].pos[1])
-    #     print()
-    #     # Calculate furthest point the pedestrian can see in this direction
-    #     see_pos = [self.pos[0] + self.R_vision_range*np.cos(math.radians(direction)),
-    #                 self.pos[1] + self.R_vision_range*np.sin(math.radians(direction))]
-
-
-    #     # # Check if in the y direction the walls are closer than the maximum y distance self can see
-    #     # if (abs(see_pos[1] - self.pos[1]) > abs(y_walls[0] - self.pos[1]) or
-    #     #     abs(see_pos[1] - self.pos[1]) > abs(y_walls[1] - self.pos[1])):
-
-    # def dist_wall(self, direction):
-    #     """
-    #     Returns True if
-    #     """
-    #     x_walls = self.model.lights[5].pos[0], self.model.lights[2].pos[0])
-    #     y_walls = self.model.lights[2].pos[1], self.model.lights[5].pos[1])
-    #     print()
-    #     # Calculate furthest point the pedestrian can see in this direction
-    #     see_pos = [self.pos[0] + self.R_vision_range*np.cos(math.radians(direction)),
-    #                 self.pos[1] + self.R_vision_range*np.sin(math.radians(direction))]
-
-    #     # If self and see_pos are within x_boundaries
-    #     if ((self.pos[0]>x_walls[0] and self.pos[0]<x_walls[1]) and
-    #         (see_pos[0]>x_walls[0] and see_pos[0]<x_walls[1])):
-    #         return self.R_vision_range
-
-    #     # If position in area 2
-    #     elif (self.pos[1]>y_walls[0] and self.pos[1]<y_walls[1]):
-    #         # if see_pos also within area 2:
-    #         if ((see_pos[1]>y_walls[0] and see_pos[1]<y_walls[1])
-    #             and (see_pos[0]>x_walls[0] and see_pos[0]<x_walls[1])):
-    #             # Just check normal walls
-    #             # Return distance to the walls if walls are in sight
-    #             if  see_pos[0]<x_walls[0]:
-    #                 return self.pos[0]-x_walls[0]
-    #             elif see_pos[0]>x_walls[1]:
-    #                 return x_walls[1] - self.pos[0]
-
-
-    #         # if see_pos is upwards of area 2
-    #         elif:
-
-    #         # if see_pos is downwards of area 2
-
-
-
-
-
-
 
 
     def new_pos(self, chosen_velocity, theta_chosen):
