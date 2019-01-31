@@ -52,11 +52,11 @@ class Pedestrian(Agent):
         # TODO: assign target point with preference to right side?
         if self.dir == "up":
             self.direction = 270
-            self.target_point = (random.uniform(self.target_x[0], self.target_x[1]), 0)
+            self.target_point = (random.uniform(self.target_x[0] + self.target_x[1] / 2, self.target_x[1]), 0)
             self.own_light = 5
         elif self.dir == "down":
             self.direction = 90
-            self.target_point = (random.uniform(self.target_x[0], self.target_x[1]), 50)
+            self.target_point = (random.uniform(self.target_x[0], self.target_x[1] / 2), 50)
             self.own_light = 2
         else:
             raise ValueError("invalid direction, choose 'up' or 'down'")
