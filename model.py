@@ -65,7 +65,7 @@ class Traffic(Model):
         self.crossing_mean = .5
         self.crossing_sd = .15
 
-        self.max_peds = 10 # 10 - 20 - 40
+        self.max_peds = 20 # 10 - 20 - 40
         self.max_cars = 8 # 2 - 4 - 8
 
         self.spawn_rate_car = 1.2
@@ -77,7 +77,7 @@ class Traffic(Model):
     def set_parameters(self, vision_angle=170, N=16, vision_range=3,
         Ek_w=1, Ok_w=.4, Pk_w=1, Ak_w=.6, Ik_w=.1,
         speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
-        crossing_mean=.5, crossing_sd=.15, max_peds=10, max_cars=8,
+        crossing_mean=.5, crossing_sd=.15, max_peds=20, max_cars=8,
         spawn_rate_car=1.2, spawn_rate_pedes=.1):
 
 
