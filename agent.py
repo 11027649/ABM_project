@@ -52,8 +52,8 @@ class Pedestrian(Agent):
         """
         # print(self.model.speed_mean)
         # check if traffic light is green or if on road side
-        # if self.red_crossing() or not self.on_road_side() or self.traffic_green():
-        if self.red_crossing() or not self.on_road_side():
+        if self.red_crossing() or not self.on_road_side() or self.traffic_green():
+        # if self.red_crossing() or not self.on_road_side():
             # get list of pedestrians in the vision field
             # TODO: check if we can do it with only 180
             self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.model.R_vision_range)
@@ -241,12 +241,12 @@ class Pedestrian(Agent):
         pos_directions = self.possible_directions()
         # TODO: Please check if using the first in pos_directions is going okay, I think it is, but im too tired to be 100% sure
         max_util = list(self.calc_utility(pos_directions[0], peds_in_180))+[pos_directions[0]]
-        max_util[0]+=random.gauss(0, .2)
+        max_util[0]+=random.gauss(0, self.model.stoch_variable)
 
         for direction in pos_directions[1:]: #TODO I think this is where something may be going wrong
             # Calculate utility for every possible direction
             util, next_pos = self.calc_utility(direction, peds_in_180)
-            util+= random.gauss(0, .2)
+            util+= random.gauss(0, self.model.stoch_variable)
             # print(util)
             # Check if this utility is higher than the previous
             if util > max_util[0]:
@@ -422,7 +422,7 @@ class Pedestrian(Agent):
             # Check if the distance is smaller, change it
             if pos_dist < min_dist:
                 min_dist = pos_dist
-        
+
         return min_dist
 
 
