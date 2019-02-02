@@ -27,8 +27,8 @@ class Traffic(Model):
         self.x_max = x_max
 
         # self.strategy = "Free"
-        self.strategy = "Simultaneous"
-        # self.strategy = "Reactive"
+        # self.strategy = "Simultaneous"
+        self.strategy = "Reactive"
 
         self.crowdedness = "Unkown?"
 
@@ -68,7 +68,7 @@ class Traffic(Model):
         self.max_peds = 50 # 10 - 20 - 40
         self.max_cars = 8 # 2 - 4 - 8
 
-        self.spawn_rate_car = 1.2
+        self.spawn_rate_car = 0.01
         self.spawn_rate_pedes = 0.1
         # we don't want to collect data when running the visualization
         self.data = False
@@ -78,7 +78,7 @@ class Traffic(Model):
         Ek_w=1, Ok_w=.4, Pk_w=1, Ak_w=.6, Ik_w=.1,
         speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
         crossing_mean=.5, crossing_sd=.15, max_peds=50, max_cars=8,
-        spawn_rate_car=1.2, spawn_rate_pedes=.1):
+        spawn_rate_car=0.01, spawn_rate_pedes=.1):
 
 
         self.N = N
