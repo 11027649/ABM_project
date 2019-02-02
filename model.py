@@ -83,7 +83,7 @@ class Traffic(Model):
         speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
         crossing_mean=.5, crossing_sd=.15, max_cars=8,
         spawn_rate_car=.01, spawn_rate_pedes=.1, stoch_variable=.2, max_car_speed=.8,
-        strategy="Simultaneous", max_peds=10):
+        strategy="Free", max_peds=10):
 
     # def set_parameters(self, vision_angle=170, N=16, vision_range=3,
     #     Ek_w=1, Ok_w=.4, Pk_w=1, Ak_w=.6, Ik_w=.1,
@@ -123,6 +123,7 @@ class Traffic(Model):
 
         self.stoch_variable = stoch_variable
         self.max_car_speed = max_car_speed
+        self.strategy = strategy
 
 
     def place_lights(self):
