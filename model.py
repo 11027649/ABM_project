@@ -116,6 +116,7 @@ class Traffic(Model):
 
         self.stoch_variable = stoch_variable
         self.max_car_speed = max_car_speed
+        self.strategy = strategy
 
 
     def place_lights(self):
