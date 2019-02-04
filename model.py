@@ -26,8 +26,8 @@ class Traffic(Model):
         self.y_max = y_max
         self.x_max = x_max
 
-        # self.strategy = "Free"
-        self.strategy = "Simultaneous"
+        self.strategy = "Free"
+        # self.strategy = "Simultaneous"
         # self.strategy = "Reactive"
 
         self.crowdedness = "Unkown?"
@@ -66,7 +66,7 @@ class Traffic(Model):
         self.crossing_sd = .15
 
 
-        self.max_peds = 45 # 10 - 20 - 40
+        self.max_peds = 60 # 10 - 20 - 40
         self.max_cars = 8 # 2 - 4 - 8
 
         self.spawn_rate_car = .01
@@ -85,7 +85,7 @@ class Traffic(Model):
 
         crossing_mean=.5, crossing_sd=.15, max_cars=8,
         spawn_rate_car=.01, spawn_rate_pedes=.1, stoch_variable=.2, max_car_speed=.8,
-        strategy="Simultaneous", max_peds=45):
+        strategy="Simultaneous", max_peds=60):
 
     # def set_parameters(self, vision_angle=170, N=16, vision_range=3,
     #     Ek_w=1, Ok_w=.4, Pk_w=1, Ak_w=.6, Ik_w=.1,
