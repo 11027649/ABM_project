@@ -60,25 +60,45 @@ class Traffic(Model):
         self.speed_mean = .134 # for max speed
         self.speed_sd = .0342
         self.gamma = 1.913 # gamma for desired speed
-        self.max_density = 5.4 # maximum density in the cone # TODO: Check what this means exactly
+        self.max_density = 5.4 # maximum density in the cone
         # Crossing through red
         self.crossing_mean = .5
         self.crossing_sd = .15
 
+<<<<<<< HEAD
         self.max_peds = 60 # 10 - 20 - 40
+=======
+        self.max_peds = 65 # 10 - 20 - 40
+>>>>>>> e19b8215a96034b25ee6ecfba70ecf8d5c434729
         self.max_cars = 8 # 2 - 4 - 8
 
-        self.spawn_rate_car = 1.2
+        self.spawn_rate_car = .01
         self.spawn_rate_pedes = 0.1
         # we don't want to collect data when running the visualization
         self.data = False
+
+        self.stoch_variable = .2
+        # TODO: SET CORRECTLY in agent.py
+        self.max_car_speed = .8
 
 
     def set_parameters(self, vision_angle=170, N=16, vision_range=3,
         Ek_w=1, Ok_w=.4, Pk_w=1, Ak_w=.6, Ik_w=.1,
         speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
+<<<<<<< HEAD
         crossing_mean=.5, crossing_sd=.15, max_peds=60, max_cars=8,
         spawn_rate_car=1.2, spawn_rate_pedes=.1):
+=======
+        crossing_mean=.5, crossing_sd=.15, max_cars=8,
+        spawn_rate_car=.01, spawn_rate_pedes=.1, stoch_variable=.2, max_car_speed=.8,
+        strategy="Free", max_peds=65):
+
+    # def set_parameters(self, vision_angle=170, N=16, vision_range=3,
+    #     Ek_w=1, Ok_w=.4, Pk_w=1, Ak_w=.6, Ik_w=.1,
+    #     speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
+    #     crossing_mean=.5, crossing_sd=.15, max_peds=30, max_cars=8,
+    #     spawn_rate_car=.01, spawn_rate_pedes=.1):
+>>>>>>> e19b8215a96034b25ee6ecfba70ecf8d5c434729
 
 
         self.N = N
@@ -109,6 +129,10 @@ class Traffic(Model):
 
         self.pedestrian_removed = 0
         self.cars_removed = 0
+
+        self.stoch_variable = stoch_variable
+        self.max_car_speed = max_car_speed
+        self.strategy = strategy
 
 
     def place_lights(self):
