@@ -53,6 +53,7 @@ class Pedestrian(Agent):
         # print(self.model.speed_mean)
         # check if traffic light is green or if on road side
         if self.red_crossing() or not self.on_road_side() or self.traffic_green():
+        # if self.red_crossing() or not self.on_road_side():
             # get list of pedestrians in the vision field
             # TODO: check if we can do it with only 180
             self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.model.R_vision_range)
