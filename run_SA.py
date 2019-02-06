@@ -14,48 +14,43 @@ from copy import copy
 from scipy import stats
 
 
-total_time = 0
-steps = 1000
+steps = 5000
 
-strategy = "Free"
+
+# Number of runs will be:
+# distrinct_samples*(number of params*2+2)*replicates
+distinct_samples = 25
+replicates = 1
+
+# strategy = "Free"
 # strategy = "Simultaneous"
-# strategy = "Reactive"
+strategy = "Reactive"
 
-max_peds = 10        
-# max_peds = 20        
-# max_peds = 30        
-# max_peds = 40        
-
-# Set the repetitions, the amount of steps, and the amount of distinct values per variable
-replicates = 2
-distinct_samples = 3
+total_time = 0
 # parameter bounds
 bounds = [[.2, .8], # crossing_mean
-          [2,30], #N
+          [20,60], # max_peds
           [2,6],# vision range in meters
           [.01, .3]] # stoch var
-
-# File names
-filepath_spent_time = "data/SA_hist" + strategy+ ".csv"
-filepath_info = "data/SA_info" + strategy + ".csv"
 
 # We define our variables and bounds
 problem = {
     'num_vars': len(bounds),
-    'names': ["crossing_mean", "N", "vision_range",
+    'names': ["crossing_mean", "max_peds", "vision_range",
         "stoch_variable"],
     'bounds': bounds
 }
 
+# File names
+filepath_spent_time = "data/SA_hist" + strategy+ ".csv"
+filepath_info = "data/SA_info" + strategy + ".csv"
 # Set headers for the datafile
-# TODO: add data headers
-headers = ["run"] + problem["names"] + ["strategy", "max_peds", "mean"]
+headers = ["run"] + problem["names"] + ["strategy", "mean"]
 output_file_name = "SA_" + strategy +"_"+ datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".csv"
 # If file does not yet exist, write columnheaders first 
-with open(output_file_name, "w") as f:
+with open(output_file_name, "w", newline='') as f:
     writer = csv.writer(f)
     writer.writerow(headers)
-
 
 # Create the sample set
 param_values = saltelli.sample(problem, distinct_samples)
@@ -68,16 +63,16 @@ for vals in param_values:
     param_dict = {}
     for i in range(len(problem['names'])):
         # Set N as integer
-        if problem['names'][i] == "N":
+        if problem['names'][i] == "max_peds":
             param_dict[problem['names'][i]] = int(vals[i])
+            vals[i] = int(vals[i])
         else:
             param_dict[problem['names'][i]] = vals[i]
+    param_dict["strategy"] = strategy
     print(param_dict)
-    print(vals)
 
     # Replicate this experiment 'replicates' times
     for i in range(replicates):
-        # TODO: add parameter for SA count
         # Initialize data
         results = Data()
         results.SA = True
@@ -97,12 +92,10 @@ for vals in param_values:
 
         # Write data to SA file
         # vals correct?
-        values_row = [count] + list(vals) + [strategy, max_peds, mean]
-        print(values_row)
+        values_row = [count] + list(vals) + [strategy, mean]
         # Write values_row
         with open(output_file_name, "a", newline='') as f:
             writer = csv.writer(f)
-            print(values_row)
             writer.writerow(values_row)
 
         count += 1

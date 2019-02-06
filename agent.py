@@ -53,32 +53,32 @@ class Pedestrian(Agent):
         # print(self.model.speed_mean)
         # check if traffic light is green or if on road side
         # if self.red_crossing() or not self.on_road_side() or self.traffic_green():
-        if self.red_crossing() or not self.on_road_side():
-            if (model.strategy!="Free" and self.traffic_green()) or (model.strategy=="Free"):
-                # get list of pedestrians in the vision field
-                # TODO: check if we can do it with only 180
-                self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.model.R_vision_range)
+        if ((self.model.strategy=="Free" and (self.red_crossing() or not self.on_road_side())) or
+            (self.model.strategy!="Free" and (self.red_crossing() or not self.on_road_side() or self.traffic_green()))):
+            # get list of pedestrians in the vision field
+            # TODO: check if we can do it with only 180
+            self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.model.R_vision_range)
 
-                peds_in_vision = self.pedestrians_in_field(self.model.vision_angle)
+            peds_in_vision = self.pedestrians_in_field(self.model.vision_angle)
 
-                # get desired_speed
-                self.des_speed = self.desired_speed(len(peds_in_vision))
+            # get desired_speed
+            self.des_speed = self.desired_speed(len(peds_in_vision))
 
-                # get new position and update direction
-                next_pos, self.direction = self.choose_direction()
+            # get new position and update direction
+            next_pos, self.direction = self.choose_direction()
 
-                # try to move agent
-                try:
-                    self.model.space.move_agent(self, next_pos)
-                except:
-                    # if it gave an exeption and it is trying to go in the wrong direction
-                    if ((self.dir == "up" and self.direction%360 <180) or
-                        (self.dir == "down" and self.direction%360 >180)):
-                        # let it be removed by the step function in model.py
-                        self.remove = True
+            # try to move agent
+            try:
+                self.model.space.move_agent(self, next_pos)
+            except:
+                # if it gave an exeption and it is trying to go in the wrong direction
+                if ((self.dir == "up" and self.direction%360 <180) or
+                    (self.dir == "down" and self.direction%360 >180)):
+                    # let it be removed by the step function in model.py
+                    self.remove = True
 
-                # Finalize this step
-                self.time += 1
+            # Finalize this step
+            self.time += 1
 
     def red_crossing(self):
         if self.dir == "up":
