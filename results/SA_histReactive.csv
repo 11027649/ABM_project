@@ -1,0 +1,49 @@
+# This is a generated file to store info about the model
+# Light strategy: Reactive
+# Timesteps of each simulation: 5000
+# Crowdedness: Unkown?
+iteration,agent_type,unique_id,time_spent
+0,Pedestrian,13,253
+0,Pedestrian,10,272
+0,Pedestrian,9,276
+0,Pedestrian,17,274
+0,Car,12,297
+0,Pedestrian,19,277
+0,Car,27,219
+0,Pedestrian,7,358
+0,Car,32,170
+0,Pedestrian,23,259
+0,Pedestrian,21,257
+0,Car,34,143
+0,Pedestrian,11,247
+0,Pedestrian,26,286
+0,Pedestrian,15,265
+0,Pedestrian,24,266
+0,Car,33,343
+0,Pedestrian,20,272
+0,Car,35,339
+0,Car,42,283
+0,Car,40,433
+0,Pedestrian,16,251
+0,Pedestrian,28,249
+0,Pedestrian,8,251
+0,Pedestrian,18,261
+0,Pedestrian,31,308
+0,Pedestrian,36,266
+0,Pedestrian,25,287
+0,Pedestrian,38,271
+0,Pedestrian,22,365
+0,Pedestrian,14,266
+0,Car,51,400
+0,Pedestrian,39,386
+0,Pedestrian,43,272
+0,Pedestrian,30,264
+0,Pedestrian,29,425
+0,Pedestrian,37,431
+0,Pedestrian,41,281
+0,Car,52,335
+0,Car,64,157
+0,Car,46,556
+0,Pedestrian,48,257
+0,Pedestrian,49,268
+0,Pedestrian,45,295
