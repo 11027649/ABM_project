@@ -26,8 +26,8 @@ class Traffic(Model):
         self.y_max = y_max
         self.x_max = x_max
 
-        self.strategy = "Free"
-        # self.strategy = "Simultaneous"
+        # self.strategy = "Free"
+        self.strategy = "Simultaneous"
         # self.strategy = "Reactive"
 
         self.crowdedness = "Unkown?"
@@ -85,7 +85,9 @@ class Traffic(Model):
         speed_mean=.134, speed_sd=.0342, gamma=1.913, max_density=5.4,
         crossing_mean=.5, crossing_sd=.15, max_cars=8,
         spawn_rate_car=.01, spawn_rate_pedes=.1, stoch_variable=.2, max_car_speed=.8,
-        strategy="Free", max_peds=50):
+        strategy="Simultaneous", max_peds=50):
+        """ This is a function so we can set the parameters for a run. For the visualization,
+        the standards are used, which are set in the init function of this model class. """
 
 
         self.N = N
