@@ -13,7 +13,11 @@ import pandas as pd
 from copy import copy
 from scipy import stats
 
+"""
+Runs a sobol sensitivity analysis, writing the mean flowing rate per simulation in an SA_...csv file
+"""
 
+# Number of steps per simulation
 steps = 5000
 
 
