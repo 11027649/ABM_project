@@ -18,15 +18,14 @@ class Pedestrian(Agent):
         self.radius = .2 # radius
         self.neighbours = []
 
+        # the "walls" are around the zebra crossing, are at the places of the traffic lights
         self.walls_x = [self.model.lights[4].pos[0], self.model.lights[3].pos[0]]
-        # self.walls_x = self.walls_x # boundaries of walls
 
         # Set individual parameters
         self.speed_free = random.gauss(self.model.speed_mean, self.model.speed_sd**2) # normal distribution of N(1.34, 0.342^2) m/s, but per (1/10s) timesteps
         self.crossing_chance = max(0, min(1, random.gauss(self.model.crossing_mean, self.model.crossing_sd))) # generates a nice 'normal distribution', max 1, min 0
 
         # Set direction in degrees
-        # TODO: assign target point with preference to right side?
         if self.dir == "up":
             self.direction = 270
             self.target_point = (random.uniform(self.walls_x[0] + ((self.walls_x[1] - self.walls_x[0]) * 2 / 6), self.walls_x[1]), 0)
@@ -50,13 +49,10 @@ class Pedestrian(Agent):
         The pedestrians always go on green, and never go on red or orange. They will
         walk through orange if they're already on the road.
         """
-        # print(self.model.speed_mean)
-        # check if traffic light is green or if on road side
-        # if self.red_crossing() or not self.on_road_side() or self.traffic_green():
+        
         if ((self.model.strategy=="Free" and (self.red_crossing() or not self.on_road_side())) or
             (self.model.strategy!="Free" and (self.red_crossing() or not self.on_road_side() or self.traffic_green()))):
             # get list of pedestrians in the vision field
-            # TODO: check if we can do it with only 180
             self.neighbours = self.model.space.get_neighbors(self.pos, include_center=False, radius=self.model.R_vision_range)
 
             peds_in_vision = self.pedestrians_in_field(self.model.vision_angle)
@@ -105,7 +101,7 @@ class Pedestrian(Agent):
         This is a function that checks if the pedestrian is near the road. If
         it's not, it never has to stop.
         """
-        # TODO: Use light coordinates?
+        
         # if the direction is up, and it's near the road sides or in the middle part
         if self.dir == "up":
             if self.pos[1] > 22.2 and self.pos[1] < 22.6:
@@ -126,7 +122,7 @@ class Pedestrian(Agent):
         """
         Returns true if the light the pedestrian is supposed to be looking at, is green.
         """
-        # TODO: Hardcoded coordinates (use actual light attribute?)
+    
         correct_side = True
 
         # check where the pedestrian is and assign it to the right traffic light
@@ -151,15 +147,15 @@ class Pedestrian(Agent):
 
     def pedestrians_in_field(self, vision_angle):
         """
-            Returns the pedestrians that are in the cone that the pedestrian can
-            actually see in a certain vision_angle (which usually is 170, but
-            can also be a bit heigher to check the most outer parts.).
+        Returns the pedestrians that are in the cone that the pedestrian can
+        actually see in a certain vision_angle (which usually is 170, but
+        can also be a bit heigher to check the most outer parts.).
         """
 
         rotatedNeighList = []
         i = -1
         # rotate all the neigbours facing either up or down
-        # TODO: Create one list
+        
         for neigh in self.neighbours:
             i = i + 1
 
@@ -179,13 +175,9 @@ class Pedestrian(Agent):
         """
         Rotate a point counterclockwise by a given angle around a given origin.
         The angle should be given in radians.
-        # TODO: Move this function to a helper functions file?
         """
 
-        # if self.dir == 'up':
         rot_angle = self.direction - 270
-        # else:
-        #     angle = self.direction - 90
 
         if rot_angle < 0:
             rot_angle += 360
@@ -210,7 +202,7 @@ class Pedestrian(Agent):
 
         # sanity check
         if self.model.vision_angle == 170:
-            # TODO: do calculations again, maybe no hardcoding?
+            # density from the paper
             dens = 0.0376
         else:
             raise ValueError('Code only works for 170 degrees vision range for now')
@@ -240,15 +232,13 @@ class Pedestrian(Agent):
 
         # Loop over the possible directions
         pos_directions = self.possible_directions()
-        # TODO: Please check if using the first in pos_directions is going okay, I think it is, but im too tired to be 100% sure
         max_util = list(self.calc_utility(pos_directions[0], peds_in_180))+[pos_directions[0]]
         max_util[0]+=random.gauss(0, self.model.stoch_variable)
 
-        for direction in pos_directions[1:]: #TODO I think this is where something may be going wrong
+        for direction in pos_directions[1:]:
             # Calculate utility for every possible direction
             util, next_pos = self.calc_utility(direction, peds_in_180)
             util+= random.gauss(0, self.model.stoch_variable)
-            # print(util)
             # Check if this utility is higher than the previous
             if util > max_util[0]:
                 max_util = [util, next_pos, direction]
@@ -331,8 +321,11 @@ class Pedestrian(Agent):
 
 
     def inertia(self, direction):
-        """Returns the inertia, based on the difference between the current direction (self.direction)
-        and the possible direction"""
+        """
+        Returns the inertia, based on the difference between the current direction (self.direction)
+        and the possible direction
+        """
+
         # Calculate absolute difference in angles
         diff = direction-self.direction
         # Make difference positive
@@ -347,7 +340,8 @@ class Pedestrian(Agent):
 
 
     def theta_angle(self, direction, ped, side):
-        """Returns the angle between direction and the angle of the closest
+        """
+        Returns the angle between direction and the angle of the closest
         pedestrian to that line. If the velocities do not cross, theta=0.
         """
 
@@ -394,6 +388,7 @@ class Pedestrian(Agent):
         """
         Returns coordinates of the targets projection on the vision range
         """
+
         # Distance in x and y coordinates to the target
         dist_diff = [self.target_point[0]-self.pos[0], self.target_point[1]-self.pos[1]]
         # Distance to target
@@ -408,6 +403,7 @@ class Pedestrian(Agent):
         """
         Returns True if
         """
+
         # Calculate furthest point the pedestrian can see
         max_x_pos = self.pos[0] + self.model.R_vision_range*np.cos(math.radians(direction))
         # If the maximum x position is outside of the walls, return distance
@@ -455,6 +451,7 @@ class Pedestrian(Agent):
         """intersecting
         This would find the closest pedestrian to a path given a subset of pedestrians
         """
+
         # Find the terms for the equation for the line that will be passing through the current point in direction
         a = math.tan(math.radians(direction))
         b = self.pos[1]
@@ -488,12 +485,10 @@ class Pedestrian(Agent):
         # Returns the min distance and the corresponding pedestrian
         return min_distance, min_pedestrian, side
 
-    # TODO: can prob be in 1 function
 
     def rotate_intersection(self, origin, point, angle):
         """
         Rotate a point counterclockwise by a given angle around a given origin.
-
         The angle should be given in radians.
         """
 
@@ -510,7 +505,6 @@ class Pedestrian(Agent):
     def rotatePedestrian(self, origin, point, direction):
         """
         Rotate a point counterclockwise by a given angle around a given origin.
-
         The angle should be given in radians.
         """
 
@@ -529,8 +523,8 @@ class Pedestrian(Agent):
         """
         This is used to find the closest pedestrian of a given included list of neighbours
         Returns distance to and the position of the closest pedestrian
-        TODO: check
         """
+
         c = self.model.space.get_distance(self.pos, inter_neigh[0].pos)
         min_neigh = inter_neigh[0]
         for i in range(1, len(inter_neigh)):
@@ -539,8 +533,6 @@ class Pedestrian(Agent):
                 c = cur_distance
                 min_neigh = inter_neigh[i]
 
-        # b = self.closest_ped_on_line([min_neigh], direction)[0]
-        # min_distance = math.sqrt(c**2 + b**2)
         min_distance = c
         return min_distance
 
@@ -549,7 +541,7 @@ class Pedestrian(Agent):
         # Takes in a list of neighbours and returns a utility value
         # The start value
         Ak = 1
-        # cycles through neighbours and adds the utility (this is for if we want to incorperate flocking later, we just pass it a larger list and bam! This part is done
+        # cycles through neighbours and adds the utility
         for neigh in neighbours:
             Ak = Ak - (abs(self.direction - neigh.direction)/math.pi)
         return Ak
@@ -655,14 +647,15 @@ class Car(Agent):
         '''
         Function to see if there is a car closeby in front of a car
         '''
+        
         # Find all the neighbours
-        # We may want to assign each car a car in front of it which we use instead of this.  That would be easier.
         neighbours = self.model.space.get_neighbors(self.pos, include_center = False, radius = self.vision_range)
         min_dist = self.vision_range + 1
         # if there are neighbours
         if neighbours:
             car_neighbours = []
-            #Find those that are cars
+
+            # find those that are cars
             for neigh in neighbours:
                 if type(neigh) is Car or type(neigh) is Pedestrian:
                     car_neighbours.append(neigh)
@@ -697,7 +690,8 @@ class Car(Agent):
     def braking_distance(self):
         distance = 0
         current_speed = self.speed
-        # can be optimized
+        
+        # brake with the right amount
         while current_speed > 0:
             distance = distance + current_speed
             current_speed = current_speed - 0.02
@@ -711,22 +705,18 @@ class Light(Agent):
         self.pos = pos
         self.state = state
         self.color = color  # where color is Red, Green or Orange
-        self.type = light  # where light is either Ped or Traf#
+        self.type = light  # where light is either Ped or Traf
         self.lane = lane
+
         self.ped_light = True
         self.car_light = False
-        # self.ped_light_top = True
-        # self.car_light_top = False
-        # self.ped_light_bottom = True
-        # self.car_light_bottom = False
+
         self.closest = math.inf
 
     def step(self):
         '''
         Update the state of the light.
         '''
-        #self.state = (self.state + 1) % 500
-
         if self.model.strategy == "Simultaneous":
             self.simultaneous_step()
         elif self.model.strategy == "Free":
@@ -747,6 +737,7 @@ class Light(Agent):
 
     def simultaneous_step(self):
         """Simultaneaous step function updated"""
+
         # checks which type of light it is
         if self.type == "Car":
             # checks to see if its red and needs to change
@@ -759,6 +750,7 @@ class Light(Agent):
 
     def simultaneous_car(self):
         """The light profile for the car lights"""
+
         # Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
@@ -767,21 +759,17 @@ class Light(Agent):
                 self.state = 0
         elif self.color == "Orange":
             self.state += 1
-            # Placehodler ToDo Figure out when it should tip over
+            
             if self.state >= 50:
                 self.color = "Red"
                 self.state = 0
-                # for light in self.model.lights:
-                #     light.car_light = False
-                #     light.ped_light = True
+                
         elif self.color == "Red" and self.car_light:
-            # print("Cars red steps", self.state)
+            
             self.state += 1
             if self.state>=75:
-                # print("Made it to switch red for car")
                 self.state = 0
-                # print(self.car_light)
-                #if self.color == "Red" and self.model.lights[2] == "Red":
+                
                 if self.color == "Red":
                     for light in self.model.lights:
                         light.car_light = False
@@ -793,6 +781,7 @@ class Light(Agent):
 
     def simultaneous_ped(self):
         """The light profile for the pedestrian lights"""
+
         # Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
@@ -802,21 +791,18 @@ class Light(Agent):
                 self.state = 0
         elif self.color == "Orange":
             self.state += 1
-            # Placehodler ToDo Figure out when it should tip over
+            
             if self.state >= 50:
                 self.color = "Red"
                 self.state = 0
-                # for light in self.model.lights:
-                #     light.ped_light = False
-                #     light.car_light = True
+                
         elif self.color == "Red" and self.ped_light:
             self.state += 1
-            # print("Peds red steps",self.state)
+        
             if self.state>=75:
-                # print("Made it to switch red for ped")
+                
                 self.state = 0
-                # print(self.ped_light)
-                #if self.color == "Red" and self.model.lights[0].color == "Red":
+                
                 if self.color == "Red":
                     for light in self.model.lights:
                         light.car_light = True
@@ -852,6 +838,7 @@ class Light(Agent):
 
     def reactive_car(self, lane):
         """The light profile for the car lights"""
+
         # Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
@@ -860,15 +847,13 @@ class Light(Agent):
                 self.state = 0
         elif self.color == "Orange":
             self.state += 1
-            # Placehodler ToDo Figure out when it should tip over
+            
             if self.state >= 40:
                 self.color = "Red"
                 self.state = 0
         elif self.color == "Red" and self.car_light:
-                # print("Cars red steps", self.state)
                 self.state += 1
                 if self.state >= 50:
-                    # print("Made it to switch red for car")
                     self.state = 0
                     if self.color == "Red":
                         for light in self.model.lights:
@@ -881,6 +866,7 @@ class Light(Agent):
 
     def reactive_ped(self, lane):
         """The light profile for the pedestrian lights"""
+
         # Changes the lights color based on the number of steps
         if self.color == "Green":
             self.state += 1
@@ -893,18 +879,15 @@ class Light(Agent):
                 self.state = 0
         elif self.color == "Orange":
             self.state += 1
-            # Placehodler ToDo Figure out when it should tip over
+            
             if self.state >= 25:
                 self.color = "Red"
                 self.state = 0
         elif self.color == "Red" and self.ped_light:
                 self.state += 1
-                # print("Peds red steps", self.state)
                 if self.state >= 50:
-                    # print("Made it to switch red for ped")
                     self.state = 0
-                    # print(self.ped_light)
-                    # if self.color == "Red" and self.model.lights[0].color == "Red":
+                    
                     if self.color == "Red":
                         for light in self.model.lights:
                             if light.lane == lane:
@@ -919,6 +902,10 @@ class Light(Agent):
         self.color = "Green"
 
     def closest_car(self):
+        """ 
+        Checks which car is closest to the traffic light, by checking a series of points on the road.
+        If it has find the closest car, it returns the distance to that car.
+        """
 
         center = 8
         if self.unique_id == 1:
@@ -949,6 +936,6 @@ class Light(Agent):
                 cur_distance = abs(self.pos[0] - neigh.pos[0])
                 if cur_distance < min_distance:
                     min_distance = cur_distance
-            # print(min_distance)
+            
             return min_distance
         return math.inf

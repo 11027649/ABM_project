@@ -8,6 +8,12 @@ Steven Schoenmaker, (10777679),
 Natasja Geitje Wezel, (11027649),
 Linda Wouters (11000139)
 
+### Installation
+pip install requirements
+
+### To run:
+python run.py
+
 ## Planning
 ## Basic model:
 ### Environment:
