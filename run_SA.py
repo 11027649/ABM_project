@@ -85,10 +85,12 @@ for vals in param_values:
         model.set_parameters(**param_dict)
         model.run_model(steps, results)
         print("\nEnd time of this run: ", time.time() - t0)
+        print('count', count)
 
         # Get mean
         df = pd.read_csv(filepath_info, header=4)
         mean = df[df['iteration'] == 0]['pedestrians_left'].mean()
+        print(mean)
 
         # Write data to SA file
         # vals correct?
