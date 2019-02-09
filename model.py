@@ -65,7 +65,7 @@ class Traffic(Model):
         self.crossing_mean = .5
         self.crossing_sd = .15
 
-        self.max_peds = 10
+        self.max_peds = 85
 
         self.max_peds = 110 # 10 - 20 - 40
         self.max_cars = 8 # 2 - 4 - 8
