@@ -8,8 +8,12 @@ import os
 
 class Data():
     def __init__(self):
+        self.SA = False
+        self.filepath_spent_time = "data/histo.csv"
+        self.filepath_info = "data/infoo.csv"
         self.generate_filepaths()
         self.iteration = 0
+
 
     def generate_filepaths(self):
         """
@@ -23,9 +27,10 @@ class Data():
         if not os.path.exists("data/"):
             os.makedirs("data")
 
+        if self.SA is False:
+            self.filepath_spent_time = "data/hist_" + str(date) + ".csv"
+            self.filepath_info = "data/info_" + str(date) + ".csv"
 
-        self.filepath_spent_time = "data/hist_" + str(date) + ".csv"
-        self.filepath_info = "data/info_" + str(date) + ".csv"
 
     def generate_headers(self, strategy, iterations, crowdedness):
         with open(self.filepath_spent_time, 'w', newline='') as csvfile:

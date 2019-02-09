@@ -5,81 +5,108 @@ import time
 from data import Data
 from progressBar import printProgressBar
 from SALib.sample import saltelli
-
+import csv
+import datetime
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd 
+from copy import copy
+from scipy import stats
+
+"""
+Runs a sobol sensitivity analysis, writing the mean flowing rate per simulation in an SA_...csv file
+"""
+
+# Number of steps per simulation
+steps = 5000
+
+
+# Number of runs will be:
+# distrinct_samples*(number of params*2+2)*replicates
+distinct_samples = 25
+replicates = 1
+
+# strategy = "Free"
+# strategy = "Simultaneous"
+strategy = "Reactive"
 
 total_time = 0
-steps = 13000
-
-# Set the repetitions, the amount of steps, and the amount of distinct values per variable
-replicates = 5
-distinct_samples = 10
 # parameter bounds
-bounds = [[120, 220], # vision_angle, smaller?
-          [2,30], #N, smaller?
+bounds = [[.2, .8], # crossing_mean
+          [20,60], # max_peds
           [2,6],# vision range in meters
-          [.1, 1.5],# Ek
-          [.1, 1.5], #Ok
-          [.1, 1.5], #Pk
-          [.1, 1.5], #Ak
-          [.1, 1.5], #Ik
-          [.1,.16], #speed mean
-          [.03, .04], # speeds sd,
-          [.8, 2.2], # gamma
-          [4, 7], # max density
-          [.2, .8], # crossing mean
-          [.05, .25], #crossing sd
-          [10,60], #max peds
-          [1,8], #max_cars
-          [.001, .05], #spawn rate car
-          [.001, .2], #spawn rate peds
-          [.01, .3], #stoch variable
-          [.6, 1.2]] # max car speed
+          [.01, .3]] # stoch var
 
 # We define our variables and bounds
 problem = {
     'num_vars': len(bounds),
-    'names': ["vision_angle", "N", "vision_range",
-        "Ek_w", "Ok_w", "Pk_w", "Ak_w", "Ik_w",
-        "speed_mean", "speed_sd", "gamma", "max_density",
-        "crossing_mean", "crossing_sd", "max_peds", "max_cars", "spawn_rate_car", "spawn_rate_pedes"],
+    'names': ["crossing_mean", "max_peds", "vision_range",
+        "stoch_variable"],
     'bounds': bounds
 }
 
-# Indices of the parameters that should be integers
-ints = [1, 14, 15]
+# File names
+filepath_spent_time = "data/SA_hist" + strategy+ ".csv"
+filepath_info = "data/SA_info" + strategy + ".csv"
+# Set headers for the datafile
+headers = ["run"] + problem["names"] + ["strategy", "mean"]
+output_file_name = "SA_" + strategy +"_"+ datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".csv"
+# If file does not yet exist, write columnheaders first 
+with open(output_file_name, "w", newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(headers)
 
 # Create the sample set
 param_values = saltelli.sample(problem, distinct_samples)
 
 count = 0
 # Vals is one sample with values for each of the parameters
-count_val = 0
-for vals in param_values: 
-    t0 = time.time()
-    results = Data()
 
-    # Change parameters that should be integers
-    vals = list(vals)
-    for i in ints:
-        vals[i] = int(vals[i])
+for vals in param_values:
+    # Create dictionary to give as input to model
+    param_dict = {}
+    for i in range(len(problem['names'])):
+        # Set N as integer
+        if problem['names'][i] == "max_peds":
+            param_dict[problem['names'][i]] = int(vals[i])
+            vals[i] = int(vals[i])
+        else:
+            param_dict[problem['names'][i]] = vals[i]
+    param_dict["strategy"] = strategy
+    print(param_dict)
 
     # Replicate this experiment 'replicates' times
     for i in range(replicates):
-        # TODO: add parameter for SA count
-        # SOMETHING WITH THE MODEL THAT LETS US GET A DF
-        # CONSISTING OF ROWS WITH THE PARAMETER VALUES FROM VALS
-        # AND THE 5 OUTPUT RESULTS
+        # Initialize data
+        results = Data()
+        results.SA = True
+        results.filepath_info = filepath_info
+        results.filepath_spent_time = filepath_spent_time
+
         # Run model with these parameters
+        t0 = time.time()
         model = Traffic()
-        model.set_parameters(*vals)
+        model.set_parameters(**param_dict)
         model.run_model(steps, results)
-    
-    count_val += 1
-    total_time += time.time() - t0 
+        print("\nEnd time of this run: ", time.time() - t0)
+        print('count', count)
 
-count += 1
+        # Get mean
+        df = pd.read_csv(filepath_info, header=4)
+        mean = df[df['iteration'] == 0]['pedestrians_left'].mean()
+        print(mean)
+
+        # Write data to SA file
+        # vals correct?
+        values_row = [count] + list(vals) + [strategy, mean]
+        # Write values_row
+        with open(output_file_name, "a", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(values_row)
+
+        count += 1
 
 
+        
 print("It took me", total_time, "s to run your model", replicates, "times with", steps, "steps")
 print("Terminated normally! Find your data in the data folder. Have fun with it! ;-)")
