@@ -67,7 +67,7 @@ class Traffic(Model):
 
         self.max_peds = 50
 
-        self.max_peds = 150 # 10 - 20 - 40
+        self.max_peds = 110 # 10 - 20 - 40
         self.max_cars = 8 # 2 - 4 - 8
 
         self.spawn_rate_car = .01
@@ -86,7 +86,6 @@ class Traffic(Model):
         crossing_mean=.5, crossing_sd=.15, max_cars=8,
         spawn_rate_car=.01, spawn_rate_pedes=.1, stoch_variable=.2, max_car_speed=.8,
         strategy="Free", max_peds=50):
-
 
 
         self.N = N
