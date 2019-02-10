@@ -1,79 +1,20 @@
 # ABM project: Traffic!
-For the ABM project in our Master, we will try to implement an Agent-Based traffic model.
+Interactions between pedestrians at crosswalks can have a significant effect on flow rates. Omitting this factor from traffic models could therefore result in poor design of traffic light systems. In order to better understand the extent of these effects, an agent based model was implemented, using the work of Liu et al. to model  pedestrian movement and the work of Nagel Schreckenberg as a base for cars. The flow rates of pedestrians and cars were examined over pedestrian densities ranging from 5 to 160 pedestrians in the field with 3 different traffic light strategies. Local and global sensitivity analyses were then performed on the four most important parameters. 
+
+For the ABM project in our Master, we have implemented an Agent-Based Model for a small conjunction.
 
 ## Authors
 Cormac Berkery, (12288160)
 Jordan Earle, (12297127)
 Steven Schoenmaker, (10777679),
-Natasja Geitje Wezel, (11027649),
+Natasja Wezel, (11027649),
 Linda Wouters (11000139)
 
 ### Installation
-pip install requirements
+pip install -r requirements.txt
 
 ### To run:
 python run.py
 
-## Planning
-## Basic model:
-### Environment:
-* Single grid
-
-Pedestrian:
-* One lane up
-* One lane down
-
-Car:
-* One lane to the left
-* One lane to the right
-
-* Traffic lights (nonphysical)
-* Cars leave one cell open in front of the pedestrian lanes
-
-
-### Agents:
-Pedestrian
-* Occupies one cell
-* Speed 1 cell per timestep
-* If green go, if red stop
-
-Car
-* Occupies 2x3 cells
-* Speed 1 cell per timestep
-* If green and no pedestrian in front
-
-### Flow
-* Cars
-* Pedestrians spawn with exponential distribution with mean=3
-
-
-
-## TODO:
-- Drive into the grid/ drive out of the grid for cars: measure waiting time for level of service
-- Pedestrians: spawn around the same distance, also measure time of crossing for los
-
-- Nagel-Schreckenberg for cars
-- Different pedestrian spawning? Also nagel-schreckenberg? (waves)
-- Multiple lanes for pedestrians
-- Acceleration
-
-- Figure out what kind of updating schedule to use (Random for now?)
-
-Crowding
-- Continuous grid
-- Vision
-- Rules if light goes orange
-- Determine size of agents and road
-
-
-Experimentation
-- Middle part
-- Go through red or no light (rules)
-- Different red/green strategies
-
-- Interface
-
-## Look up
-- How and if we want to use Nagel-Schreckenberg for the cars
-- Flow we want to use for the pedestrians
-- What crowd dynamics we want to use for pedestrians
+The user will be asked whether they want to run the vizualisation or not - answer yes or no.
+If answered no, you will be asked how often you want to run the model, and with how many iterations. Answer with integers.

@@ -6,3 +6,5 @@ matplotlib
 time
 seaborn
 pandas
+scipy
+SALib
