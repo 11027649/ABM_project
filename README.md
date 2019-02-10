@@ -18,5 +18,5 @@ pip install -r requirements.txt
 ### To run:
 python run.py
 
-The user will be asked whether they want to run the vizualisation or not - answer yes or no.
-If answered no, you will be asked how often you want to run the model, and with how many iterations. Answer with integers.
+The user will be asked whether they want to run the vizualisation or not - answer yes or no. On default, the model will run with a simultaneous strategie. To change the strategie you need to comment/uncomment the right strategie. To change the density, you need to adjust the variable self.max_peds. Both self.strategie and self.max_peds can be found in model.py.
+If answered no, you will be asked how often you want to run the model, and with how many iterations. Answer with integers. Your data will be stored in the data folder.
