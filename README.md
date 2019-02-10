@@ -3,6 +3,8 @@ Interactions between pedestrians at crosswalks can have a significant effect on 
 
 For the ABM project in our Master, we have implemented an Agent-Based Model for a small conjunction.
 
+![picture of road](https://github.com/11027649/ABM_project/blob/master/vids/abm.PNG)
+
 ## Authors
 Cormac Berkery, (12288160)
 Jordan Earle, (12297127)
